@@ -31,6 +31,8 @@ BIEN_THE|BT002|SP001|Lốc 4 hộp 180 ml|LOC|4|30000|20|true
 
 Khi triển khai, mã thật dùng UUID; cần có tài khoản quản lý, phiếu nhập tạo ra tồn đầu và các bản ghi liên quan thì file mới hợp lệ. Không phát sinh lại mã cho đối tượng cũ khi đọc file.
 
+Bộ dữ liệu mẫu đầy đủ nằm tại [`data/du-lieu.txt`](../data/du-lieu.txt), dùng UUID và có **60 bản ghi dữ liệu**, đáp ứng yêu cầu ít nhất 50 bản ghi trong file text. Xem thành phần và tài khoản thực hành ở mục 4.
+
 ## 2. Quy trình đọc
 
 1. Xác định cố định đường dẫn dữ liệu của dự án; không lặng lẽ đọc một file khác do thay thư mục chạy.
@@ -66,3 +68,33 @@ SKU và tài khoản mới đều bắt đầu ở 0; tồn đầu kỳ phải �
 Phiên đăng nhập nên giữ mã tài khoản hoặc tra lại tài khoản theo mã sau phục hồi, vì đối tượng cũ có thể đã được thay bằng đối tượng mới. Nếu tiến trình dừng sau commit nhưng trước khi in, lần mở lại file đã có trạng thái hoàn tất; thao tác thanh toán lặp bị chặn theo trạng thái đơn.
 
 File tạm còn sót không được tự nạp thay file chính. Chỉ chạy một tiến trình với thư mục dữ liệu này; mô hình không giải quyết ghi đồng thời giữa nhiều JVM. Thay file nguyên tử hạn chế file bị ghi dở, không phải cam kết chống mọi lỗi ổ đĩa/mất điện. Sao lưu file đã đóng sau buổi thực hành; không sửa dữ liệu bằng tay khi chương trình đang chạy.
+
+## 4. Bộ dữ liệu mẫu tối thiểu 50 bản ghi
+
+File [`data/du-lieu.txt`](../data/du-lieu.txt) có 62 dòng: `VNM|1`, 60 bản ghi và `END|60`. Số lượng tối thiểu 50 được tính trên tổng bản ghi của các bảng, không tính dòng đầu/cuối và không yêu cầu mỗi bảng có 50 dòng.
+
+| Loại bản ghi | Số lượng |
+| --- | ---: |
+| `TAI_KHOAN` | 5 |
+| `SAN_PHAM` | 5 |
+| `BIEN_THE` | 15 |
+| `KHUYEN_MAI` | 3 |
+| `PHIEU_NHAP` | 1 |
+| `CT_PHIEU_NHAP` | 15 |
+| `DON_HANG` | 8 |
+| `CT_DON_HANG` | 8 |
+| **Tổng** | **60** |
+
+Bộ mẫu có đủ ba vai trò, năm nhóm hàng và ba kiểu đóng gói. Phiếu nhập ngày 01/10/2026 tạo tồn 100 cho từng SKU; năm đơn đã thanh toán trừ tồn và cập nhật điểm, hai đơn chờ và một đơn hủy không làm đổi tồn/điểm. Có đơn vãng lai, đơn dùng điểm, hai loại khuyến mãi và hai ưu đãi cùng SKU để kiểm tra chọn mức giảm tốt nhất. Ngày và giá chỉ dùng minh họa cho đồ án.
+
+| Tên đăng nhập mẫu | Vai trò | Điểm hiện có |
+| --- | --- | ---: |
+| `demo.quanly` | Quản lý cửa hàng | Không áp dụng |
+| `demo.nhanvien` | Nhân viên bán hàng | Không áp dụng |
+| `demo.khach01` | Khách hàng | 2 |
+| `demo.khach02` | Khách hàng | 6 |
+| `demo.khach03` | Khách hàng | 6 |
+
+Mật khẩu thực hành cho các tài khoản trên là `VnmDemo!2026`. File chỉ lưu PBKDF2-HMAC-SHA256 với 600000 vòng, salt ngẫu nhiên riêng 16 byte và hash 32 byte, mã hóa Base64. Các tài khoản này chỉ phục vụ bộ mẫu; khi khởi tạo hệ thống mới, người vận hành vẫn tự nhập tài khoản quản lý đầu tiên theo mục 2.
+
+Khi thay đổi bộ mẫu, phải giữ ít nhất 50 bản ghi, cập nhật `END|N` và đối chiếu lại khóa ngoại, tiền, tồn và điểm. Bộ mẫu dùng cho việc triển khai/kiểm thử; hiện dự án chưa có bộ đọc file Java để nạp nó.

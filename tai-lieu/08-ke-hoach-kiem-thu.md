@@ -38,6 +38,7 @@
 | KT30 | Truyền `TaiKhoan` vào `DanhSach<SanPham>`; thử thêm/xóa qua danh sách do `xuat()` trả về | Sai kiểu bị chặn khi biên dịch; sửa cấu trúc bản xuất báo `UnsupportedOperationException`, danh sách gốc giữ nguyên |
 | KT31 | Gọi `xoa` qua interface trên sáu manager chung; gọi `sua` trên manager đơn/phiếu | Báo không hỗ trợ, không xóa lịch sử hoặc sửa chứng từ; khóa/ngừng/hủy vẫn qua hành vi chuyên biệt |
 | KT32 | Gọi `them`/`sua`/`xoa` qua interface chi tiết khi đang soạn rồi sau khi đơn/phiếu nhận quyền sở hữu | Lúc soạn: gộp/thay/xóa đúng SKU, giữ kiểm tra tồn/giá/tràn số; sau khóa: cả ba bị chặn qua cả tham chiếu cũ, kể cả đơn chờ và dữ liệu nạp lại |
+| KT33 | Kiểm tra bộ mẫu `data/du-lieu.txt` rồi nạp bằng bộ đọc khi triển khai | Có ít nhất 50 bản ghi, không tính `VNM`/`END`; bộ hiện tại có 60 bản ghi và `END\|60`; đủ tám bảng, xác thực được tài khoản mẫu, khóa ngoại/tiền/tồn/điểm khớp lịch sử |
 
 Khi bắt đầu viết code, ưu tiên một self-check nhỏ cho công thức KT11–KT16 và vòng đọc/ghi KT24, thêm kiểm chứng KT21 cho xử lý lỗi lưu. Không chỉ kiểm tra menu chạy được; cần chứng minh tiền, điểm và tồn không bị lệch.
 
