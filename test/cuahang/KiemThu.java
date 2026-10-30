@@ -1,8 +1,18 @@
 package cuahang;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.UnaryOperator;
 
 /**
  * Self-check các tình huống trong tài liệu 08. Chạy:
@@ -15,6 +25,7 @@ public class KiemThu {
         kiemThuCongThuc();
         kiemThuChiTiet();
         kiemThuQuanLy();
+        kiemThuLuuTru();
         System.out.println("OK: " + soKiemTra + " kiểm tra đều đạt.");
     }
 
@@ -281,6 +292,136 @@ public class KiemThu {
         loi(IllegalArgumentException.class,
                 () -> qlSpThat.napDanhSach(List.of(sua, sua)), "Nạp lô trùng mã bị từ chối");
         dung(qlSpThat.xuat().size() == 1, "Nạp lỗi không làm đổi danh sách");
+    }
+
+    // ---------- KT21, KT23, KT24, KT33: lưu trữ file text ----------
+
+    static final Path FILE_MAU = Path.of("data", "du-lieu.txt");
+    static final String MAT_KHAU_MAU = "VnmDemo!2026";
+
+    static void kiemThuLuuTru() {
+        try {
+            Path thuMuc = Files.createTempDirectory("vnm-kiemthu");
+            Path file = Files.copy(FILE_MAU, thuMuc.resolve("du-lieu.txt"));
+            String noiDungMau = Files.readString(file);
+
+            // KT33: bộ mẫu ≥ 50 bản ghi, nạp được, ghi lại y hệt
+            BoDuLieu bo = new BoDuLieu(file);
+            dung(!new BoDuLieu(thuMuc.resolve("chua-co.txt")).luuTru.tonTai(), "Nhận biết file chưa tồn tại");
+            bo.luuTru.docDuLieu();
+            dung(noiDungMau.lines().count() - 2 >= 50 && noiDungMau.endsWith("END|60\n"), "KT33 bộ mẫu có 60 bản ghi");
+            dung(bo.taiKhoan.xuat().size() == 5 && bo.sanPham.xuat().size() == 5 && bo.bienThe.xuat().size() == 15
+                    && bo.khuyenMai.xuat().size() == 3 && bo.donHang.xuat().size() == 8 && bo.phieuNhap.xuat().size() == 1,
+                    "KT33 nạp đủ tám bảng");
+            dung(bo.luuTru.xuatThanhChuoi().equals(noiDungMau), "KT33/KT24 ghi lại đúng từng byte bộ mẫu");
+            for (String ten : List.of("demo.quanly", "demo.nhanvien", "demo.khach01", "demo.khach02", "demo.khach03")) {
+                dung(bo.taiKhoan.timTheoTenDangNhap(ten).kiemTraMatKhau(MAT_KHAU_MAU.toCharArray()),
+                        "KT33 xác thực được tài khoản mẫu " + ten);
+            }
+            dung(!bo.taiKhoan.timTheoTenDangNhap("demo.quanly").kiemTraMatKhau("sai".toCharArray()), "Sai mật khẩu bị từ chối");
+            dung(bo.taiKhoan.timTheoTenDangNhap("demo.quanly") instanceof QuanLyCuaHang
+                    && bo.taiKhoan.timTheoTenDangNhap("demo.nhanvien") instanceof NhanVienBanHang
+                    && ((KhachHang) bo.taiKhoan.timTheoTenDangNhap("demo.khach01")).getDiemTichLuy() == 2,
+                    "KT24 dựng đúng lớp con tài khoản và điểm");
+            dung(bo.khuyenMai.xuat().stream().filter(km -> km instanceof KhuyenMaiPhanTram).count() == 1,
+                    "KT24 dựng đúng lớp con khuyến mãi");
+
+            // KT24: đổi trong RAM, lưu, mở lại bằng bộ manager mới → giống hệt
+            BienTheSanPham bt = bo.bienThe.xuat().getFirst();
+            bo.bienThe.sua(bt.getMaBienThe(), new BienTheSanPham(bt.getMaBienThe(), bt.getMaSanPham(), bt.getTenQuyCach(),
+                    bt.getKieuDongGoi(), bt.getSoDonViCoSo(), 9_000, bt.getSoLuongTon(), true));
+            bo.luuTru.ghiAnToan();
+            BoDuLieu moLai = new BoDuLieu(file);
+            moLai.luuTru.docDuLieu();
+            dung(moLai.bienThe.timTheoMa(bt.getMaBienThe()).getGiaBan() == 9_000
+                    && moLai.luuTru.xuatThanhChuoi().equals(bo.luuTru.xuatThanhChuoi()), "KT24 lưu rồi mở lại khớp hoàn toàn");
+            dung(!Files.exists(thuMuc.resolve("du-lieu.tmp")), "Không còn file tạm sau khi lưu");
+
+            // KT23: file hỏng → báo lỗi, không nạp một phần
+            String hopLe = moLai.luuTru.xuatThanhChuoi();
+            Map<String, String> fileHong = new LinkedHashMap<>();
+            fileHong.put("rỗng", "");
+            fileHong.put("sai dòng đầu", hopLe.replace("VNM|1", "VNM|2"));
+            fileHong.put("thiếu END", hopLe.replace("END|60\n", ""));
+            fileHong.put("END sai số", hopLe.replace("END|60", "END|59"));
+            fileHong.put("dòng trống ở giữa", hopLe.replaceFirst("\nSAN_PHAM", "\n\nSAN_PHAM"));
+            fileHong.put("thừa cột", suaDong(hopLe, "SAN_PHAM|", d -> d + "|x"));
+            fileHong.put("ID trùng", suaDong(hopLe, "SAN_PHAM|", d -> d + "\n" + d).replace("END|60", "END|61"));
+            fileHong.put("vai trò lạ", hopLe.replace("|NHAN_VIEN_BAN_HANG|", "|BAO_VE|"));
+            fileHong.put("FK sản phẩm sai", suaDong(hopLe, "BIEN_THE|", d -> d.replace("|94329236", "|X4329236")));
+            fileHong.put("tồn lệch", hopLe.replace("|30000|98|", "|30000|97|"));
+            fileHong.put("điểm lệch", suaDong(hopLe, "TAI_KHOAN|8b2a1983", d -> d.substring(0, d.length() - 1) + "3"));
+            fileHong.put("chi tiết mồ côi", suaDong(hopLe, "CT_DON_HANG|", d -> d.replaceFirst("CT_DON_HANG\\|.", "CT_DON_HANG|Z")));
+            fileHong.put("tổng đơn sai", hopLe.replace("|60000|6000|0|54000", "|60000|6000|0|50000"));
+            fileHong.put("không còn quản lý", suaDong(hopLe, "TAI_KHOAN|fb5e2d83", d -> d.replace("|true|", "|false|")));
+            fileHong.put("có ký tự null", hopLe.replace("|true|\nTAI_KHOAN", "|null|\nTAI_KHOAN"));
+            for (Map.Entry<String, String> hong : fileHong.entrySet()) {
+                loi(IllegalArgumentException.class, () -> moLai.luuTru.napTuChuoi(hong.getValue()), "KT23 " + hong.getKey());
+                dung(moLai.luuTru.xuatThanhChuoi().equals(hopLe), "KT23 " + hong.getKey() + ": RAM giữ nguyên");
+            }
+            try {
+                moLai.luuTru.napTuChuoi(fileHong.get("thừa cột"));
+            } catch (IllegalArgumentException e) {
+                dung(e.getMessage().startsWith("Dòng 7:"), "KT23 thông báo đúng số dòng lỗi: " + e.getMessage());
+            }
+
+            // File rỗng trên đĩa: báo lỗi, không ghi đè
+            Path rong = Files.writeString(thuMuc.resolve("rong.txt"), "");
+            loi(IllegalArgumentException.class, () -> chay(() -> new BoDuLieu(rong).luuTru.docDuLieu()), "File rỗng báo lỗi");
+            dung(Files.readString(rong).isEmpty(), "File rỗng không bị ghi đè");
+
+            // KT21 (phần file): thư mục không ghi được → lỗi IO, file chính giữ nguyên
+            String truocKhiLoi = Files.readString(file);
+            Set<PosixFilePermission> quyenCu = Files.getPosixFilePermissions(thuMuc);
+            Files.setPosixFilePermissions(thuMuc, PosixFilePermissions.fromString("r-x------"));
+            try {
+                loi(java.io.UncheckedIOException.class, () -> chay(moLai.luuTru::ghiAnToan), "KT21 lỗi ghi file được báo");
+            } finally {
+                Files.setPosixFilePermissions(thuMuc, quyenCu);
+            }
+            dung(Files.readString(file).equals(truocKhiLoi), "KT21 file chính giữ nguyên khi ghi lỗi");
+        } catch (IOException e) {
+            throw new java.io.UncheckedIOException(e);
+        }
+    }
+
+    /** Bộ sáu manager + lưu trữ như Main tạo. */
+    static final class BoDuLieu {
+        final QuanLyTaiKhoan taiKhoan = new QuanLyTaiKhoan();
+        final QuanLySanPham sanPham = new QuanLySanPham();
+        final QuanLyBienTheSanPham bienThe = new QuanLyBienTheSanPham(sanPham);
+        final QuanLyKhuyenMai khuyenMai = new QuanLyKhuyenMai(bienThe);
+        final QuanLyDonHang donHang = new QuanLyDonHang();
+        final QuanLyPhieuNhap phieuNhap = new QuanLyPhieuNhap();
+        final LuuTruText luuTru;
+
+        BoDuLieu(Path file) {
+            luuTru = new LuuTruText(file, taiKhoan, sanPham, bienThe, khuyenMai, donHang, phieuNhap);
+        }
+    }
+
+    interface ThaoTacIO {
+        void chay() throws IOException;
+    }
+
+    static void chay(ThaoTacIO thaoTac) {
+        try {
+            thaoTac.chay();
+        } catch (IOException e) {
+            throw new java.io.UncheckedIOException(e);
+        }
+    }
+
+    /** Sửa dòng đầu tiên bắt đầu bằng tiền tố. */
+    static String suaDong(String noiDung, String tienTo, UnaryOperator<String> sua) {
+        List<String> dong = new ArrayList<>(noiDung.lines().toList());
+        for (int i = 0; i < dong.size(); i++) {
+            if (dong.get(i).startsWith(tienTo)) {
+                dong.set(i, sua.apply(dong.get(i)));
+                break;
+            }
+        }
+        return String.join("\n", dong) + "\n";
     }
 
     // ---------- tiện ích ----------
