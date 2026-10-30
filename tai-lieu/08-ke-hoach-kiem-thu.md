@@ -1,6 +1,6 @@
 # 08. Kế hoạch kiểm thử và thứ tự triển khai
 
-Đây là kế hoạch với kết quả mong đợi, không phải tuyên bố chương trình đã chạy đúng. Đối chiếu với [Quy tắc nghiệp vụ](06-quy-tac-nghiep-vu.md) và [Lưu trữ file text](07-luu-tru-file-text.md).
+Bảng dưới ghi kết quả mong đợi. Cả 33 tình huống có kiểm chứng tự động trong `test/cuahang/KiemThu.java` (cách chạy ở [README](README.md#mã-nguồn-và-cách-chạy)); phần chỉ nằm ở giao diện, như menu đăng ký không có lựa chọn nội bộ (KT01) hay nhập chữ thay số (KT26), được kiểm tra khi chạy console, còn phần chặn sai kiểu của KT30 do trình biên dịch đảm nhận. Đối chiếu với [Quy tắc nghiệp vụ](06-quy-tac-nghiep-vu.md) và [Lưu trữ file text](07-luu-tru-file-text.md).
 
 ## 1. Tình huống kiểm thử
 

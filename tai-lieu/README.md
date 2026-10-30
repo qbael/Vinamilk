@@ -1,6 +1,6 @@
 # Tài liệu đồ án quản lý cửa hàng sữa
 
-Bản thiết kế cho ứng dụng Java 26 chạy bằng console, lưu dữ liệu trong file text, không dùng database. Đây là tài liệu để triển khai; chưa phải ứng dụng đã hoàn thiện.
+Bản thiết kế cho ứng dụng Java chạy bằng console, lưu dữ liệu trong file text, không dùng database. Mã nguồn đã được triển khai theo đúng thiết kế này trong `src/cuahang/`; xem [cách chạy](#mã-nguồn-và-cách-chạy).
 
 ## Các tài liệu
 
@@ -34,8 +34,33 @@ Bộ dữ liệu mẫu tại [`data/du-lieu.txt`](../data/du-lieu.txt) có **60 
 
 Ví dụ `QuanLySanPham extends DanhSach<SanPham>` thực hiện `IQuanLy<SanPham>` thông qua lớp cha. Danh sách và các thao tác là instance để tham gia kế thừa/đa hình. `DanhSach<T>` giữ `List<T>` và thực thi `xuat()`; lớp con override thêm, sửa, xóa theo nghiệp vụ, bảo toàn lịch sử và vòng đời chứng từ. Xem [thiết kế chung](04-thiet-ke-lop.md#4-interface-và-lớp-cha-generic-cho-danh-sách).
 
-## Phạm vi của đợt tài liệu này
+## Mã nguồn và cách chạy
 
-Chưa viết các lớp Java, chưa thay đổi `src/Main.java`. Mỗi lớp/interface/enum trong thiết kế dự kiến được đặt trong một file `.java` riêng. Dùng Markdown để có thể đọc, sửa và theo dõi thay đổi ngay trong dự án.
+- `src/cuahang/`: 32 file `.java`, mỗi lớp/interface/enum trong thiết kế một file, cùng package `cuahang`. Điểm vào duy nhất là `cuahang.Main`.
+- `test/cuahang/KiemThu.java`: một file self-check (không dùng framework) kiểm chứng các tình huống trong [kế hoạch kiểm thử](08-ke-hoach-kiem-thu.md). File này nằm ngoài `src/` nên không làm đổi con số 32 kiểu.
 
-Môi trường terminal được kiểm tra ngày 22/10/2026 đang dùng Java 17; khi triển khai cần cấu hình JDK 26 cho cả IDE và lệnh chạy. Tài liệu không yêu cầu tính năng preview hoặc thư viện ngoài JDK.
+Chạy từ thư mục gốc dự án (đường dẫn dữ liệu là `data/du-lieu.txt` tính từ thư mục chạy; chương trình in đường dẫn tuyệt đối khi khởi động):
+
+```bash
+javac -d out $(find src -name '*.java') && java -cp out cuahang.Main
+```
+
+Chạy self-check:
+
+```bash
+javac -d out $(find src test -name '*.java') && java -cp out cuahang.KiemThu
+```
+
+Đăng nhập thử bằng `demo.quanly`, `demo.nhanvien`, `demo.khach01`… với mật khẩu `VnmDemo!2026`. Chương trình ghi thẳng vào `data/du-lieu.txt` sau mỗi thao tác; muốn quay về bộ mẫu thì chạy `git restore data/du-lieu.txt`. Nếu chưa có file dữ liệu, chương trình hỏi xác nhận rồi tạo quản lý đầu tiên.
+
+Mã nguồn không dùng tính năng preview, tính năng riêng của JDK 26 hay thư viện ngoài JDK; đã chạy và kiểm thử với JDK 25, chạy được trên JDK 26.
+
+### Ghi chú triển khai
+
+Các điểm tài liệu thiết kế chưa quy định cụ thể, được chốt khi viết mã:
+
+- Màn hình hiển thị 8 ký tự đầu của UUID (kéo dài nếu hai mã cùng danh sách trùng phần đầu); khi nhập có thể gõ mã đầy đủ hoặc phần đầu duy nhất. File vẫn lưu UUID đầy đủ.
+- Mật khẩu ít nhất 6 ký tự; số điện thoại bắt đầu bằng 0, gồm 10–11 chữ số; tên đăng nhập không chứa khoảng trắng.
+- Dòng trong giỏ đang soạn chưa mang khuyến mãi; khuyến mãi tốt nhất được tính cho cả dòng khi báo giá, lưu đơn và thanh toán.
+- Thanh toán gồm hai bước: `xemTruocThanhToan` tính bảng cuối trên bản sao của đơn; `thanhToan` tính lại, đối chiếu với tổng khách đã xác nhận rồi chốt đơn + tồn + điểm trong một lần lưu.
+- Ngoài phương thức trong tài liệu lớp, mã có thêm vài phương thức nội bộ: `TaiKhoan.banSaoVoiTrangThai`, `DonHang.banSao`, các tiện ích `protected` tìm/lọc/kiểm tra trùng trong `DanhSach<T>`.

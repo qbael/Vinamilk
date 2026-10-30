@@ -97,4 +97,4 @@ Bộ mẫu có đủ ba vai trò, năm nhóm hàng và ba kiểu đóng gói. Ph
 
 Mật khẩu thực hành cho các tài khoản trên là `VnmDemo!2026`. File chỉ lưu PBKDF2-HMAC-SHA256 với 600000 vòng, salt ngẫu nhiên riêng 16 byte và hash 32 byte, mã hóa Base64. Các tài khoản này chỉ phục vụ bộ mẫu; khi khởi tạo hệ thống mới, người vận hành vẫn tự nhập tài khoản quản lý đầu tiên theo mục 2.
 
-Khi thay đổi bộ mẫu, phải giữ ít nhất 50 bản ghi, cập nhật `END|N` và đối chiếu lại khóa ngoại, tiền, tồn và điểm. Bộ mẫu dùng cho việc triển khai/kiểm thử; hiện dự án chưa có bộ đọc file Java để nạp nó.
+Khi thay đổi bộ mẫu, phải giữ ít nhất 50 bản ghi, cập nhật `END|N` và đối chiếu lại khóa ngoại, tiền, tồn và điểm. Bộ mẫu dùng cho việc triển khai/kiểm thử; `LuuTruText` nạp và kiểm tra toàn bộ bộ mẫu khi khởi động (KT33 trong `KiemThu`).

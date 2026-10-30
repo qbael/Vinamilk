@@ -26,4 +26,4 @@ Các danh sách là dữ liệu instance kế thừa từ `DanhSach<T>`, không 
 
 Không cần thuộc tính lưu danh mục hoặc logic tính tiền trong `Main`. Đồ án lưu sau mỗi thay đổi, không chờ thoát mới lưu. Khi triển khai dùng một điểm vào duy nhất ở `src/cuahang/Main.java` và thay thế điểm vào mẫu hiện có, không để hai `Main` gây nhầm cấu hình chạy.
 
-Đây là mô tả thiết kế; chưa chỉnh sửa file Java mẫu. Chương trình cần chạy với JDK 26; không yêu cầu tính năng preview.
+Đã triển khai tại `src/cuahang/Main.java`, thay điểm vào mẫu cũ. Không yêu cầu tính năng preview hay tính năng riêng của JDK 26; đã chạy với JDK 25.

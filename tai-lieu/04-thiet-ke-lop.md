@@ -28,7 +28,7 @@ Phép nhân/cộng tiền và số lượng phải kiểm tra tràn số, ví d�
 
 ## 3. Tài liệu riêng cho từng lớp
 
-Mỗi tài liệu dưới đây mô tả trách nhiệm, thuộc tính, phương thức, quan hệ và các ràng buộc của đúng một kiểu Java. Đây là danh sách thiết kế, chưa phải mã nguồn đã được tạo.
+Mỗi tài liệu dưới đây mô tả trách nhiệm, thuộc tính, phương thức, quan hệ và các ràng buộc của đúng một kiểu Java. Mã nguồn tương ứng nằm trong `src/cuahang/`, mỗi kiểu một file cùng tên.
 
 | Nhóm | Tài liệu riêng |
 | --- | --- |
