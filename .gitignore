@@ -28,3 +28,18 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### AI tooling ###
+CLAUDE.md
+AGENTS.md
+.claude/
+
+### Build ###
+*.class
+
+### Dữ liệu chạy ###
+data/du-lieu.tmp
+
+### IntelliJ (file cá nhân) ###
+.idea/workspace.xml
+.idea/.name
