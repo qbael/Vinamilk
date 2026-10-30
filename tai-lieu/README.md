@@ -51,6 +51,12 @@ Chạy self-check:
 javac -d out $(find src test -name '*.java') && java -cp out cuahang.KiemThu
 ```
 
+Chạy kiểm thử end-to-end qua giao diện console (gõ sẵn phím vào chương trình thật trên bản copy của `data/`; nếu máy có `expect` thì chạy thêm một kịch bản trong terminal thật để kiểm tra mật khẩu được ẩn):
+
+```bash
+bash test/e2e.sh
+```
+
 Đăng nhập thử bằng `demo.quanly`, `demo.nhanvien`, `demo.khach01`… với mật khẩu `VnmDemo!2026`. Chương trình ghi thẳng vào `data/du-lieu.txt` sau mỗi thao tác; muốn quay về bộ mẫu thì chạy `git restore data/du-lieu.txt`. Nếu chưa có file dữ liệu, chương trình hỏi xác nhận rồi tạo quản lý đầu tiên.
 
 Mã nguồn không dùng tính năng preview, tính năng riêng của JDK 26 hay thư viện ngoài JDK; đã chạy và kiểm thử với JDK 25, chạy được trên JDK 26.

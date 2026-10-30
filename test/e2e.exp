@@ -1,0 +1,36 @@
+#!/usr/bin/expect -f
+# Chạy chương trình trong terminal thật (TTY) để đi qua nhánh Console.readPassword.
+# Được gọi từ test/e2e.sh: expect test/e2e.exp <thư mục chứa out/ và data/>
+set timeout 10
+set mk {VnmDemo!2026}
+log_user 0
+cd [lindex $argv 0]
+spawn java -cp out cuahang.Main
+
+proc cho {mau tenBuoc} {
+    global expect_out
+    expect {
+        -re $mau {}
+        timeout { puts "FAIL: TTY — không thấy \"$tenBuoc\""; exit 1 }
+        eof { puts "FAIL: TTY — chương trình thoát trước \"$tenBuoc\""; exit 1 }
+    }
+}
+
+cho "Chọn: " "menu chính"
+send "1\r"
+cho "Tên đăng nhập.*: " "ô tên đăng nhập"
+send "demo.khach01\r"
+cho "Mật khẩu: " "ô mật khẩu"
+send "$mk\r"
+cho "(.*)Xin chào Lê Hoàng An" "lời chào sau đăng nhập"
+if {[string first $mk $expect_out(1,string)] >= 0} {
+    puts "FAIL: TTY — mật khẩu bị hiện lên màn hình"
+    exit 1
+}
+cho "Chọn: " "menu khách hàng"
+send "0\r"
+cho "Chọn: " "menu chính sau đăng xuất"
+send "0\r"
+cho "Tạm biệt!" "lời tạm biệt"
+expect eof
+puts "PASS: TTY đăng nhập, mật khẩu được ẩn"
