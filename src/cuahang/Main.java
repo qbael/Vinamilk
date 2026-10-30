@@ -1,7 +1,9 @@
 package cuahang;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
@@ -14,21 +16,25 @@ public class Main {
         QuanLyPhieuNhap quanLyPhieuNhap = new QuanLyPhieuNhap();
         LuuTruText luuTru = new LuuTruText(duongDan, quanLyTaiKhoan, quanLySanPham, quanLyBienThe,
                 quanLyKhuyenMai, quanLyDonHang, quanLyPhieuNhap);
+        DichVuCuaHang dichVu = new DichVuCuaHang(quanLyTaiKhoan, quanLySanPham, quanLyBienThe, quanLyKhuyenMai,
+                quanLyDonHang, quanLyPhieuNhap, luuTru);
 
         System.out.println("File dữ liệu: " + duongDan);
-        try {
-            if (!luuTru.tonTai()) {
-                // Khởi tạo hệ thống mới được nối vào ở giai đoạn dịch vụ/giao diện.
-                System.out.println("Chưa có file dữ liệu. Chức năng khởi tạo sẽ có ở giai đoạn sau.");
+        try (Scanner boDoc = new Scanner(System.in, StandardCharsets.UTF_8)) {
+            GiaoDienConsole giaoDien = new GiaoDienConsole(dichVu, boDoc);
+            if (luuTru.tonTai()) {
+                luuTru.docDuLieu();
+            } else if (!giaoDien.khoiTaoHeThong(duongDan)) {
+                System.out.println("Chưa khởi tạo hệ thống, thoát chương trình.");
                 return;
             }
-            luuTru.docDuLieu();
-            System.out.printf("Đã nạp: %d tài khoản, %d sản phẩm, %d SKU, %d khuyến mãi, %d đơn hàng, %d phiếu nhập.%n",
-                    quanLyTaiKhoan.xuat().size(), quanLySanPham.xuat().size(), quanLyBienThe.xuat().size(),
-                    quanLyKhuyenMai.xuat().size(), quanLyDonHang.xuat().size(), quanLyPhieuNhap.xuat().size());
+            giaoDien.chay();
         } catch (IOException | RuntimeException e) {
-            System.err.println("Không thể khởi động: " + e.getMessage());
+            System.err.println("Không thể tiếp tục: " + e.getMessage());
             System.exit(1);
+        } catch (Error e) {
+            System.err.println("Lỗi nghiêm trọng: " + e.getMessage());
+            System.exit(2);
         }
     }
 }

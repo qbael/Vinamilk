@@ -28,6 +28,7 @@ public class KiemThu {
         kiemThuLuuTru();
         kiemThuDichVuTaiKhoanVaNhapHang();
         kiemThuDatHangVaThanhToan();
+        kiemThuKhuyenMaiVaBaoCao();
         System.out.println("OK: " + soKiemTra + " kiểm tra đều đạt.");
     }
 
@@ -683,6 +684,68 @@ public class KiemThu {
         dung(moLai.dichVu.xemDon(nvMoi, donKh2).getTrangThai() == TrangThaiDonHang.DA_THANH_TOAN
                 && moLai.luuTru.xuatThanhChuoi().equals(bo.luuTru.xuatThanhChuoi()), "KT22/KT24 mở lại đúng trạng thái");
         loi(IllegalStateException.class, () -> moLai.dichVu.thanhToan(nvMoi, donKh2, 0, 0), "KT22 không ghi nhận thêm");
+    }
+
+    // ---------- KM-01, BC-01 (KT25), mã rút gọn của giao diện ----------
+
+    static void kiemThuKhuyenMaiVaBaoCao() {
+        Path thuMuc = chay(() -> Files.createTempDirectory("vnm-baocao"));
+        BoDuLieu bo = new BoDuLieu(chay(() -> Files.copy(FILE_MAU, thuMuc.resolve("du-lieu.txt"))));
+        chay(bo.luuTru::docDuLieu);
+        DichVuCuaHang dv = bo.dichVu;
+        char[] mk = MAT_KHAU_MAU.toCharArray();
+        String ql = dv.dangNhap("demo.quanly", mk);
+        String nv = dv.dangNhap("demo.nhanvien", mk);
+        LocalDate homNay = DichVuCuaHang.homNay();
+
+        // Báo cáo trên bộ mẫu: 5 đơn đã thanh toán 02–06/10, phiếu nhập 01/10
+        Map<String, Long> thang10 = dv.tongKetThuChi(ql, LocalDate.of(2026, 10, 1), LocalDate.of(2026, 10, 31));
+        long chiNhap = bo.phieuNhap.xuat().getFirst().tinhTongTien();
+        dung(thang10.get("Doanh thu gộp") == 248_000 && thang10.get("Giảm do khuyến mãi") == 10_000
+                        && thang10.get("Giảm do điểm") == 500 && thang10.get("Thu bán hàng ròng") == 237_500
+                        && thang10.get("Chi nhập hàng") == chiNhap
+                        && thang10.get("Chênh lệch thu − chi nhập") == 237_500 - chiNhap
+                        && thang10.get("Số đơn đã thanh toán") == 5,
+                "BC-01 báo cáo tháng 10 của bộ mẫu");
+        Map<String, Long> motNgay = dv.tongKetThuChi(ql, LocalDate.of(2026, 10, 2), LocalDate.of(2026, 10, 2));
+        dung(motNgay.get("Thu bán hàng ròng") == 54_000 && motNgay.get("Chi nhập hàng") == 0
+                && motNgay.get("Số đơn đã thanh toán") == 1, "KT25 kỳ một ngày tính cả hai đầu, chỉ đơn thanh toán ngày đó");
+        Map<String, Long> ngayDonCho = dv.tongKetThuChi(ql, LocalDate.of(2026, 10, 27), LocalDate.of(2026, 10, 28));
+        dung(ngayDonCho.values().stream().allMatch(v -> v == 0), "KT25 đơn chờ/hủy không góp vào báo cáo");
+        loi(IllegalArgumentException.class, () -> dv.tongKetThuChi(ql, homNay, homNay.minusDays(1)), "Kỳ ngược bị từ chối");
+        loi(SecurityException.class, () -> dv.tongKetThuChi(nv, homNay, homNay), "Nhân viên không xem báo cáo");
+
+        // KM-01: thêm, sửa, ngừng; người không phải quản lý chỉ thấy KM đang hiệu lực
+        String maKm = dv.themKhuyenMai(ql, true, "Giảm 5% thùng sữa chua", "094d9508-3a5d-4954-b873-5638be5e0fd0",
+                homNay, homNay.plusDays(7), 5);
+        String maKmSau = dv.themKhuyenMai(ql, false, "Giảm sau", "094d9508-3a5d-4954-b873-5638be5e0fd0",
+                homNay.plusDays(10), homNay.plusDays(20), 1_000);
+        loi(IllegalArgumentException.class,
+                () -> dv.themKhuyenMai(ql, true, "x", "094d9508-3a5d-4954-b873-5638be5e0fd0", homNay, homNay, 101), "Tỷ lệ 101% bị từ chối");
+        loi(IllegalArgumentException.class, () -> dv.themKhuyenMai(ql, true, "x", "khong-co", homNay, homNay, 5), "SKU không tồn tại");
+        loi(SecurityException.class,
+                () -> dv.themKhuyenMai(nv, true, "x", "094d9508-3a5d-4954-b873-5638be5e0fd0", homNay, homNay, 5), "Nhân viên không tạo KM");
+        dung(dv.danhSachKhuyenMai(nv).stream().noneMatch(km -> km.getMaKhuyenMai().equals(maKmSau))
+                && dv.danhSachKhuyenMai(ql).stream().anyMatch(km -> km.getMaKhuyenMai().equals(maKmSau)),
+                "Nhân viên chỉ thấy KM đang hiệu lực, quản lý thấy tất cả");
+        dv.capNhatKhuyenMai(ql, maKm, "Giảm 8% thùng sữa chua", homNay, homNay.plusDays(3), 8);
+        dung(((KhuyenMaiPhanTram) bo.khuyenMai.timTheoMa(maKm)).getTyLePhanTram() == 8, "Sửa mức giảm khuyến mãi");
+        dung(dv.khuyenMaiHienHanh(bo.bienThe.timTheoMa("094d9508-3a5d-4954-b873-5638be5e0fd0")).getMaKhuyenMai().equals(maKm),
+                "Danh mục hiển thị KM hiện hành của SKU");
+        dv.ngungKhuyenMai(ql, maKm);
+        loi(IllegalStateException.class, () -> dv.ngungKhuyenMai(ql, maKm), "Không ngừng lại KM đã ngừng");
+        dung(dv.khuyenMaiHienHanh(bo.bienThe.timTheoMa("094d9508-3a5d-4954-b873-5638be5e0fd0")) == null,
+                "KM đã ngừng không còn áp dụng");
+
+        // Mã rút gọn: 8 ký tự, kéo dài khi hai mã trùng phần đầu
+        Map<String, String> ma = GiaoDienConsole.maNgan(List.of("abcdefgh-1111", "abcdefgh-2222", "12345678-xxxx"));
+        dung(ma.get("12345678-xxxx").equals("12345678") && ma.get("abcdefgh-1111").equals("abcdefgh-1")
+                && ma.get("abcdefgh-2222").equals("abcdefgh-2"), "Mã ngắn 8 ký tự, trùng thì dài hơn");
+        dung(GiaoDienConsole.tien(1_234_500).equals("1.234.500đ") && GiaoDienConsole.tien(-6_000).equals("-6.000đ"),
+                "Định dạng tiền có dấu chấm hàng nghìn");
+        dung(GiaoDienConsole.cot("Sữa tươi có đường", 8).equals("Sữa tư… ") && GiaoDienConsole.cot("12345678", 8).equals("123456… ")
+                        && GiaoDienConsole.cot("Kem", 5).equals("Kem  ") && GiaoDienConsole.cotPhai("5", 3).equals("  5"),
+                "Cột cố định cắt chữ dài, căn phải số");
     }
 
     static DonHang thanhToan(DichVuCuaHang dv, String nguoiThu, String maDon, int diem) {

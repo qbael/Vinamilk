@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -199,6 +200,10 @@ public class DichVuCuaHang {
 
     public SanPham timSanPham(String maSanPham) {
         return quanLySanPham.timTheoMa(maSanPham);
+    }
+
+    public BienTheSanPham timBienTheTheoMa(String maBienThe) {
+        return quanLyBienThe.timTheoMa(maBienThe);
     }
 
     /** Quản lý thấy cả mục ngừng bán; người khác chỉ thấy sản phẩm đang kinh doanh. */
@@ -497,6 +502,119 @@ public class DichVuCuaHang {
         SanPham sp = quanLySanPham.timTheoMa(bt.getMaSanPham());
         return new ChiTietDonHang(bt.getMaBienThe(), sp.getTenSanPham(), bt.getTenQuyCach(), soLuong,
                 bt.getGiaBan(), maKhuyenMai, tienGiam);
+    }
+
+    // ================================================================ khuyến mãi
+
+    /** Quản lý thấy mọi chương trình; người khác chỉ thấy chương trình đang có hiệu lực hôm nay. */
+    public List<KhuyenMai> danhSachKhuyenMai(String maNguoiGoi) {
+        boolean laQuanLy = yeuCau(maNguoiGoi) instanceof QuanLyCuaHang;
+        LocalDate ngay = homNay();
+        return quanLyKhuyenMai.xuat().stream().filter(km -> laQuanLy || km.coHieuLuc(ngay)).toList();
+    }
+
+    /** Chương trình tốt nhất hôm nay cho một đơn vị SKU, để hiển thị danh mục; null nếu không có. */
+    public KhuyenMai khuyenMaiHienHanh(BienTheSanPham bienThe) {
+        return quanLyKhuyenMai.timTotNhat(bienThe.getMaBienThe(), homNay(), bienThe.getGiaBan(), 1);
+    }
+
+    public String tenKhuyenMai(String maKhuyenMai) {
+        KhuyenMai km = quanLyKhuyenMai.timTheoMa(maKhuyenMai);
+        return km == null ? maKhuyenMai : km.getTenKhuyenMai();
+    }
+
+    /** laPhanTram: giaTri là tỷ lệ 1–100; ngược lại là số đồng giảm mỗi đơn vị SKU. */
+    public String themKhuyenMai(String maQuanLy, boolean laPhanTram, String tenKhuyenMai, String maBienThe,
+                                LocalDate tuNgay, LocalDate denNgay, long giaTri) {
+        yeuCauQuanLy(maQuanLy);
+        timBienTheCoSan(maBienThe);
+        KhuyenMai km = laPhanTram
+                ? new KhuyenMaiPhanTram(tenKhuyenMai, maBienThe, tuNgay, denNgay, tyLe(giaTri))
+                : new KhuyenMaiSoTien(tenKhuyenMai, maBienThe, tuNgay, denNgay, giaTri);
+        giaoDich(() -> quanLyKhuyenMai.them(km));
+        return km.getMaKhuyenMai();
+    }
+
+    /** Sửa tên, thời hạn và mức giảm cho các lần thanh toán sau; không đổi SKU/loại giảm. */
+    public void capNhatKhuyenMai(String maQuanLy, String maKhuyenMai, String tenKhuyenMai, LocalDate tuNgay,
+                                 LocalDate denNgay, long giaTri) {
+        yeuCauQuanLy(maQuanLy);
+        KhuyenMai cu = timKhuyenMaiCoSan(maKhuyenMai);
+        giaoDich(() -> quanLyKhuyenMai.sua(maKhuyenMai,
+                banSaoKhuyenMai(cu, tenKhuyenMai, tuNgay, denNgay, cu.isDangApDung(), giaTri)));
+    }
+
+    public void ngungKhuyenMai(String maQuanLy, String maKhuyenMai) {
+        yeuCauQuanLy(maQuanLy);
+        KhuyenMai cu = timKhuyenMaiCoSan(maKhuyenMai);
+        if (!cu.isDangApDung()) {
+            throw new IllegalStateException("Chương trình đã ngừng áp dụng.");
+        }
+        long giaTri = cu instanceof KhuyenMaiPhanTram pt ? pt.getTyLePhanTram()
+                : ((KhuyenMaiSoTien) cu).getSoTienGiamMoiDonVi();
+        giaoDich(() -> quanLyKhuyenMai.sua(maKhuyenMai,
+                banSaoKhuyenMai(cu, cu.getTenKhuyenMai(), cu.getTuNgay(), cu.getDenNgay(), false, giaTri)));
+    }
+
+    private KhuyenMai timKhuyenMaiCoSan(String maKhuyenMai) {
+        KhuyenMai km = quanLyKhuyenMai.timTheoMa(maKhuyenMai);
+        if (km == null) {
+            throw new IllegalArgumentException("Không tìm thấy khuyến mãi.");
+        }
+        return km;
+    }
+
+    private static KhuyenMai banSaoKhuyenMai(KhuyenMai cu, String ten, LocalDate tuNgay, LocalDate denNgay,
+                                             boolean dangApDung, long giaTri) {
+        return cu instanceof KhuyenMaiPhanTram
+                ? new KhuyenMaiPhanTram(cu.getMaKhuyenMai(), ten, cu.getMaBienThe(), tuNgay, denNgay, dangApDung, tyLe(giaTri))
+                : new KhuyenMaiSoTien(cu.getMaKhuyenMai(), ten, cu.getMaBienThe(), tuNgay, denNgay, dangApDung, giaTri);
+    }
+
+    private static int tyLe(long giaTri) {
+        if (giaTri < 1 || giaTri > 100) {
+            throw new IllegalArgumentException("Tỷ lệ giảm phải từ 1 đến 100%.");
+        }
+        return (int) giaTri;
+    }
+
+    // ================================================================ báo cáo
+
+    /**
+     * Tổng kết thu-chi trong kỳ [tuNgay, denNgay]: thu theo ngày thanh toán của đơn đã thanh toán,
+     * chi theo ngày nhập; dùng giá trị đã chốt trên chứng từ. Chênh lệch không phải lợi nhuận.
+     */
+    public LinkedHashMap<String, Long> tongKetThuChi(String maQuanLy, LocalDate tuNgay, LocalDate denNgay) {
+        yeuCauQuanLy(maQuanLy);
+        long doanhThuGop = 0;
+        long giamKhuyenMai = 0;
+        long giamDiem = 0;
+        List<DonHang> donTrongKy = quanLyDonHang.timDaThanhToanTrongKhoang(tuNgay, denNgay);
+        for (DonHang dh : donTrongKy) {
+            doanhThuGop = Math.addExact(doanhThuGop, dh.getTongTienHang());
+            giamKhuyenMai = Math.addExact(giamKhuyenMai, dh.getTongGiamKhuyenMai());
+            giamDiem = Math.addExact(giamDiem, dh.getTienGiamDiem());
+        }
+        long chiNhap = 0;
+        for (PhieuNhap pn : quanLyPhieuNhap.timTrongKhoang(tuNgay, denNgay)) {
+            chiNhap = Math.addExact(chiNhap, pn.tinhTongTien());
+        }
+        long thuRong = doanhThuGop - giamKhuyenMai - giamDiem;
+        LinkedHashMap<String, Long> baoCao = new LinkedHashMap<>();
+        baoCao.put("Doanh thu gộp", doanhThuGop);
+        baoCao.put("Giảm do khuyến mãi", giamKhuyenMai);
+        baoCao.put("Giảm do điểm", giamDiem);
+        baoCao.put("Thu bán hàng ròng", thuRong);
+        baoCao.put("Chi nhập hàng", chiNhap);
+        baoCao.put("Chênh lệch thu − chi nhập", Math.subtractExact(thuRong, chiNhap));
+        baoCao.put("Số đơn đã thanh toán", (long) donTrongKy.size());
+        return baoCao;
+    }
+
+    /** Họ tên để in trên đơn/hóa đơn; không trả dữ liệu xác thực. */
+    public String hoTen(String maTaiKhoan) {
+        TaiKhoan tk = maTaiKhoan == null ? null : quanLyTaiKhoan.timTheoMa(maTaiKhoan);
+        return tk == null ? "" : tk.getHoTen();
     }
 
     // ================================================================ nhập hàng
