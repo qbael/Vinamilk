@@ -27,6 +27,7 @@ public class KiemThu {
         kiemThuQuanLy();
         kiemThuLuuTru();
         kiemThuDichVuTaiKhoanVaNhapHang();
+        kiemThuDatHangVaThanhToan();
         System.out.println("OK: " + soKiemTra + " kiểm tra đều đạt.");
     }
 
@@ -511,6 +512,189 @@ public class KiemThu {
         BoDuLieu moLai = new BoDuLieu(file);
         chay(moLai.luuTru::docDuLieu);
         dung(moLai.luuTru.xuatThanhChuoi().equals(bo.luuTru.xuatThanhChuoi()), "Mở lại sau các giao dịch khớp RAM");
+    }
+
+    // ---------- KT03, KT05–KT10, KT14, KT16–KT18, KT21, KT22: đặt hàng và thanh toán ----------
+
+    static final String LOC_SUA_TUOI = "6c910bdf-d7bc-4493-b9ca-766d7b8bf293";
+    static final String HOP_SUA_TUOI = "0582a2b4-b1b0-4286-a394-47927cf144b7";
+    static final String THUNG_SUA_TUOI = "5155fb99-487d-4bab-869c-2ed7810b0716";
+    static final String LOC_SUA_CHUA = "e22b5090-40d5-44a9-8cdc-096f954c2103";
+
+    static void kiemThuDatHangVaThanhToan() {
+        Path thuMuc = chay(() -> Files.createTempDirectory("vnm-donhang"));
+        Path file = chay(() -> Files.copy(FILE_MAU, thuMuc.resolve("du-lieu.txt")));
+        BoDuLieu bo = new BoDuLieu(file);
+        chay(bo.luuTru::docDuLieu);
+        DichVuCuaHang dv = bo.dichVu;
+        char[] mk = MAT_KHAU_MAU.toCharArray();
+        String ql = dv.dangNhap("demo.quanly", mk);
+        String nv = dv.dangNhap("demo.nhanvien", mk);
+        String kh1 = dv.dangNhap("demo.khach01", mk);
+        String kh2 = dv.dangNhap("demo.khach02", mk);
+        LocalDate homNay = DichVuCuaHang.homNay();
+
+        // KT05: bán 2 lốc → chỉ tồn lốc giảm 2
+        int tonLoc = ton(bo, LOC_SUA_TUOI);
+        int tonHop = ton(bo, HOP_SUA_TUOI);
+        int tonThung = ton(bo, THUNG_SUA_TUOI);
+        DanhSachChiTietDonHang gio = new DanhSachChiTietDonHang();
+        dv.themVaoGio(nv, gio, LOC_SUA_TUOI, 2);
+        String donVangLai = dv.lapDonTaiQuay(nv, null, gio);
+        dung(ton(bo, LOC_SUA_TUOI) == tonLoc, "Đơn chờ không giữ/trừ tồn");
+        // KT16: vãng lai không dùng điểm, cộng 0
+        loi(IllegalArgumentException.class, () -> dv.xemTruocThanhToan(nv, donVangLai, 1), "KT16 vãng lai không dùng điểm");
+        DonHang daTra = thanhToan(dv, nv, donVangLai, 0);
+        dung(daTra.getTrangThai() == TrangThaiDonHang.DA_THANH_TOAN && daTra.getDiemCong() == 0
+                && nv.equals(daTra.getMaNguoiThuTien()) && daTra.getThoiDiemThanhToan() != null,
+                "KT16 vãng lai đã thanh toán, 0 điểm, có người và thời điểm thu");
+        dung(ton(bo, LOC_SUA_TUOI) == tonLoc - 2 && ton(bo, HOP_SUA_TUOI) == tonHop && ton(bo, THUNG_SUA_TUOI) == tonThung,
+                "KT05 tồn lốc −2, tồn hộp/thùng giữ nguyên");
+        // KT17: thanh toán lặp bị chặn, in lại chỉ đọc
+        loi(IllegalStateException.class, () -> dv.thanhToan(nv, donVangLai, 0, daTra.getTongThanhToan()), "KT17 thanh toán lặp");
+        dung(ton(bo, LOC_SUA_TUOI) == tonLoc - 2 && dv.xemDon(nv, donVangLai) == daTra, "KT17 tồn không đổi, xem lại hóa đơn");
+
+        // Có khuyến mãi riêng của bài kiểm thử, không phụ thuộc hạn của bộ mẫu
+        bo.khuyenMai.them(new KhuyenMaiPhanTram("Giảm 10% lốc sữa chua", LOC_SUA_CHUA, homNay.minusDays(1),
+                homNay.plusDays(1), 10));
+
+        // Dùng điểm: khách02 có 6 điểm, mua 2 lốc sữa chua 26.000 giảm 10%
+        int diemTruoc = diem(bo, kh2);
+        DanhSachChiTietDonHang gio2 = new DanhSachChiTietDonHang();
+        dv.themVaoGio(kh2, gio2, LOC_SUA_CHUA, 2);
+        DanhSachChiTietDonHang baoGia = dv.baoGia(kh2, gio2);
+        dung(baoGia.tinhTongTienHang() == 52_000 && baoGia.tinhTongGiam() == 5_200, "Báo giá tạm tính có khuyến mãi");
+        String donKh2 = dv.datHang(kh2, gio2);
+        dung(dv.diemToiDaDuocDung(nv, donKh2) == Math.min(diemTruoc, 93), "Điểm tối đa = min(điểm có, floor(46.800/500))");
+        loi(IllegalArgumentException.class, () -> dv.xemTruocThanhToan(nv, donKh2, diemTruoc + 1), "Không dùng quá điểm đang có");
+        loi(SecurityException.class, () -> dv.thanhToan(kh2, donKh2, 0, 0), "Khách không tự thanh toán");
+        loi(IllegalStateException.class, () -> dv.thanhToan(nv, donKh2, 6, 1), "Tổng khác bảng tính đã xác nhận bị từ chối");
+        dung(dv.xemDon(nv, donKh2).getTrangThai() == TrangThaiDonHang.CHO_THANH_TOAN && diem(bo, kh2) == diemTruoc,
+                "Từ chối tổng lệch: đơn vẫn chờ, điểm không đổi");
+        DonHang donDiem = thanhToan(dv, nv, donKh2, 6);
+        dung(donDiem.getTienGiamDiem() == 600 && donDiem.getTongThanhToan() == 46_200 && donDiem.getDiemCong() == 4,
+                "Dùng 6 điểm: trả 46.200, cộng 4");
+        dung(diem(bo, kh2) == diemTruoc - 6 + 4, "Điểm sau giao dịch = có − dùng + cộng");
+        dung(dv.lichSuDiem(kh2, kh2).contains(donDiem), "Lịch sử điểm có đơn vừa thanh toán");
+
+        // KT03: khách không xem/hủy đơn của khách khác
+        loi(SecurityException.class, () -> dv.xemDon(kh1, donKh2), "KT03 khách xem đơn người khác");
+        loi(SecurityException.class, () -> dv.huyDon(kh1, donKh2), "KT03 khách hủy đơn người khác");
+        dung(dv.danhSachDon(kh1, null).stream().allMatch(dh -> kh1.equals(dh.getMaKhachHang())), "KT03 khách chỉ thấy đơn mình");
+
+        // KT08: đặt rồi hủy → chỉ đổi trạng thái
+        int tonSuaChua = ton(bo, LOC_SUA_CHUA);
+        DanhSachChiTietDonHang gio3 = new DanhSachChiTietDonHang();
+        dv.themVaoGio(kh1, gio3, LOC_SUA_CHUA, 1);
+        String donHuy = dv.datHang(kh1, gio3);
+        int diemKh1 = diem(bo, kh1);
+        dv.huyDon(kh1, donHuy);
+        dung(dv.xemDon(kh1, donHuy).getTrangThai() == TrangThaiDonHang.DA_HUY && ton(bo, LOC_SUA_CHUA) == tonSuaChua
+                && diem(bo, kh1) == diemKh1, "KT08 hủy không đổi tồn/điểm");
+        loi(IllegalStateException.class, () -> dv.huyDon(kh1, donHuy), "Không hủy lại đơn đã hủy");
+        loi(IllegalStateException.class, () -> dv.xemTruocThanhToan(nv, donHuy, 0), "Không thanh toán đơn đã hủy");
+
+        // KT09: giá tăng sau khi đặt → thanh toán theo giá hiện tại
+        DanhSachChiTietDonHang gio4 = new DanhSachChiTietDonHang();
+        dv.themVaoGio(kh1, gio4, HOP_SUA_TUOI, 3);
+        String donGiaTang = dv.datHang(kh1, gio4);
+        dv.capNhatBienThe(ql, HOP_SUA_TUOI, 9_000, true);
+        DonHang xemTruoc = dv.xemTruocThanhToan(nv, donGiaTang, 0);
+        dung(dv.xemDon(nv, donGiaTang).getTongTienHang() == 24_000 && xemTruoc.getTongTienHang() == 27_000,
+                "KT09 tạm tính 24.000, bảng cuối theo giá mới 27.000");
+        dung(dv.xemDon(nv, donGiaTang).getTrangThai() == TrangThaiDonHang.CHO_THANH_TOAN, "Xem trước không đổi đơn thật");
+
+        // KT10: SKU ngừng bán → không thanh toán, không tự bỏ dòng
+        dv.capNhatBienThe(ql, HOP_SUA_TUOI, 9_000, false);
+        loi(IllegalArgumentException.class, () -> dv.xemTruocThanhToan(nv, donGiaTang, 0), "KT10 SKU ngừng bán chặn thanh toán");
+        loi(IllegalArgumentException.class, () -> dv.themVaoGio(kh1, new DanhSachChiTietDonHang(), HOP_SUA_TUOI, 1),
+                "Không chọn SKU ngừng bán vào giỏ");
+        dv.capNhatBienThe(ql, HOP_SUA_TUOI, 9_000, true);
+
+        // KT06, KT07: SKU tồn 5
+        String maSp = dv.themSanPham(ql, "Sữa hạt", "Vinamilk", "hộp", "180 ml", null, LoaiSanPham.SUA);
+        String sku5 = dv.themBienThe(ql, maSp, "Lốc 4 hộp 180 ml", KieuDongGoi.LOC, 4, 40_000);
+        DanhSachChiTietPhieuNhap phieu = new DanhSachChiTietPhieuNhap();
+        dv.themVaoPhieuNhap(ql, phieu, sku5, 5, 30_000);
+        dv.nhapHang(ql, "NCC", phieu);
+        DanhSachChiTietDonHang gio5 = new DanhSachChiTietDonHang();
+        dv.themVaoGio(kh1, gio5, sku5, 3);
+        loi(IllegalArgumentException.class, () -> dv.themVaoGio(kh1, gio5, sku5, 3), "KT06 gộp thành 6 vượt tồn 5");
+        dung(gio5.timTheoBienThe(sku5).getSoLuong() == 3, "KT06 giỏ giữ nguyên sau lỗi");
+        loi(IllegalArgumentException.class, () -> dv.themVaoGio(kh1, gio5, sku5, 0), "KT26 số lượng 0 bị từ chối");
+        dv.suaSoLuongTrongGio(kh1, gio5, sku5, 4);
+        String donA = dv.datHang(kh1, gio5);
+        DanhSachChiTietDonHang gio6 = new DanhSachChiTietDonHang();
+        dv.themVaoGio(kh2, gio6, sku5, 4);
+        String donB = dv.datHang(kh2, gio6);
+        thanhToan(dv, nv, donA, 0);
+        dung(ton(bo, sku5) == 1, "KT07 thanh toán đơn thứ nhất còn 1");
+        loi(IllegalArgumentException.class, () -> dv.xemTruocThanhToan(nv, donB, 0), "KT07 đơn thứ hai thiếu tồn");
+        dung(dv.xemDon(nv, donB).getTrangThai() == TrangThaiDonHang.CHO_THANH_TOAN, "KT07 đơn thứ hai vẫn chờ");
+
+        // KT14: KM 100% → đơn 0đ, không tích điểm nhưng vẫn trừ tồn
+        bo.khuyenMai.them(new KhuyenMaiPhanTram("Tặng 100%", sku5, homNay, homNay, 100));
+        DanhSachChiTietDonHang gio7 = new DanhSachChiTietDonHang();
+        dv.themVaoGio(nv, gio7, sku5, 1);
+        String don0 = dv.lapDonTaiQuay(nv, kh1, gio7);
+        DonHang da0 = thanhToan(dv, nv, don0, 0);
+        dung(da0.getTongThanhToan() == 0 && da0.getDiemCong() == 0 && ton(bo, sku5) == 0, "KT14 đơn 0đ trừ tồn, không tích điểm");
+
+        // KT18: đổi giá/ngừng KM sau khi bán → hóa đơn cũ không đổi
+        long tongCu = donDiem.getTongThanhToan();
+        dv.capNhatBienThe(ql, LOC_SUA_CHUA, 99_000, true);
+        for (KhuyenMai km : bo.khuyenMai.timTheoBienThe(LOC_SUA_CHUA)) {
+            bo.khuyenMai.sua(km.getMaKhuyenMai(), km instanceof KhuyenMaiPhanTram pt
+                    ? new KhuyenMaiPhanTram(km.getMaKhuyenMai(), km.getTenKhuyenMai(), km.getMaBienThe(), km.getTuNgay(),
+                    km.getDenNgay(), false, pt.getTyLePhanTram())
+                    : new KhuyenMaiSoTien(km.getMaKhuyenMai(), km.getTenKhuyenMai(), km.getMaBienThe(), km.getTuNgay(),
+                    km.getDenNgay(), false, ((KhuyenMaiSoTien) km).getSoTienGiamMoiDonVi()));
+        }
+        DonHang hoaDonCu = dv.xemDon(nv, donKh2);
+        dung(hoaDonCu.getTongThanhToan() == tongCu && hoaDonCu.getChiTiet().getFirst().getDonGia() == 26_000
+                && hoaDonCu.getChiTiet().getFirst().getMaKhuyenMai() != null, "KT18 hóa đơn cũ giữ giá và KM đã chốt");
+
+        // KT21 khi thanh toán: lưu lỗi → đơn, tồn, điểm về như cũ
+        DanhSachChiTietDonHang gio8 = new DanhSachChiTietDonHang();
+        dv.themVaoGio(kh1, gio8, LOC_SUA_TUOI, 1);
+        String donLoi = dv.datHang(kh1, gio8);
+        String ramTruoc = bo.luuTru.xuatThanhChuoi();
+        long tongLoi = dv.xemTruocThanhToan(nv, donLoi, 0).getTongThanhToan();
+        Set<PosixFilePermission> quyenCu = chay(() -> Files.getPosixFilePermissions(thuMuc));
+        chay(() -> Files.setPosixFilePermissions(thuMuc, PosixFilePermissions.fromString("r-x------")));
+        try {
+            loi(IllegalStateException.class, () -> dv.thanhToan(nv, donLoi, 0, tongLoi), "KT21 thanh toán lỗi lưu");
+        } finally {
+            chay(() -> Files.setPosixFilePermissions(thuMuc, quyenCu));
+        }
+        dung(bo.luuTru.xuatThanhChuoi().equals(ramTruoc)
+                && dv.xemDon(nv, donLoi).getTrangThai() == TrangThaiDonHang.CHO_THANH_TOAN, "KT21 thanh toán lỗi: RAM như cũ");
+
+        // Khách bị khóa không thanh toán được đơn của mình
+        dv.khoaTaiKhoan(ql, kh1);
+        loi(IllegalStateException.class, () -> dv.xemTruocThanhToan(nv, donLoi, 0), "Khách bị khóa chặn thanh toán");
+        dv.moKhoaTaiKhoan(ql, kh1);
+        loi(IllegalArgumentException.class, () -> dv.datHang(kh1, new DanhSachChiTietDonHang()), "Giỏ trống không đặt được");
+
+        // KT22: mở lại sau commit → giao dịch đã hoàn tất, không thanh toán lại được
+        BoDuLieu moLai = new BoDuLieu(file);
+        chay(moLai.luuTru::docDuLieu);
+        String nvMoi = moLai.dichVu.dangNhap("demo.nhanvien", mk);
+        dung(moLai.dichVu.xemDon(nvMoi, donKh2).getTrangThai() == TrangThaiDonHang.DA_THANH_TOAN
+                && moLai.luuTru.xuatThanhChuoi().equals(bo.luuTru.xuatThanhChuoi()), "KT22/KT24 mở lại đúng trạng thái");
+        loi(IllegalStateException.class, () -> moLai.dichVu.thanhToan(nvMoi, donKh2, 0, 0), "KT22 không ghi nhận thêm");
+    }
+
+    static DonHang thanhToan(DichVuCuaHang dv, String nguoiThu, String maDon, int diem) {
+        return dv.thanhToan(nguoiThu, maDon, diem, dv.xemTruocThanhToan(nguoiThu, maDon, diem).getTongThanhToan());
+    }
+
+    static int ton(BoDuLieu bo, String maBienThe) {
+        return bo.bienThe.timTheoMa(maBienThe).getSoLuongTon();
+    }
+
+    static int diem(BoDuLieu bo, String maKhach) {
+        return ((KhachHang) bo.taiKhoan.timTheoMa(maKhach)).getDiemTichLuy();
     }
 
     /** Bộ sáu manager + lưu trữ + dịch vụ như Main tạo. */

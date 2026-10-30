@@ -279,6 +279,226 @@ public class DichVuCuaHang {
         return quanLyBienThe.xuat();
     }
 
+    // ================================================================ giỏ hàng, đặt hàng, hủy
+
+    /**
+     * Thêm SKU vào giỏ đang soạn; chọn lại cùng SKU thì gộp lượng.
+     * Kiểm tra tồn trên tổng lượng đã gộp, không chỉ lần chọn này.
+     */
+    public void themVaoGio(String maNguoiGoi, DanhSachChiTietDonHang gio, String maBienThe, int soLuong) {
+        yeuCau(maNguoiGoi);
+        if (soLuong <= 0) {
+            throw new IllegalArgumentException("Số lượng phải là số nguyên dương.");
+        }
+        ChiTietDonHang cu = gio.timTheoBienThe(maBienThe);
+        int tong = cu == null ? soLuong : Math.addExact(cu.getSoLuong(), soLuong);
+        ChiTietDonHang dong = dongBan(timBienTheDangBan(maBienThe), tong, null, 0);
+        if (cu == null) {
+            gio.them(dong);
+        } else {
+            gio.sua(maBienThe, dong);
+        }
+    }
+
+    /** Đặt lại số lượng một dòng trong giỏ (thay, không cộng). */
+    public void suaSoLuongTrongGio(String maNguoiGoi, DanhSachChiTietDonHang gio, String maBienThe, int soLuongMoi) {
+        yeuCau(maNguoiGoi);
+        gio.sua(maBienThe, dongBan(timBienTheDangBan(maBienThe), soLuongMoi, null, 0));
+    }
+
+    public void xoaKhoiGio(String maNguoiGoi, DanhSachChiTietDonHang gio, String maBienThe) {
+        yeuCau(maNguoiGoi);
+        gio.xoa(maBienThe);
+    }
+
+    /** Bảng giá tạm tính của giỏ theo giá và khuyến mãi hôm nay; không lưu gì. */
+    public DanhSachChiTietDonHang baoGia(String maNguoiGoi, DanhSachChiTietDonHang gio) {
+        yeuCau(maNguoiGoi);
+        return tinhGia(gio.xuat(), homNay());
+    }
+
+    /** Khách tự đặt đơn nhận tại cửa hàng; đơn luôn gắn chính khách đang đăng nhập. */
+    public String datHang(String maKhachHang, DanhSachChiTietDonHang gio) {
+        yeuCau(maKhachHang, VaiTro.KHACH_HANG);
+        return luuDonMoi(maKhachHang, maKhachHang, gio);
+    }
+
+    /** Nhân viên/quản lý lập đơn tại quầy; maKhachHang null nghĩa là khách vãng lai. */
+    public String lapDonTaiQuay(String maNguoiLap, String maKhachHang, DanhSachChiTietDonHang gio) {
+        yeuCau(maNguoiLap, VaiTro.NHAN_VIEN_BAN_HANG, VaiTro.QUAN_LY_CUA_HANG);
+        if (maKhachHang != null) {
+            khachDangHoatDong(maKhachHang);
+        }
+        return luuDonMoi(maKhachHang, maNguoiLap, gio);
+    }
+
+    private String luuDonMoi(String maKhachHang, String maNguoiLap, DanhSachChiTietDonHang gio) {
+        DonHang don = new DonHang(maKhachHang, maNguoiLap, tinhGia(gio.xuat(), homNay()), bayGio());
+        giaoDich(() -> quanLyDonHang.them(don));
+        return don.getMaDonHang();
+    }
+
+    /** Khách chỉ thấy đơn của mình; nhân viên/quản lý thấy mọi đơn. trangThai null = tất cả. */
+    public List<DonHang> danhSachDon(String maNguoiGoi, TrangThaiDonHang trangThai) {
+        TaiKhoan nguoiGoi = yeuCau(maNguoiGoi);
+        List<DonHang> don = nguoiGoi instanceof KhachHang
+                ? quanLyDonHang.timTheoKhach(nguoiGoi.getMaTaiKhoan())
+                : quanLyDonHang.xuat();
+        return don.stream().filter(dh -> trangThai == null || dh.getTrangThai() == trangThai).toList();
+    }
+
+    public DonHang xemDon(String maNguoiGoi, String maDonHang) {
+        TaiKhoan nguoiGoi = yeuCau(maNguoiGoi);
+        DonHang don = quanLyDonHang.timTheoMa(maDonHang);
+        if (don == null) {
+            throw new IllegalArgumentException("Không tìm thấy đơn hàng.");
+        }
+        if (nguoiGoi instanceof KhachHang && !nguoiGoi.getMaTaiKhoan().equals(don.getMaKhachHang())) {
+            throw new SecurityException("Đơn hàng không thuộc tài khoản của bạn.");
+        }
+        return don;
+    }
+
+    /** Hủy đơn chờ: chỉ đổi trạng thái, không hoàn tồn/điểm vì đơn chờ chưa trừ. */
+    public void huyDon(String maNguoiGoi, String maDonHang) {
+        DonHang don = xemDon(maNguoiGoi, maDonHang);
+        if (don.getTrangThai() != TrangThaiDonHang.CHO_THANH_TOAN) {
+            throw new IllegalStateException("Chỉ hủy được đơn đang chờ thanh toán (đơn này: "
+                    + don.getTrangThai().getTenHienThi() + ").");
+        }
+        giaoDich(() -> quanLyDonHang.timTheoMa(maDonHang).huy());
+    }
+
+    /** Lịch sử điểm: các đơn đã thanh toán của khách (điểm dùng/cộng nằm trên đơn). */
+    public List<DonHang> lichSuDiem(String maNguoiGoi, String maKhachHang) {
+        xemKhachHang(maNguoiGoi, maKhachHang);
+        return quanLyDonHang.timTheoKhach(maKhachHang).stream()
+                .filter(dh -> dh.getTrangThai() == TrangThaiDonHang.DA_THANH_TOAN)
+                .toList();
+    }
+
+    // ================================================================ thanh toán
+
+    /** Số điểm tối đa khách được dùng cho đơn theo giá hiện hành: min(điểm có, 20% sau khuyến mãi). */
+    public int diemToiDaDuocDung(String maNguoiThu, String maDonHang) {
+        DonHang don = donChoThanhToan(maNguoiThu, maDonHang);
+        if (don.getMaKhachHang() == null) {
+            return 0;
+        }
+        DanhSachChiTietDonHang dong = tinhGia(don.getChiTiet(), homNay());
+        return Math.min(khachDangHoatDong(don.getMaKhachHang()).getDiemTichLuy(),
+                DonHang.diemToiDaTheoTien(dong.tinhTongTienHang() - dong.tinhTongGiam()));
+    }
+
+    /**
+     * Bảng tính cuối theo giá/khuyến mãi hiện hành và số điểm khách chọn,
+     * trên một bản sao tách rời; đơn thật và tồn/điểm không đổi.
+     */
+    public DonHang xemTruocThanhToan(String maNguoiThu, String maDonHang, int diemSuDung) {
+        DonHang don = donChoThanhToan(maNguoiThu, maDonHang);
+        DonHang banSao = don.banSao();
+        banSao.chotThanhToan(dongThanhToan(don, diemSuDung, homNay()), maNguoiThu, bayGio(), diemSuDung);
+        return banSao;
+    }
+
+    /**
+     * Thu tiền: tính lại, đối chiếu với tổng khách đã xác nhận, rồi chốt đơn + trừ tồn
+     * + trừ/cộng điểm trong cùng một lần lưu. Chỉ trả về khi đã lưu thành công.
+     */
+    public DonHang thanhToan(String maNguoiThu, String maDonHang, int diemSuDung, long tongDaXacNhan) {
+        DonHang don = donChoThanhToan(maNguoiThu, maDonHang);
+        LocalDateTime thoiDiem = bayGio();
+        DanhSachChiTietDonHang dong = dongThanhToan(don, diemSuDung, thoiDiem.toLocalDate());
+        giaoDich(() -> {
+            DonHang dh = quanLyDonHang.timTheoMa(maDonHang);
+            dh.chotThanhToan(dong, maNguoiThu, thoiDiem, diemSuDung);
+            if (dh.getTongThanhToan() != tongDaXacNhan) {
+                throw new IllegalStateException(
+                        "Số tiền phải trả đã thay đổi so với bảng tính khách xác nhận; hãy xem lại.");
+            }
+            for (ChiTietDonHang ct : dh.getChiTiet()) {
+                quanLyBienThe.timTheoMa(ct.getMaBienThe()).giamTon(ct.getSoLuong());
+            }
+            if (dh.getMaKhachHang() != null) {
+                KhachHang khach = (KhachHang) quanLyTaiKhoan.timTheoMa(dh.getMaKhachHang());
+                khach.truDiem(dh.getDiemSuDung());
+                khach.congDiem(dh.getDiemCong());
+            }
+        });
+        return quanLyDonHang.timTheoMa(maDonHang);
+    }
+
+    private DonHang donChoThanhToan(String maNguoiThu, String maDonHang) {
+        yeuCau(maNguoiThu, VaiTro.NHAN_VIEN_BAN_HANG, VaiTro.QUAN_LY_CUA_HANG);
+        DonHang don = xemDon(maNguoiThu, maDonHang);
+        if (don.getTrangThai() != TrangThaiDonHang.CHO_THANH_TOAN) {
+            throw new IllegalStateException(don.getTrangThai() == TrangThaiDonHang.DA_THANH_TOAN
+                    ? "Đơn đã thanh toán." : "Đơn đã hủy.");
+        }
+        if (don.getMaKhachHang() != null) {
+            khachDangHoatDong(don.getMaKhachHang());
+        }
+        return don;
+    }
+
+    /** Dòng đã tính lại giá/khuyến mãi của ngày thanh toán, sau khi kiểm tra điểm khách đang có. */
+    private DanhSachChiTietDonHang dongThanhToan(DonHang don, int diemSuDung, LocalDate ngay) {
+        if (don.getMaKhachHang() != null) {
+            int diemCo = khachDangHoatDong(don.getMaKhachHang()).getDiemTichLuy();
+            if (diemSuDung > diemCo) {
+                throw new IllegalArgumentException("Khách không đủ điểm: hiện có " + diemCo + ".");
+            }
+        }
+        return tinhGia(don.getChiTiet(), ngay);
+    }
+
+    private KhachHang khachDangHoatDong(String maKhachHang) {
+        if (!(quanLyTaiKhoan.timTheoMa(maKhachHang) instanceof KhachHang khach)) {
+            throw new IllegalArgumentException("Không tìm thấy khách hàng thành viên.");
+        }
+        if (!khach.isDangHoatDong()) {
+            throw new IllegalStateException("Tài khoản khách hàng đã bị khóa.");
+        }
+        return khach;
+    }
+
+    /**
+     * Dựng danh sách dòng mới theo giá bán và khuyến mãi tốt nhất của ngày cho cả dòng.
+     * Mọi SKU phải đang bán và đủ tồn; không tự bỏ dòng nào.
+     */
+    private DanhSachChiTietDonHang tinhGia(List<ChiTietDonHang> dong, LocalDate ngay) {
+        if (dong.isEmpty()) {
+            throw new IllegalArgumentException("Giỏ hàng đang trống.");
+        }
+        DanhSachChiTietDonHang ketQua = new DanhSachChiTietDonHang();
+        for (ChiTietDonHang ct : dong) {
+            BienTheSanPham bt = timBienTheDangBan(ct.getMaBienThe());
+            KhuyenMai km = quanLyKhuyenMai.timTotNhat(bt.getMaBienThe(), ngay, bt.getGiaBan(), ct.getSoLuong());
+            ketQua.them(dongBan(bt, ct.getSoLuong(), km == null ? null : km.getMaKhuyenMai(),
+                    km == null ? 0 : km.tinhTienGiam(bt.getGiaBan(), ct.getSoLuong())));
+        }
+        return ketQua;
+    }
+
+    private BienTheSanPham timBienTheDangBan(String maBienThe) {
+        BienTheSanPham bt = timBienTheCoSan(maBienThe);
+        if (!quanLyBienThe.dangBan(bt)) {
+            throw new IllegalArgumentException("SKU " + bt.getTenQuyCach() + " đang ngừng bán.");
+        }
+        return bt;
+    }
+
+    /** Dòng bán chụp tên/giá hiện tại; số lượng không vượt tồn hiện có. */
+    private ChiTietDonHang dongBan(BienTheSanPham bt, int soLuong, String maKhuyenMai, long tienGiam) {
+        if (soLuong > bt.getSoLuongTon()) {
+            throw new IllegalArgumentException("Không đủ hàng " + bt.getTenQuyCach() + ": còn "
+                    + bt.getSoLuongTon() + ", cần " + soLuong + ".");
+        }
+        SanPham sp = quanLySanPham.timTheoMa(bt.getMaSanPham());
+        return new ChiTietDonHang(bt.getMaBienThe(), sp.getTenSanPham(), bt.getTenQuyCach(), soLuong,
+                bt.getGiaBan(), maKhuyenMai, tienGiam);
+    }
+
     // ================================================================ nhập hàng
 
     /** Thêm dòng vào phiếu đang soạn; cùng SKU thì cộng lượng nếu cùng giá nhập. */
