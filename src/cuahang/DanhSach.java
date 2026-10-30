@@ -1,7 +1,10 @@
 package cuahang;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 public abstract class DanhSach<T> implements IQuanLy<T> {
@@ -40,6 +43,16 @@ public abstract class DanhSach<T> implements IQuanLy<T> {
     protected final void thayToanBo(List<T> duLieuDaKiemTra) {
         danhSach.clear();
         danhSach.addAll(duLieuDaKiemTra);
+    }
+
+    /** Kiểm tra lô nạp: không có phần tử null, không trùng khóa. */
+    protected static <E> void kiemTraKhongTrung(List<E> lo, Function<E, Object> layKhoa, String tenKhoa) {
+        Set<Object> daCo = new HashSet<>();
+        for (E phanTu : lo) {
+            if (!daCo.add(layKhoa.apply(khacNull(phanTu)))) {
+                throw new IllegalArgumentException("Trùng " + tenKhoa + ": " + layKhoa.apply(phanTu));
+            }
+        }
     }
 
     protected static String kiemTraMa(String ma) {
