@@ -72,6 +72,9 @@ public class LuuTruText {
     public void ghiAnToan() throws IOException {
         String noiDung = xuatThanhChuoi();
         phanTich(noiDung, false);
+        if (duongDan.getParent() != null) {
+            Files.createDirectories(duongDan.getParent());
+        }
         Files.writeString(duongDanTam, noiDung, StandardCharsets.UTF_8);
         // ponytail: chưa fsync file tạm; thay nguyên tử chống file ghi dở, không chống mất điện.
         Files.move(duongDanTam, duongDan, StandardCopyOption.ATOMIC_MOVE);

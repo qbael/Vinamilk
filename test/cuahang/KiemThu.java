@@ -26,6 +26,7 @@ public class KiemThu {
         kiemThuChiTiet();
         kiemThuQuanLy();
         kiemThuLuuTru();
+        kiemThuDichVuTaiKhoanVaNhapHang();
         System.out.println("OK: " + soKiemTra + " kiểm tra đều đạt.");
     }
 
@@ -385,7 +386,134 @@ public class KiemThu {
         }
     }
 
-    /** Bộ sáu manager + lưu trữ như Main tạo. */
+    // ---------- KT01–KT04, KT19–KT21, KT28: dịch vụ tài khoản, danh mục, nhập hàng ----------
+
+    static void kiemThuDichVuTaiKhoanVaNhapHang() {
+        Path thuMuc = chay(() -> Files.createTempDirectory("vnm-dichvu"));
+
+        // Khởi tạo hệ thống khi chưa có file
+        BoDuLieu moi = new BoDuLieu(thuMuc.resolve("moi").resolve("du-lieu.txt"));
+        dung(moi.dichVu.canKhoiTao(), "Chưa có file thì được khởi tạo");
+        String maQlDau = moi.dichVu.khoiTaoHeThong("admin", "matkhau1".toCharArray(), "Quản lý đầu", "0900000009");
+        dung(!moi.dichVu.canKhoiTao(), "Đã có dữ liệu thì không khởi tạo lại");
+        loi(IllegalStateException.class,
+                () -> moi.dichVu.khoiTaoHeThong("admin2", "matkhau1".toCharArray(), "X", "0900000009"), "Không khởi tạo lần hai");
+        BoDuLieu moiMoLai = new BoDuLieu(moi.luuTru.getDuongDan());
+        chay(moiMoLai.luuTru::docDuLieu);
+        dung(moiMoLai.taiKhoan.timTheoMa(maQlDau) instanceof QuanLyCuaHang, "File khởi tạo có quản lý đầu tiên");
+
+        // Làm việc trên bản sao bộ mẫu
+        Path file = chay(() -> Files.copy(FILE_MAU, thuMuc.resolve("du-lieu.txt")));
+        BoDuLieu bo = new BoDuLieu(file);
+        chay(bo.luuTru::docDuLieu);
+        DichVuCuaHang dv = bo.dichVu;
+        char[] mk = MAT_KHAU_MAU.toCharArray();
+        String maQl = dv.dangNhap("demo.quanly", mk);
+        String maNv = dv.dangNhap(" DEMO.NhanVien ", mk);
+        loi(IllegalArgumentException.class, () -> dv.dangNhap("demo.quanly", "sai".toCharArray()), "Sai mật khẩu");
+        loi(IllegalArgumentException.class, () -> dv.dangNhap("khong.co", mk), "Tên không tồn tại");
+
+        // KT01: tự đăng ký chỉ tạo khách hàng điểm 0, lưu xuống file
+        String maKh = dv.dangKyKhachHang("khach.moi", "matkhau1".toCharArray(), "Khách Mới", "0911222333");
+        dung(dv.xemKhachHang(maKh, maKh).getDiemTichLuy() == 0, "KT01 khách mới điểm 0");
+        dung(chay(() -> Files.readString(file)).contains("|KHACH_HANG|khach.moi|"), "KT01 đăng ký đã lưu file");
+        // KT02
+        int soTk = bo.taiKhoan.xuat().size();
+        loi(IllegalArgumentException.class,
+                () -> dv.dangKyKhachHang("  KHACH.MOI ", "matkhau1".toCharArray(), "X", "0911222333"), "KT02 trùng tên sau chuẩn hóa");
+        loi(IllegalArgumentException.class,
+                () -> dv.dangKyKhachHang("ab", "123".toCharArray(), "X", "0911222333"), "Mật khẩu quá ngắn");
+        loi(IllegalArgumentException.class,
+                () -> dv.dangKyKhachHang("abc", "matkhau1".toCharArray(), "X", "12345"), "Số điện thoại sai");
+        dung(bo.taiKhoan.xuat().size() == soTk, "KT02 không tạo thêm tài khoản");
+
+        // Phân quyền tại dịch vụ
+        loi(SecurityException.class,
+                () -> dv.taoTaiKhoanNoiBo(maKh, VaiTro.QUAN_LY_CUA_HANG, "x", mk, "X", "0900000000"), "Khách không tạo tài khoản nội bộ");
+        loi(SecurityException.class, () -> dv.themSanPham(maNv, "Sữa", "V", "hộp", "1 l", null, LoaiSanPham.SUA),
+                "Nhân viên không quản lý danh mục");
+        loi(SecurityException.class, () -> dv.xemKhachHang(maKh, bo.taiKhoan.timTheoTenDangNhap("demo.khach01").getMaTaiKhoan()),
+                "Khách không xem điểm người khác");
+        dung(dv.traThanhVien(maNv, "0911222333").size() == 1, "Nhân viên tra thành viên theo số điện thoại");
+        loi(SecurityException.class, () -> dv.traThanhVien(maKh, "0911222333"), "Khách không tra thành viên");
+        loi(IllegalStateException.class, () -> dv.layTaiKhoanDangNhap("ma-khong-co"), "Mã phiên lạ bị từ chối");
+
+        // KT04: không khóa quản lý hoạt động cuối cùng
+        loi(IllegalStateException.class, () -> dv.khoaTaiKhoan(maQl, maQl), "KT04 không khóa quản lý cuối cùng");
+        String maQl2 = dv.taoTaiKhoanNoiBo(maQl, VaiTro.QUAN_LY_CUA_HANG, "quanly2", "matkhau2".toCharArray(),
+                "Quản lý hai", "0900000010");
+        loi(IllegalArgumentException.class,
+                () -> dv.taoTaiKhoanNoiBo(maQl, VaiTro.KHACH_HANG, "kh", mk, "X", "0900000000"), "Không tạo khách từ màn nội bộ");
+        dung(dv.khoaTaiKhoan(maQl2, maQl2), "Quản lý tự khóa khi còn quản lý khác: kết thúc phiên");
+        loi(IllegalStateException.class, () -> dv.danhSachTaiKhoan(maQl2), "Tài khoản đã khóa không thao tác được");
+        loi(IllegalStateException.class, () -> dv.dangNhap("quanly2", "matkhau2".toCharArray()), "Tài khoản khóa không đăng nhập được");
+        loi(IllegalStateException.class, () -> dv.khoaTaiKhoan(maQl, maQl), "KT04 vẫn còn đúng một quản lý thì không khóa");
+        dv.moKhoaTaiKhoan(maQl, maQl2);
+        dung(dv.layTaiKhoanDangNhap(maQl2) instanceof QuanLyCuaHang, "Mở lại tài khoản");
+
+        // KT28: khóa khách đang có phiên → mọi thao tác bằng phiên đó bị chặn ngay
+        dv.khoaTaiKhoan(maQl, maKh);
+        loi(IllegalStateException.class, () -> dv.xemKhachHang(maKh, maKh), "KT28 phiên của tài khoản đã khóa mất quyền");
+        dv.moKhoaTaiKhoan(maQl, maKh);
+
+        // Danh mục: SKU mới tồn 0; nhân viên không thấy SKU ngừng bán, quản lý thấy
+        String maSp = dv.themSanPham(maQl, "Sữa đặc", "Ông Thọ", "lon", "380 g", null, LoaiSanPham.SUA);
+        String maLon = dv.themBienThe(maQl, maSp, "1 lon 380 g", KieuDongGoi.BAN_LE, 1, 25_000);
+        String maThung = dv.themBienThe(maQl, maSp, "Thùng 24 lon", KieuDongGoi.THUNG, 24, 560_000);
+        dung(bo.bienThe.timTheoMa(maLon).getSoLuongTon() == 0, "SKU mới tồn 0");
+        dv.capNhatBienThe(maQl, maLon, 26_000, false);
+        dung(dv.timBienThe(maNv, "sữa đặc").size() == 1 && dv.timBienThe(maQl, "sữa đặc").size() == 2,
+                "Nhân viên không thấy SKU ngừng bán, quản lý thấy");
+        dung(dv.timBienThe(maNv, maThung.substring(0, 8)).size() == 1, "Tìm SKU theo phần đầu mã");
+        dv.capNhatSanPham(maQl, maSp, "Sữa đặc có đường", "Ông Thọ", "Lon thiếc", false);
+        dung(dv.timBienThe(maNv, "sữa đặc").isEmpty(), "Ngừng sản phẩm cha ẩn mọi SKU với nhân viên");
+        dv.capNhatSanPham(maQl, maSp, "Sữa đặc có đường", "Ông Thọ", "Lon thiếc", true);
+
+        // KT19: nhập 3 thùng 200.000đ → tồn thùng +3, các quy cách khác không đổi
+        BienTheSanPham thungSuaTuoi = bo.bienThe.timTheoMa("5155fb99-487d-4bab-869c-2ed7810b0716");
+        int tonThung = thungSuaTuoi.getSoLuongTon();
+        int tonLoc = bo.bienThe.timTheoMa("6c910bdf-d7bc-4493-b9ca-766d7b8bf293").getSoLuongTon();
+        DanhSachChiTietPhieuNhap phieu = new DanhSachChiTietPhieuNhap();
+        dv.themVaoPhieuNhap(maQl, phieu, thungSuaTuoi.getMaBienThe(), 2, 200_000);
+        dv.themVaoPhieuNhap(maQl, phieu, thungSuaTuoi.getMaBienThe(), 1, 200_000);
+        loi(IllegalArgumentException.class,
+                () -> dv.themVaoPhieuNhap(maQl, phieu, thungSuaTuoi.getMaBienThe(), 1, 210_000), "Cùng SKU khác giá trên phiếu");
+        loi(SecurityException.class, () -> dv.nhapHang(maNv, "NCC", phieu), "Nhân viên không nhập hàng");
+        String maPhieu = dv.nhapHang(maQl, "Nhà phân phối A", phieu);
+        dung(bo.bienThe.timTheoMa(thungSuaTuoi.getMaBienThe()).getSoLuongTon() == tonThung + 3
+                        && bo.bienThe.timTheoMa("6c910bdf-d7bc-4493-b9ca-766d7b8bf293").getSoLuongTon() == tonLoc,
+                "KT19 tồn thùng +3, tồn lốc không đổi");
+        dung(dv.xemPhieuNhap(maQl, maPhieu).tinhTongTien() == 600_000, "KT19 chi nhập 600.000");
+        DanhSachChiTietPhieuNhap phieuRong = new DanhSachChiTietPhieuNhap();
+        loi(IllegalArgumentException.class, () -> dv.nhapHang(maQl, "NCC", phieuRong), "Phiếu rỗng bị từ chối");
+        loi(IllegalArgumentException.class, () -> dv.nhapHang(maQl, " ", phieu), "Nguồn nhập trống bị từ chối");
+
+        // KT21: lưu lỗi khi sửa giá / nhập hàng → RAM và file về trạng thái cũ
+        String fileTruoc = chay(() -> Files.readString(file));
+        String ramTruoc = bo.luuTru.xuatThanhChuoi();
+        Set<PosixFilePermission> quyenCu = chay(() -> Files.getPosixFilePermissions(thuMuc));
+        chay(() -> Files.setPosixFilePermissions(thuMuc, PosixFilePermissions.fromString("r-x------")));
+        try {
+            loi(IllegalStateException.class, () -> dv.capNhatBienThe(maQl, maThung, 999_000, true), "KT21 sửa giá lỗi lưu");
+            DanhSachChiTietPhieuNhap phieu2 = new DanhSachChiTietPhieuNhap();
+            dv.themVaoPhieuNhap(maQl, phieu2, maThung, 5, 500_000);
+            loi(IllegalStateException.class, () -> dv.nhapHang(maQl, "NCC", phieu2), "KT21 nhập hàng lỗi lưu");
+            dung(!phieu2.isDaChot(), "KT21 phiếu đang soạn vẫn sửa được sau lỗi lưu");
+        } finally {
+            chay(() -> Files.setPosixFilePermissions(thuMuc, quyenCu));
+        }
+        dung(bo.luuTru.xuatThanhChuoi().equals(ramTruoc), "KT21 RAM về trạng thái cũ");
+        dung(bo.bienThe.timTheoMa(maThung).getGiaBan() == 560_000 && bo.bienThe.timTheoMa(maThung).getSoLuongTon() == 0,
+                "KT21 giá và tồn không đổi");
+        dung(chay(() -> Files.readString(file)).equals(fileTruoc), "KT21 file chính không đổi");
+
+        // Toàn bộ thay đổi vẫn đọc lại hợp lệ (đối chiếu tồn/điểm qua chứng từ)
+        BoDuLieu moLai = new BoDuLieu(file);
+        chay(moLai.luuTru::docDuLieu);
+        dung(moLai.luuTru.xuatThanhChuoi().equals(bo.luuTru.xuatThanhChuoi()), "Mở lại sau các giao dịch khớp RAM");
+    }
+
+    /** Bộ sáu manager + lưu trữ + dịch vụ như Main tạo. */
     static final class BoDuLieu {
         final QuanLyTaiKhoan taiKhoan = new QuanLyTaiKhoan();
         final QuanLySanPham sanPham = new QuanLySanPham();
@@ -394,9 +522,11 @@ public class KiemThu {
         final QuanLyDonHang donHang = new QuanLyDonHang();
         final QuanLyPhieuNhap phieuNhap = new QuanLyPhieuNhap();
         final LuuTruText luuTru;
+        final DichVuCuaHang dichVu;
 
         BoDuLieu(Path file) {
             luuTru = new LuuTruText(file, taiKhoan, sanPham, bienThe, khuyenMai, donHang, phieuNhap);
+            dichVu = new DichVuCuaHang(taiKhoan, sanPham, bienThe, khuyenMai, donHang, phieuNhap, luuTru);
         }
     }
 
@@ -404,9 +534,21 @@ public class KiemThu {
         void chay() throws IOException;
     }
 
+    interface GiaTriIO<V> {
+        V lay() throws IOException;
+    }
+
     static void chay(ThaoTacIO thaoTac) {
         try {
             thaoTac.chay();
+        } catch (IOException e) {
+            throw new java.io.UncheckedIOException(e);
+        }
+    }
+
+    static <V> V chay(GiaTriIO<V> thaoTac) {
+        try {
+            return thaoTac.lay();
         } catch (IOException e) {
             throw new java.io.UncheckedIOException(e);
         }
