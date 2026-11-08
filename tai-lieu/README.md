@@ -13,7 +13,8 @@ Bản thiết kế cho ứng dụng Java chạy bằng console, lưu dữ liệu
 | [05 — Mô hình dữ liệu](05-mo-hinh-du-lieu.md) | Bảng logic, khóa chính/ngoại, từ điển cột và sơ đồ quan hệ |
 | [06 — Quy tắc nghiệp vụ](06-quy-tac-nghiep-vu.md) | Vòng đời đơn, công thức tiền/điểm, tồn kho và thu-chi |
 | [07 — Lưu trữ file text](07-luu-tru-file-text.md) | Định dạng UTF-8, đọc/ghi, khôi phục khi lưu lỗi và bộ dữ liệu mẫu |
-| [08 — Kế hoạch kiểm thử](08-ke-hoach-kiem-thu.md) | 33 tình huống kiểm chứng và thứ tự triển khai |
+| [08 — Kế hoạch kiểm thử](08-ke-hoach-kiem-thu.md) | 39 tình huống kiểm chứng và thứ tự triển khai |
+| [09 — Demo và kiểm thử tay](09-demo-va-kiem-thu-tay.md) | Luồng app, kịch bản demo theo yêu cầu đề, câu hỏi thường gặp, checklist test tay |
 
 Thư mục `lop/` có **32 file riêng**, ví dụ [TaiKhoan](lop/TaiKhoan.md), [BienTheSanPham](lop/BienTheSanPham.md), [IQuanLy](lop/IQuanLy.md), [DanhSach](lop/DanhSach.md), [QuanLySanPham](lop/QuanLySanPham.md). Mỗi file mô tả một kiểu Java; xem toàn bộ tại [mục lục lớp](04-thiet-ke-lop.md). Tổng cộng có 41 file Markdown: mục lục này, 8 tài liệu theo chủ đề và 32 tài liệu lớp.
 
@@ -57,7 +58,7 @@ Chạy kiểm thử end-to-end qua giao diện console (gõ sẵn phím vào ch�
 bash test/e2e.sh
 ```
 
-Đăng nhập thử bằng `demo.quanly`, `demo.nhanvien`, `demo.khach01`… với mật khẩu `VnmDemo!2026`. Chương trình ghi thẳng vào `data/du-lieu.txt` sau mỗi thao tác; muốn quay về bộ mẫu thì chạy `git restore data/du-lieu.txt`. Nếu chưa có file dữ liệu, chương trình hỏi xác nhận rồi tạo quản lý đầu tiên.
+Đăng nhập thử bằng `demo.quanly`, `demo.nhanvien`, `demo.khach01`… với mật khẩu `VnmDemo!2026`. Chương trình ghi thẳng vào `data/du-lieu.txt` sau mỗi thao tác và lưu hóa đơn vào thư mục `hoa-don/` ở thư mục chạy; muốn quay về bộ mẫu thì chạy `git restore data/du-lieu.txt`. Nếu chưa có file dữ liệu, chương trình hỏi xác nhận rồi tạo quản lý đầu tiên.
 
 Mã nguồn không dùng tính năng preview, tính năng riêng của JDK 26 hay thư viện ngoài JDK; đã chạy và kiểm thử với JDK 25, chạy được trên JDK 26.
 
