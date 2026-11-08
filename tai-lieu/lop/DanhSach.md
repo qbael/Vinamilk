@@ -4,7 +4,7 @@
 
 **Khai báo dự kiến:** `public abstract class DanhSach<T> implements IQuanLy<T>`, file `DanhSach.java`.
 
-Lớp cha giữ danh sách có kiểu và thực thi phần xuất dữ liệu dùng chung. Không khởi tạo trực tiếp; lớp con xác định `T` và triển khai thêm, sửa, xóa theo ràng buộc nghiệp vụ.
+Lớp cha giữ danh sách có kiểu và thực thi phần xuất dữ liệu dùng chung. Có constructor `protected DanhSach()` tạo danh sách rỗng, lớp con gọi qua `super()`. Không khởi tạo trực tiếp; lớp con xác định `T` và triển khai thêm, sửa, xóa theo ràng buộc nghiệp vụ.
 
 ## Khung lớp dự kiến
 

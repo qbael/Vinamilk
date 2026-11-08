@@ -10,6 +10,10 @@ import java.util.function.Predicate;
 public abstract class DanhSach<T> implements IQuanLy<T> {
     protected final List<T> danhSach = new ArrayList<>();
 
+    /** Khởi tạo danh sách rỗng; lớp con gọi qua super(). */
+    protected DanhSach() {
+    }
+
     @Override
     public final List<T> xuat() {
         return List.copyOf(danhSach);

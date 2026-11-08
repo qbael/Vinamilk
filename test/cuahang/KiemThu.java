@@ -265,14 +265,26 @@ public class KiemThu {
                 () -> qlKm.sua("KM-A", new KhuyenMaiSoTien("KM-A", "Giảm 1000", "BT1", tu, den, true, 1_000)),
                 "KM đã ngừng không mở lại được");
 
-        // KT31: xóa qua interface trên sáu manager, sửa đơn/phiếu đều bị từ chối
+        // KT31: tài khoản, đơn, phiếu không xóa được; sản phẩm/SKU/KM xóa thật qua interface (đa hình)
         QuanLyDonHang qlDh = new QuanLyDonHang();
         QuanLyPhieuNhap qlPn = new QuanLyPhieuNhap();
-        List<IQuanLy<?>> sauManager = List.of(qlTk, qlSpThat, qlBt, qlKm, qlDh, qlPn);
-        for (IQuanLy<?> manager : sauManager) {
+        for (IQuanLy<?> manager : List.<IQuanLy<?>>of(qlTk, qlDh, qlPn)) {
             loi(UnsupportedOperationException.class, () -> manager.xoa("X"),
                     "KT31 xóa trên " + manager.getClass().getSimpleName());
         }
+        for (IQuanLy<?> manager : List.<IQuanLy<?>>of(qlSpThat, qlBt, qlKm)) {
+            loi(IllegalArgumentException.class, () -> manager.xoa("X"),
+                    "KT31 xóa mã không tồn tại trên " + manager.getClass().getSimpleName());
+        }
+        IQuanLy<KhuyenMai> qlKmChung = qlKm;
+        qlKmChung.xoa("KM-D");
+        dung(qlKm.timTheoMa("KM-D") == null && qlKm.xuat().size() == 3, "KT31 xóa khuyến mãi qua interface");
+        qlBt.timTheoMa("BT3").tangTon(1);
+        loi(IllegalStateException.class, () -> qlBt.xoa("BT3"), "KT31 SKU còn tồn không xóa được");
+        qlBt.timTheoMa("BT3").giamTon(1);
+        IQuanLy<BienTheSanPham> qlBtChung = qlBt;
+        qlBtChung.xoa("BT3");
+        dung(qlBt.timTheoMa("BT3") == null && qlBt.xuat().size() == 2, "KT31 xóa SKU tồn 0 qua interface");
         loi(UnsupportedOperationException.class, () -> qlDh.sua("X", null), "KT31 sửa đơn hàng bị từ chối");
         loi(UnsupportedOperationException.class, () -> qlPn.sua("X", null), "KT31 sửa phiếu nhập bị từ chối");
 
@@ -830,6 +842,29 @@ public class KiemThu {
         dung(dv.danhSachKhuyenMai(nv).stream().noneMatch(km -> km.getMaKhuyenMai().equals(maKmSau))
                 && dv.danhSachKhuyenMai(ql).stream().anyMatch(km -> km.getMaKhuyenMai().equals(maKmSau)),
                 "Nhân viên chỉ thấy KM đang hiệu lực, quản lý thấy tất cả");
+        // KT39: xóa hẳn mục chưa có giao dịch; mục đã có giao dịch chỉ ngừng được
+        loi(IllegalStateException.class, () -> dv.xoaKhuyenMai(ql, "e1792775-e735-45ec-9f60-5d3fa00c2164"),
+                "KT39 KM đã áp dụng trên đơn không xóa được");
+        loi(IllegalStateException.class, () -> dv.xoaBienThe(ql, "f9f193ce-a053-4fc0-b5fc-89fb49c0881f"),
+                "KT39 SKU đã có phiếu nhập không xóa được");
+        loi(IllegalStateException.class, () -> dv.xoaSanPham(ql, "a8f710f9-a0ae-44ab-9969-c575bf65e52a"),
+                "KT39 sản phẩm còn SKU không xóa được");
+        loi(SecurityException.class, () -> dv.xoaKhuyenMai(nv, maKmSau), "KT39 nhân viên không xóa KM");
+        String spMoi = dv.themSanPham(ql, "Sữa thử xóa", "Vinamilk", "hộp", "110 ml", null, LoaiSanPham.SUA);
+        String btMoi = dv.themBienThe(ql, spMoi, "1 hộp 110 ml", KieuDongGoi.BAN_LE, 1, 6_000);
+        String kmMoi = dv.themKhuyenMai(ql, true, "KM thử xóa", btMoi, homNay, homNay.plusDays(1), 5);
+        loi(IllegalStateException.class, () -> dv.xoaBienThe(ql, btMoi), "KT39 SKU còn KM phải xóa KM trước");
+        dv.xoaKhuyenMai(ql, kmMoi);
+        dv.xoaBienThe(ql, btMoi);
+        dv.xoaSanPham(ql, spMoi);
+        dv.xoaKhuyenMai(ql, maKmSau);
+        BoDuLieu moLaiSauXoa = new BoDuLieu(bo.luuTru.getDuongDan());
+        chay(moLaiSauXoa.luuTru::docDuLieu);
+        dung(moLaiSauXoa.sanPham.timTheoMa(spMoi) == null && moLaiSauXoa.bienThe.timTheoMa(btMoi) == null
+                        && moLaiSauXoa.khuyenMai.timTheoMa(kmMoi) == null && moLaiSauXoa.khuyenMai.timTheoMa(maKmSau) == null,
+                "KT39 xóa KM → SKU → sản phẩm đã lưu xuống file");
+        loi(IllegalArgumentException.class, () -> dv.xoaSanPham(ql, spMoi), "KT39 xóa lại mục đã xóa báo không tìm thấy");
+
         dv.capNhatKhuyenMai(ql, maKm, "Giảm 8% thùng sữa chua", homNay, homNay.plusDays(3), 8);
         dung(((KhuyenMaiPhanTram) bo.khuyenMai.timTheoMa(maKm)).getTyLePhanTram() == 8, "Sửa mức giảm khuyến mãi");
         dung(dv.khuyenMaiHienHanh(bo.bienThe.timTheoMa("094d9508-3a5d-4954-b873-5638be5e0fd0")).getMaKhuyenMai().equals(maKm),

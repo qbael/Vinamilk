@@ -25,13 +25,13 @@ Các phương thức dưới đây là instance; `xuat()` kế thừa `public fi
 | `List<BienTheSanPham> layHangDangBan()` | SKU và sản phẩm cha đều đang kinh doanh; giao diện hiển thị riêng tình trạng hết hàng |
 | `void them(BienTheSanPham bienThe)` | Từ chối `null`, kiểm tra sản phẩm cha tồn tại, mã không trùng, quy cách không trùng; SKU mới có tồn 0 |
 | `void sua(String ma, BienTheSanPham duLieuMoi)` | Từ chối `null`, mã không tồn tại hoặc mã không khớp; kiểm tra toàn bộ trường rồi gọi `doiGia`, `ngungKinhDoanh`/`moKinhDoanh`, không dùng `list.set` |
-| `void xoa(String ma)` | Ném `UnsupportedOperationException("Không được xóa SKU; hãy ngừng kinh doanh qua dịch vụ.")` |
+| `void xoa(String ma)` | Xóa hẳn SKU tồn 0; còn tồn báo `IllegalStateException`. Dịch vụ kiểm tra thêm đơn, phiếu nhập và khuyến mãi trỏ tới SKU |
 | `void napDanhSach(List<BienTheSanPham> duLieuDaKiemTra)` | Package-private, chỉ phục vụ nạp/phục hồi: kiểm tra toàn bộ lô trước khi `clear`/`addAll`; giữ tồn đã đối chiếu từ chứng từ, không yêu cầu tồn 0 như SKU mới |
 
 ## Quan hệ và ràng buộc
 
 - Phần tử [BienTheSanPham](BienTheSanPham.md) liên kết tới [SanPham](SanPham.md) bằng `maSanPham`. Không trùng bộ `(maSanPham, kieuDongGoi, soDonViCoSo)`.
-- Mã và cấu tạo quy cách bất biến; giá bán dương, tồn không âm. Không xóa SKU có lịch sử; dùng cờ ngừng kinh doanh.
+- Mã và cấu tạo quy cách bất biến; giá bán dương, tồn không âm. Không xóa SKU có lịch sử hoặc còn khuyến mãi; dùng cờ ngừng kinh doanh.
 - [DichVuCuaHang](DichVuCuaHang.md) kiểm tra quyền rồi mới gọi `doiGia`, `tangTon`, `giamTon` của SKU. Tăng tồn chỉ qua ghi nhận nhập hàng, giảm tồn chỉ qua thanh toán; không có chức năng đặt tồn tùy ý.
 - `sua` chỉ đổi giá và trạng thái bằng các hành vi trên. Mã, lớp cụ thể, sản phẩm cha, tên/cấu tạo quy cách, kiểu đóng gói, số đơn vị cơ sở và tồn phải giữ nguyên; từ chối dữ liệu đổi tồn hoặc chuyển SKU sang hàng khác.
 - Tồn lẻ/lốc/thùng độc lập. Mua một lốc giảm một đơn vị SKU lốc; không tự tháo thùng hay đổi sang tồn hộp lẻ.

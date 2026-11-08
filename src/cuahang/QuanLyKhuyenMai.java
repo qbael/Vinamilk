@@ -77,9 +77,15 @@ public final class QuanLyKhuyenMai extends DanhSach<KhuyenMai> {
         }
     }
 
+    /** Xóa hẳn chương trình; DichVuCuaHang.xoaKhuyenMai kiểm tra chưa có đơn nào dùng trước khi gọi. */
     @Override
     public void xoa(String ma) {
-        throw new UnsupportedOperationException("Không được xóa khuyến mãi; hãy ngừng áp dụng qua dịch vụ.");
+        kiemTraMa(ma);
+        KhuyenMai km = timTheoMa(ma);
+        if (km == null) {
+            throw new IllegalArgumentException("Không tìm thấy khuyến mãi " + ma + ".");
+        }
+        danhSach.remove(km);
     }
 
     void napDanhSach(List<KhuyenMai> duLieuDaKiemTra) {

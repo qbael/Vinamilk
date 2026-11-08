@@ -38,6 +38,6 @@ Thuộc tính là `private`. Không có setter gán tồn tùy ý. [DichVuCuaHan
 - `giaBan > 0`, `soLuongTon ≥ 0`. SKU mới có tồn 0. `BAN_LE` có 1 đơn vị cơ sở; `LOC`/`THUNG` có hơn 1.
 - Hai thùng 24 và 48 đơn vị là hai SKU hợp lệ. Không đổi cấu tạo quy cách thành SKU khác; tạo SKU mới khi thay đổi hàng hóa/quy cách.
 - Không tự tách thùng thành lốc/lẻ. Chỉ bán khi cả sản phẩm cha và SKU đang kinh doanh; đặt đơn không giữ tồn.
-- Không xóa SKU để bảo toàn tham chiếu lịch sử. Giá mới không thay đơn giá đã chốt của đơn cũ.
+- Không xóa SKU đã có giao dịch để bảo toàn tham chiếu lịch sử. Giá mới không thay đơn giá đã chốt của đơn cũ.
 
 Xem [Mô hình dữ liệu](../05-mo-hinh-du-lieu.md) và [Mục lục lớp](../04-thiet-ke-lop.md).

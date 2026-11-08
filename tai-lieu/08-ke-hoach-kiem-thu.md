@@ -1,6 +1,6 @@
 # 08. Kế hoạch kiểm thử và thứ tự triển khai
 
-Bảng dưới ghi kết quả mong đợi. Cả 38 tình huống có kiểm chứng tự động trong `test/cuahang/KiemThu.java` (cách chạy ở [README](README.md#mã-nguồn-và-cách-chạy)); phần chỉ nằm ở giao diện, như menu đăng ký không có lựa chọn nội bộ (KT01) hay nhập chữ thay số (KT26), được kiểm tra khi chạy console, còn phần chặn sai kiểu của KT30 do trình biên dịch đảm nhận. Đối chiếu với [Quy tắc nghiệp vụ](06-quy-tac-nghiep-vu.md) và [Lưu trữ file text](07-luu-tru-file-text.md).
+Bảng dưới ghi kết quả mong đợi. Cả 39 tình huống có kiểm chứng tự động trong `test/cuahang/KiemThu.java` (cách chạy ở [README](README.md#mã-nguồn-và-cách-chạy)); phần chỉ nằm ở giao diện, như menu đăng ký không có lựa chọn nội bộ (KT01) hay nhập chữ thay số (KT26), được kiểm tra khi chạy console, còn phần chặn sai kiểu của KT30 do trình biên dịch đảm nhận. Đối chiếu với [Quy tắc nghiệp vụ](06-quy-tac-nghiep-vu.md) và [Lưu trữ file text](07-luu-tru-file-text.md).
 
 ## 1. Tình huống kiểm thử
 
@@ -36,7 +36,7 @@ Bảng dưới ghi kết quả mong đợi. Cả 38 tình huống có kiểm ch�
 | KT28 | Đăng xuất KH rồi đăng nhập NV trong cùng JVM | Dùng lại cùng sáu đối tượng quản lý, dữ liệu giữ nguyên; phiên trước không còn quyền tác động |
 | KT29 | Dùng biến `IQuanLy<SanPham>` tham chiếu `QuanLySanPham`, gọi `xuat`/`them`/`sua` | Chạy đúng override; dữ liệu hợp lệ được cập nhật, null/trùng mã/đổi mã bị từ chối; không thay đổi một phần khi có lỗi |
 | KT30 | Truyền `TaiKhoan` vào `DanhSach<SanPham>`; thử thêm/xóa qua danh sách do `xuat()` trả về | Sai kiểu bị chặn khi biên dịch; sửa cấu trúc bản xuất báo `UnsupportedOperationException`, danh sách gốc giữ nguyên |
-| KT31 | Gọi `xoa` qua interface trên sáu manager chung; gọi `sua` trên manager đơn/phiếu | Báo không hỗ trợ, không xóa lịch sử hoặc sửa chứng từ; khóa/ngừng/hủy vẫn qua hành vi chuyên biệt |
+| KT31 | Gọi `xoa` qua interface trên sáu manager chung; gọi `sua` trên manager đơn/phiếu | Tài khoản/đơn/phiếu báo không hỗ trợ; sản phẩm/SKU/khuyến mãi xóa đúng override (mã lạ báo lỗi, SKU còn tồn bị chặn); không sửa chứng từ |
 | KT32 | Gọi `them`/`sua`/`xoa` qua interface chi tiết khi đang soạn rồi sau khi đơn/phiếu nhận quyền sở hữu | Lúc soạn: gộp/thay/xóa đúng SKU, giữ kiểm tra tồn/giá/tràn số; sau khóa: cả ba bị chặn qua cả tham chiếu cũ, kể cả đơn chờ và dữ liệu nạp lại |
 | KT33 | Kiểm tra bộ mẫu `data/du-lieu.txt` rồi nạp bằng bộ đọc khi triển khai | Có ít nhất 50 bản ghi, không tính `VNM`/`END`; bộ hiện tại có 60 bản ghi và `END\|60`; đủ tám bảng, xác thực được tài khoản mẫu, khóa ngoại/tiền/tồn/điểm khớp lịch sử |
 | KT34 | Thống kê bán hàng tháng 10 của bộ mẫu | 5 đơn, thu ròng 237.500đ; top SKU theo doanh thu; tổng theo nhóm hàng = gộp − KM, tổng theo người thu/ngày = thu ròng; 8 đơn tạo, 1 hủy |
@@ -44,6 +44,7 @@ Bảng dưới ghi kết quả mong đợi. Cả 38 tình huống có kiểm ch�
 | KT36 | Xuất file hóa đơn cho đơn đã thanh toán và đơn chờ | File `HD-20261002-84736ab2.txt` có tiêu đề, người thu, tổng tiền, mọi dòng ≤ 50 ký tự; đơn chờ bị từ chối; thanh toán qua console tự lưu file |
 | KT37 | Hạ tồn một SKU về 11, 10; ngừng bán SKU đó; nhân viên gọi cảnh báo | Bộ mẫu không cảnh báo; 11 chưa, 10 có cảnh báo; SKU ngừng bán bị bỏ qua; nhân viên bị từ chối; quản lý đăng nhập thấy danh sách sắp hết |
 | KT38 | Đổi mật khẩu với mật khẩu hiện tại sai, mật khẩu mới trùng cũ hoặc quá ngắn, rồi đổi đúng | Ba trường hợp lỗi bị từ chối, salt giữ nguyên; đổi đúng thì mật khẩu cũ hết hiệu lực, mật khẩu mới đăng nhập được kể cả sau khi mở lại file; điểm và trạng thái giữ nguyên |
+| KT39 | Xóa KM đã áp dụng, SKU đã có phiếu nhập, sản phẩm còn SKU, SKU còn KM; rồi xóa KM → SKU → sản phẩm mới tạo | Bốn ca đầu bị từ chối kèm lý do; chuỗi xóa mục chưa giao dịch thành công và không còn trong file sau khi mở lại; nhân viên không xóa được |
 
 Khi bắt đầu viết code, ưu tiên một self-check nhỏ cho công thức KT11–KT16 và vòng đọc/ghi KT24, thêm kiểm chứng KT21 cho xử lý lỗi lưu. Không chỉ kiểm tra menu chạy được; cần chứng minh tiền, điểm và tồn không bị lệch.
 

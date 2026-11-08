@@ -61,7 +61,7 @@ BIEN_THE|maBienThe|maSanPham|tenQuyCach|kieuDongGoi|soDonViCoSo|giaBan|soLuongTo
 - Biến thể: tên quy cách không rỗng, giá bán > 0, tồn ≥ 0. `BAN_LE` có 1 đơn vị cơ sở; `LOC` và `THUNG` có số đơn vị cơ sở > 1.
 - Không trùng bộ `(maSanPham, kieuDongGoi, soDonViCoSo)`. Hai thùng 24 và 48 đơn vị là hai biến thể hợp lệ; thùng 24 không được tạo hai lần cho cùng sản phẩm.
 - Mã và liên kết sản phẩm–SKU không đổi sau tạo. Nếu đổi định lượng, đơn vị cơ sở hay cấu tạo quy cách làm thành hàng khác, tạo sản phẩm/SKU mới. Không dùng sửa tên để biến sữa 180 ml đã có lịch sử thành sữa 1 lít.
-- Không xóa danh mục; dùng cờ ngừng kinh doanh. SKU chỉ bán được khi cả SKU và sản phẩm cha đang kinh doanh.
+- Mục đã có giao dịch không xóa, dùng cờ ngừng kinh doanh. Chỉ xóa hẳn được mục **chưa phát sinh giao dịch**: SKU không nằm trên đơn/phiếu nhập và không còn khuyến mãi; sản phẩm không còn SKU. SKU chỉ bán được khi cả SKU và sản phẩm cha đang kinh doanh.
 
 ### Khuyến mãi
 
@@ -72,7 +72,7 @@ KHUYEN_MAI|maKhuyenMai|loaiKhuyenMai|tenKhuyenMai|maBienThe|tuNgay|denNgay|dangA
 - `loaiKhuyenMai = PHAN_TRAM`: `giaTri` ánh xạ vào `tyLePhanTram` (1–100).
 - `loaiKhuyenMai = SO_TIEN`: `giaTri` ánh xạ vào `soTienGiamMoiDonVi` (> 0).
 - Mỗi chương trình áp dụng một SKU; muốn cùng chương trình cho nhiều SKU thì tạo từng bản ghi. Chưa cần bảng trung gian nhiều–nhiều.
-- Ngày bắt đầu ≤ ngày kết thúc; bao gồm cả hai đầu ngày. Không xóa bản ghi, chỉ sửa/ngừng cho lần bán tiếp theo. `maBienThe` và loại giảm không đổi sau tạo; đổi đối tượng/loại áp dụng thì tạo chương trình mới.
+- Ngày bắt đầu ≤ ngày kết thúc; bao gồm cả hai đầu ngày. Chương trình đã áp dụng trên đơn (kể cả đơn chờ/hủy) không xóa, chỉ sửa/ngừng cho lần bán tiếp theo; chương trình chưa áp dụng xóa hẳn được. `maBienThe` và loại giảm không đổi sau tạo; đổi đối tượng/loại áp dụng thì tạo chương trình mới.
 
 ### Đơn và chi tiết đơn
 

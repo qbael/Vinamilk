@@ -56,7 +56,7 @@ Tất cả tám lớp danh sách dùng trường/phương thức instance. [Main
 
 `xuat()` xuất dữ liệu cho nơi gọi duyệt; [GiaoDienConsole](lop/GiaoDienConsole.md) định dạng và in các trường được phép xem sau khi dịch vụ kiểm tra quyền. `List.copyOf` chỉ bảo vệ cấu trúc; thuộc tính nghiệp vụ vẫn phải private. Không cung cấp setter tự do cho mã, điểm, tồn hoặc trạng thái chứng từ.
 
-Hợp đồng có đủ sửa/xóa nhưng vẫn giữ quy tắc nghiệp vụ: sáu danh sách chung từ chối xóa vật lý bằng `UnsupportedOperationException`; danh sách đơn/phiếu cũng từ chối sửa tùy ý. Khóa tài khoản, ngừng bán, ngừng khuyến mãi, hủy/thanh toán đơn vẫn đi qua các hành vi chuyên biệt. Danh sách chi tiết chỉ cho thêm/sửa/xóa lúc soạn, kể cả khi được tham chiếu qua `IQuanLy<T>`.
+Hợp đồng có đủ sửa/xóa nhưng vẫn giữ quy tắc nghiệp vụ: danh sách tài khoản, đơn hàng, phiếu nhập từ chối xóa vật lý bằng `UnsupportedOperationException`; danh sách sản phẩm, SKU, khuyến mãi xóa thật, nhưng [DichVuCuaHang](lop/DichVuCuaHang.md) chỉ gọi khi mục chưa phát sinh giao dịch (lưu file cũng từ chối nếu còn tham chiếu); danh sách đơn/phiếu cũng từ chối sửa tùy ý. Khóa tài khoản, ngừng bán, ngừng khuyến mãi, hủy/thanh toán đơn vẫn đi qua các hành vi chuyên biệt. Danh sách chi tiết chỉ cho thêm/sửa/xóa lúc soạn, kể cả khi được tham chiếu qua `IQuanLy<T>`.
 
 ## 5. Lựa chọn mô hình OOP
 

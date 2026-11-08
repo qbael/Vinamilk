@@ -4,6 +4,11 @@ import java.time.LocalDate;
 import java.util.List;
 
 public final class QuanLyDonHang extends DanhSach<DonHang> {
+    /** Danh sách rỗng; Main tạo một lần rồi dùng chung cho dịch vụ và lưu trữ. */
+    public QuanLyDonHang() {
+        super();
+    }
+
     public DonHang timTheoMa(String maDonHang) {
         return timDauTien(dh -> dh.getMaDonHang().equals(maDonHang));
     }

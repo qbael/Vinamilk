@@ -3,6 +3,11 @@ package cuahang;
 public final class DanhSachChiTietDonHang extends DanhSach<ChiTietDonHang> {
     private boolean daChot = false;
 
+    /** Danh sách dòng đang soạn, chưa chốt. */
+    public DanhSachChiTietDonHang() {
+        super();
+    }
+
     public ChiTietDonHang timTheoBienThe(String maBienThe) {
         return timDauTien(ct -> ct.getMaBienThe().equals(maBienThe));
     }

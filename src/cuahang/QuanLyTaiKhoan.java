@@ -3,6 +3,11 @@ package cuahang;
 import java.util.List;
 
 public final class QuanLyTaiKhoan extends DanhSach<TaiKhoan> {
+    /** Danh sách rỗng; Main tạo một lần rồi dùng chung cho dịch vụ và lưu trữ. */
+    public QuanLyTaiKhoan() {
+        super();
+    }
+
     public TaiKhoan timTheoMa(String maTaiKhoan) {
         return timDauTien(tk -> tk.getMaTaiKhoan().equals(maTaiKhoan));
     }

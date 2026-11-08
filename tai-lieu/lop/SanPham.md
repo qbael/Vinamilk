@@ -33,7 +33,7 @@ Constructor kiểm tra đầy đủ các trường bắt buộc và loại sản
 
 - Một sản phẩm có không hoặc nhiều SKU, liên kết bằng `BienTheSanPham.maSanPham`. Tra qua [QuanLyBienTheSanPham](QuanLyBienTheSanPham.md), không giữ thêm danh sách SKU trong sản phẩm.
 - [QuanLySanPham](QuanLySanPham.md) giữ danh mục sản phẩm dùng chung. Bảng logic `SAN_PHAM` có khóa chính `maSanPham`; xem [Mô hình dữ liệu](../05-mo-hinh-du-lieu.md).
-- Không xóa sản phẩm. Ngừng sản phẩm chặn việc bán tất cả SKU của nó mà không cần thay đổi trạng thái riêng từng SKU.
+- Không xóa sản phẩm còn SKU. Ngừng sản phẩm chặn việc bán tất cả SKU của nó mà không cần thay đổi trạng thái riêng từng SKU.
 - Đổi đơn vị cơ sở hoặc định lượng làm thành hàng khác thì tạo sản phẩm mới. Không dùng sửa tên để biến sữa 180 ml có lịch sử thành sữa 1 lít.
 - Năm nhóm hàng dùng [LoaiSanPham](LoaiSanPham.md); không tạo lớp `Sua`, `Kem`… khi chưa có hành vi riêng. Đổi mô tả không viết lại dữ liệu đã chụp trong chứng từ cũ.
 

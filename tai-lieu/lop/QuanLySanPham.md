@@ -24,7 +24,7 @@ Các phương thức dưới đây là instance; `xuat()` kế thừa `public fi
 | `List<SanPham> timTheoLoai(LoaiSanPham loai)` | Lọc theo một trong năm nhóm hàng |
 | `void them(SanPham sanPham)` | Từ chối `null`, trùng mã và dữ liệu sản phẩm không hợp lệ |
 | `void sua(String ma, SanPham duLieuMoi)` | Từ chối `null`, mã không tồn tại hoặc mã không khớp; kiểm tra toàn bộ trường rồi gọi `capNhatThongTin`, `ngungKinhDoanh`/`moKinhDoanh`, không dùng `list.set` |
-| `void xoa(String ma)` | Ném `UnsupportedOperationException("Không được xóa sản phẩm; hãy ngừng kinh doanh qua dịch vụ.")` |
+| `void xoa(String ma)` | Xóa hẳn sản phẩm theo mã; mã không tồn tại báo `IllegalArgumentException`. Dịch vụ kiểm tra sản phẩm không còn SKU trước khi gọi |
 | `void napDanhSach(List<SanPham> duLieuDaKiemTra)` | Package-private, chỉ phục vụ nạp/phục hồi: kiểm tra toàn bộ lô trước khi `clear`/`addAll`, không áp điều kiện chỉ dành cho tạo mới |
 
 ## Quan hệ và ràng buộc
@@ -32,6 +32,6 @@ Các phương thức dưới đây là instance; `xuat()` kế thừa `public fi
 - Quản lý các [SanPham](SanPham.md); các quy cách bán được quản lý riêng bởi [QuanLyBienTheSanPham](QuanLyBienTheSanPham.md). Không tạo bản sao danh sách SKU trong mỗi sản phẩm.
 - [DichVuCuaHang](DichVuCuaHang.md) kiểm tra quyền quản lý trước khi thêm hoặc gọi hành vi cập nhật mô tả, ngừng/mở bán trên sản phẩm tìm được. Không dùng một setter chung để thay toàn bộ sản phẩm.
 - `sua` chỉ đổi tên, thương hiệu, mô tả và trạng thái bằng các hành vi trên. Mã, lớp cụ thể, đơn vị cơ sở, định lượng và loại sản phẩm phải giữ nguyên; kiểm tra mọi trường trước khi thay đổi để không cập nhật dở dang.
-- Không xóa sản phẩm đã có liên kết. Mã bất biến; thay định lượng/đơn vị thành mặt hàng khác phải tạo sản phẩm mới. Ngừng sản phẩm cha làm mọi SKU của nó không bán được dù cờ riêng của SKU vẫn bật.
+- Không xóa sản phẩm còn SKU (dịch vụ chặn, lưu file cũng chặn). Mã bất biến; thay định lượng/đơn vị thành mặt hàng khác phải tạo sản phẩm mới. Ngừng sản phẩm cha làm mọi SKU của nó không bán được dù cờ riêng của SKU vẫn bật.
 - Mọi danh sách trả về đều không cho thêm/xóa trực tiếp, dùng `List.copyOf`. Đây là bản sao nông; giao diện chỉ đọc phần tử, thay đổi phải qua dịch vụ kiểm tra quyền.
 - Lớp không tương ứng một bảng riêng; các phần tử ánh xạ `SAN_PHAM`. [LuuTruText](LuuTruText.md) đảm nhiệm lưu toàn hệ thống, manager không tự ghi file.

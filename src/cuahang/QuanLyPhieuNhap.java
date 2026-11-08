@@ -4,6 +4,11 @@ import java.time.LocalDate;
 import java.util.List;
 
 public final class QuanLyPhieuNhap extends DanhSach<PhieuNhap> {
+    /** Danh sách rỗng; Main tạo một lần rồi dùng chung cho dịch vụ và lưu trữ. */
+    public QuanLyPhieuNhap() {
+        super();
+    }
+
     public PhieuNhap timTheoMa(String maPhieuNhap) {
         return timDauTien(pn -> pn.getMaPhieuNhap().equals(maPhieuNhap));
     }

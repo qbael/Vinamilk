@@ -91,7 +91,7 @@
 1. Tạo hoặc sửa thông tin sản phẩm, chọn một trong năm nhóm hàng.
 2. Tạo SKU thuộc sản phẩm với mã tự sinh, tên/quy cách, kiểu đóng gói, số đơn vị cơ sở trong gói, giá bán và trạng thái đang bán. Khi sửa, giữ nguyên mã và liên kết sản phẩm; không đổi cấu tạo quy cách thành hàng khác.
 3. Xác nhận và lưu thay đổi. SKU mới có tồn bằng 0; muốn tăng tồn phải lập phiếu nhập.
-4. Với hàng đã có lịch sử, sử dụng ngừng bán hoặc mở bán lại; không xóa dữ liệu làm đứt tham chiếu. Không đổi một SKU đã có giao dịch thành hàng hóa hoặc quy cách khác; tạo SKU mới cho quy cách mới.
+4. Với hàng đã có lịch sử, sử dụng ngừng bán hoặc mở bán lại; không xóa dữ liệu làm đứt tham chiếu. Mục tạo nhầm, chưa có giao dịch thì xóa hẳn: SKU chưa nằm trên đơn/phiếu nhập và không còn khuyến mãi; sản phẩm không còn SKU nào. Thứ tự xóa: khuyến mãi → SKU → sản phẩm; vi phạm thì báo lý do và gợi ý ngừng bán. Không đổi một SKU đã có giao dịch thành hàng hóa hoặc quy cách khác; tạo SKU mới cho quy cách mới.
 
 **Đầu ra:** Danh mục có thể dùng ngay cho bán hàng và nhập hàng. **Lỗi cần xử lý:** Mã trùng, sản phẩm cha không tồn tại, quy cách/giá không hợp lệ, dữ liệu bắt buộc thiếu hoặc lỗi lưu. Ngừng bán sản phẩm khiến các SKU của sản phẩm đó không được bán; lịch sử giao dịch vẫn giữ nguyên.
 
@@ -160,6 +160,7 @@
 1. Quản lý chọn SKU và loại khuyến mãi: giảm theo phần trăm hoặc giảm số tiền trên một đơn vị SKU.
 2. Nhập giá trị giảm, thời gian bắt đầu/kết thúc và trạng thái áp dụng.
 3. Kiểm tra dữ liệu, xác nhận và lưu. Có thể cập nhật hoặc ngừng chương trình cho các lần thanh toán sau.
+4. Chương trình tạo nhầm, chưa áp dụng cho đơn nào (kể cả đơn chờ, đơn hủy) thì xóa hẳn được; đã áp dụng thì chỉ ngừng.
 
 **Đầu ra:** Chương trình khuyến mãi được áp dụng tự động khi đủ điều kiện. **Lỗi cần xử lý:** SKU không tồn tại, giá trị giảm không hợp lệ, thời gian kết thúc trước bắt đầu hoặc lỗi lưu. Nếu nhiều chương trình cùng hợp lệ, mỗi dòng chỉ nhận chương trình giảm nhiều nhất; giảm bằng điểm được tính sau bước này. Dữ liệu khuyến mãi trên đơn đã thanh toán không bị tính lại.
 

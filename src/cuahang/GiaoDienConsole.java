@@ -735,7 +735,7 @@ public class GiaoDienConsole {
         while (phienConHieuLuc()) {
             int chon = chonMenu("SẢN PHẨM VÀ SKU", "Quay lại", "Danh sách / tìm SKU", "Danh sách sản phẩm",
                     "Thêm sản phẩm", "Sửa sản phẩm / ngừng, mở bán", "Thêm SKU (quy cách bán)",
-                    "Sửa giá / ngừng, mở bán SKU");
+                    "Sửa giá / ngừng, mở bán SKU", "Xóa SKU (chưa có giao dịch)", "Xóa sản phẩm (không còn SKU)");
             switch (chon) {
                 case 1 -> thucHien(this::xemSanPham);
                 case 2 -> thucHien(() -> inBangSanPham(dichVu.danhSachSanPham(maTaiKhoanDangNhap)));
@@ -743,6 +743,8 @@ public class GiaoDienConsole {
                 case 4 -> thucHien(this::suaSanPham);
                 case 5 -> thucHien(this::themBienThe);
                 case 6 -> thucHien(this::suaBienThe);
+                case 7 -> thucHien(this::xoaBienThe);
+                case 8 -> thucHien(this::xoaSanPham);
                 default -> {
                     return;
                 }
@@ -816,6 +818,24 @@ public class GiaoDienConsole {
         inDong("Đã thêm SKU " + ma.substring(0, DO_DAI_MA_NGAN) + " với tồn 0; hãy lập phiếu nhập để có hàng.");
     }
 
+    private void xoaBienThe() {
+        BienTheSanPham bt = chonBienThe(false);
+        if (bt != null && xacNhan("Xóa hẳn SKU " + bt.getTenQuyCach() + "? Không khôi phục được.")) {
+            dichVu.xoaBienThe(maTaiKhoanDangNhap, bt.getMaBienThe());
+            inDong("Đã xóa SKU.");
+        }
+    }
+
+    private void xoaSanPham() {
+        List<SanPham> ds = dichVu.danhSachSanPham(maTaiKhoanDangNhap);
+        inBangSanPham(ds);
+        SanPham sp = chonTheoMa(ds, SanPham::getMaSanPham, "Mã sản phẩm cần xóa (Enter = quay lại)");
+        if (sp != null && xacNhan("Xóa hẳn sản phẩm " + sp.getTenSanPham() + "? Không khôi phục được.")) {
+            dichVu.xoaSanPham(maTaiKhoanDangNhap, sp.getMaSanPham());
+            inDong("Đã xóa sản phẩm.");
+        }
+    }
+
     private void suaBienThe() {
         BienTheSanPham bt = chonBienThe(false);
         if (bt == null) {
@@ -831,12 +851,14 @@ public class GiaoDienConsole {
 
     private void menuKhuyenMai() {
         while (phienConHieuLuc()) {
-            int chon = chonMenu("KHUYẾN MÃI", "Quay lại", "Danh sách", "Thêm", "Sửa", "Ngừng áp dụng");
+            int chon = chonMenu("KHUYẾN MÃI", "Quay lại", "Danh sách", "Thêm", "Sửa", "Ngừng áp dụng",
+                    "Xóa (chưa áp dụng cho đơn nào)");
             switch (chon) {
                 case 1 -> thucHien(() -> inBangKhuyenMai(dichVu.danhSachKhuyenMai(maTaiKhoanDangNhap)));
                 case 2 -> thucHien(this::themKhuyenMai);
                 case 3 -> thucHien(this::suaKhuyenMai);
                 case 4 -> thucHien(this::ngungKhuyenMai);
+                case 5 -> thucHien(this::xoaKhuyenMai);
                 default -> {
                     return;
                 }
@@ -899,6 +921,16 @@ public class GiaoDienConsole {
                 tuNgay == null ? km.getTuNgay() : tuNgay, denNgay == null ? km.getDenNgay() : denNgay,
                 giaTri == null ? giaTriCu : giaTri);
         inDong("Đã cập nhật khuyến mãi cho các lần thanh toán sau.");
+    }
+
+    private void xoaKhuyenMai() {
+        List<KhuyenMai> ds = dichVu.danhSachKhuyenMai(maTaiKhoanDangNhap);
+        inBangKhuyenMai(ds);
+        KhuyenMai km = chonTheoMa(ds, KhuyenMai::getMaKhuyenMai, "Mã khuyến mãi cần xóa (Enter = quay lại)");
+        if (km != null && xacNhan("Xóa hẳn \"" + km.getTenKhuyenMai() + "\"? Không khôi phục được.")) {
+            dichVu.xoaKhuyenMai(maTaiKhoanDangNhap, km.getMaKhuyenMai());
+            inDong("Đã xóa khuyến mãi.");
+        }
     }
 
     private void ngungKhuyenMai() {

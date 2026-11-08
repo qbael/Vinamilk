@@ -298,6 +298,54 @@ public class DichVuCuaHang {
         return bt;
     }
 
+    // ---------------------------------------------------------------- xóa hẳn mục chưa có giao dịch
+
+    /** Chỉ xóa được sản phẩm không còn SKU nào; SKU đã có giao dịch thì cả sản phẩm chỉ ngừng bán được. */
+    public void xoaSanPham(String maQuanLy, String maSanPham) {
+        yeuCauQuanLy(maQuanLy);
+        if (quanLySanPham.timTheoMa(maSanPham) == null) {
+            throw new IllegalArgumentException("Không tìm thấy sản phẩm.");
+        }
+        int soSku = quanLyBienThe.timTheoSanPham(maSanPham).size();
+        if (soSku > 0) {
+            throw new IllegalStateException("Sản phẩm còn " + soSku + " SKU; hãy xóa các SKU trước "
+                    + "(SKU đã có giao dịch thì chỉ ngừng bán được).");
+        }
+        giaoDich(() -> quanLySanPham.xoa(maSanPham));
+    }
+
+    /** Chỉ xóa SKU chưa nằm trên đơn hàng/phiếu nhập nào và không còn khuyến mãi; ngược lại hãy ngừng bán. */
+    public void xoaBienThe(String maQuanLy, String maBienThe) {
+        yeuCauQuanLy(maQuanLy);
+        timBienTheCoSan(maBienThe);
+        boolean coTrenDon = quanLyDonHang.xuat().stream()
+                .anyMatch(dh -> dh.getChiTiet().stream().anyMatch(ct -> ct.getMaBienThe().equals(maBienThe)));
+        boolean coTrenPhieu = quanLyPhieuNhap.xuat().stream()
+                .anyMatch(pn -> pn.getChiTiet().stream().anyMatch(ct -> ct.getMaBienThe().equals(maBienThe)));
+        if (coTrenDon || coTrenPhieu) {
+            throw new IllegalStateException("SKU đã có trên " + (coTrenDon ? "đơn hàng" : "phiếu nhập")
+                    + "; không xóa để giữ lịch sử, hãy ngừng bán.");
+        }
+        int soKm = quanLyKhuyenMai.timTheoBienThe(maBienThe).size();
+        if (soKm > 0) {
+            throw new IllegalStateException("SKU còn " + soKm + " khuyến mãi; hãy xóa khuyến mãi trước.");
+        }
+        giaoDich(() -> quanLyBienThe.xoa(maBienThe));
+    }
+
+    /** Chỉ xóa chương trình chưa áp dụng cho đơn nào (kể cả đơn chờ, đơn hủy); ngược lại hãy ngừng áp dụng. */
+    public void xoaKhuyenMai(String maQuanLy, String maKhuyenMai) {
+        yeuCauQuanLy(maQuanLy);
+        timKhuyenMaiCoSan(maKhuyenMai);
+        boolean daDung = quanLyDonHang.xuat().stream()
+                .anyMatch(dh -> dh.getChiTiet().stream().anyMatch(ct -> maKhuyenMai.equals(ct.getMaKhuyenMai())));
+        if (daDung) {
+            throw new IllegalStateException("Khuyến mãi đã được áp dụng trên đơn hàng; không xóa để giữ lịch sử, "
+                    + "hãy ngừng áp dụng.");
+        }
+        giaoDich(() -> quanLyKhuyenMai.xoa(maKhuyenMai));
+    }
+
     public List<BienTheSanPham> xemTonKho(String maQuanLy) {
         yeuCauQuanLy(maQuanLy);
         return quanLyBienThe.xuat();

@@ -6,6 +6,10 @@ import java.nio.file.Path;
 import java.util.Scanner;
 
 public class Main {
+    /** Lớp chỉ chứa điểm khởi chạy main, không tạo đối tượng. */
+    private Main() {
+    }
+
     public static void main(String[] args) {
         Path duongDan = Path.of("data", "du-lieu.txt").toAbsolutePath();
         QuanLyTaiKhoan quanLyTaiKhoan = new QuanLyTaiKhoan();

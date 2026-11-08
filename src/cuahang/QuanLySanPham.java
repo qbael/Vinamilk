@@ -4,6 +4,11 @@ import java.util.List;
 import java.util.Locale;
 
 public final class QuanLySanPham extends DanhSach<SanPham> {
+    /** Danh sách rỗng; Main tạo một lần rồi dùng chung cho dịch vụ và lưu trữ. */
+    public QuanLySanPham() {
+        super();
+    }
+
     public SanPham timTheoMa(String maSanPham) {
         return timDauTien(sp -> sp.getMaSanPham().equals(maSanPham));
     }
@@ -47,9 +52,18 @@ public final class QuanLySanPham extends DanhSach<SanPham> {
         }
     }
 
+    /**
+     * Xóa hẳn sản phẩm. Lớp này không thấy danh sách SKU nên DichVuCuaHang.xoaSanPham phải kiểm tra
+     * sản phẩm không còn SKU trước; lưu file cũng từ chối nếu còn SKU trỏ tới.
+     */
     @Override
     public void xoa(String ma) {
-        throw new UnsupportedOperationException("Không được xóa sản phẩm; hãy ngừng kinh doanh qua dịch vụ.");
+        kiemTraMa(ma);
+        SanPham sp = timTheoMa(ma);
+        if (sp == null) {
+            throw new IllegalArgumentException("Không tìm thấy sản phẩm " + ma + ".");
+        }
+        danhSach.remove(sp);
     }
 
     void napDanhSach(List<SanPham> duLieuDaKiemTra) {

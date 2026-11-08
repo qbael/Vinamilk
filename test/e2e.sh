@@ -269,6 +269,82 @@ $KEM
 0
 0" "1 ly 100 ml +12.000đ +-50% +6.000đ"
 
+# ---------- quản lý: xóa hẳn mục chưa có giao dịch
+
+moi
+kichBan "Thêm sản phẩm để thử xóa" "$(dn demo.quanly)
+2
+3
+Sữa thử xóa
+Vinamilk
+hộp
+110 ml
+
+1
+0
+0
+0" "Đã thêm sản phẩm"
+SP_MOI=$(grep '|Sữa thử xóa|' "$TMP/data/du-lieu.txt" | cut -d'|' -f2 | cut -c1-8)
+
+kichBan "Không xóa được mục còn SKU, còn khuyến mãi hoặc đã có giao dịch" "$(dn demo.quanly)
+2
+5
+$SP_MOI
+Lốc 4 hộp 110 ml
+2
+4
+24000
+0
+3
+2
+110 ml
+1
+KM thử xóa
+10
+01/01/2026
+31/12/2099
+5
+$KM_SUA_CHUA
+c
+0
+2
+8
+$SP_MOI
+c
+7
+110 ml
+c
+7
+$KEM
+c
+0
+0
+0" "Đã thêm SKU" "Đã thêm khuyến mãi" "Khuyến mãi đã được áp dụng trên đơn hàng" "Sản phẩm còn 1 SKU" \
+    "SKU còn 1 khuyến mãi" "SKU đã có trên phiếu nhập"
+KM_MOI=$(grep '|KM thử xóa|' "$TMP/data/du-lieu.txt" | cut -d'|' -f2 | cut -c1-8)
+
+kichBan "Xóa khuyến mãi, SKU rồi sản phẩm chưa có giao dịch" "$(dn demo.quanly)
+3
+5
+$KM_MOI
+c
+0
+2
+7
+110 ml
+c
+8
+$SP_MOI
+c
+0
+0
+0" "Đã xóa khuyến mãi" "Đã xóa SKU" "Đã xóa sản phẩm"
+if grep -qE "Sữa thử xóa|Lốc 4 hộp 110 ml|KM thử xóa" "$TMP/data/du-lieu.txt"; then
+    echo "FAIL: Mục đã xóa vẫn còn trong file dữ liệu"; loi=$((loi + 1))
+else
+    echo "PASS: Mục đã xóa không còn trong file dữ liệu"
+fi
+
 # ---------- quản lý: tài khoản
 
 moi

@@ -71,9 +71,21 @@ public final class QuanLyBienTheSanPham extends DanhSach<BienTheSanPham> {
         }
     }
 
+    /**
+     * Xóa hẳn SKU chưa từng nhập hàng (tồn 0). DichVuCuaHang.xoaBienThe kiểm tra thêm đơn hàng,
+     * phiếu nhập và khuyến mãi trỏ tới SKU này trước khi gọi.
+     */
     @Override
     public void xoa(String ma) {
-        throw new UnsupportedOperationException("Không được xóa SKU; hãy ngừng kinh doanh qua dịch vụ.");
+        kiemTraMa(ma);
+        BienTheSanPham bt = timTheoMa(ma);
+        if (bt == null) {
+            throw new IllegalArgumentException("Không tìm thấy SKU " + ma + ".");
+        }
+        if (bt.getSoLuongTon() != 0) {
+            throw new IllegalStateException("SKU còn tồn " + bt.getSoLuongTon() + "; chỉ ngừng bán được.");
+        }
+        danhSach.remove(bt);
     }
 
     /** Liên kết sản phẩm cha và tồn đã được LuuTruText đối chiếu trước khi gọi. */

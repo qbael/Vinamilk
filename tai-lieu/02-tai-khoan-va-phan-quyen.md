@@ -111,8 +111,8 @@ Trong chi tiết đơn đã thanh toán, nhân viên có thể hiển thị lạ
 
 ```text
 1. Bán hàng                    -> Các thao tác của nhân viên bán hàng
-2. Quản lý sản phẩm và SKU     -> Danh sách, thêm, sửa, ngừng / mở bán
-3. Quản lý khuyến mãi          -> Danh sách, thêm, sửa, ngừng áp dụng
+2. Quản lý sản phẩm và SKU     -> Danh sách, tìm, thêm, sửa, ngừng / mở bán, xóa mục chưa có giao dịch
+3. Quản lý khuyến mãi          -> Danh sách, thêm, sửa, ngừng áp dụng, xóa chương trình chưa áp dụng
 4. Nhập hàng                  -> Lập phiếu nhập, xem lịch sử nhập
 5. Quản lý tài khoản          -> Danh sách, tạo nội bộ, khóa / mở lại
 6. Báo cáo                    -> Thu - chi, tồn hiện tại, thống kê bán hàng, nhập - xuất - tồn

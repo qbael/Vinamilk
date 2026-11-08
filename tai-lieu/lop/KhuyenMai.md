@@ -35,6 +35,6 @@ Constructor kiểm tra mã, tên, SKU và khoảng ngày; thuộc tính là `pri
 - [QuanLyKhuyenMai](QuanLyKhuyenMai.md) giữ `List<KhuyenMai>` chứa cả hai lớp con. Khi tính ưu đãi dùng đa hình, không thay bằng chuỗi điều kiện phân loại.
 - Ánh xạ vào `KHUYEN_MAI`; cột `loaiKhuyenMai` xác định lớp con, cột `giaTri` chứa giá trị riêng của lớp con. Không cần thuộc tính loại có setter trong lớp cha.
 - Ngày bắt đầu không sau ngày kết thúc. Không đổi mã SKU hoặc kiểu giảm sau tạo; trường hợp đó tạo chương trình mới.
-- Không xóa chương trình. Sửa hoặc ngừng chương trình không tính lại giảm giá đã chốt trong [ChiTietDonHang](ChiTietDonHang.md).
+- Không xóa chương trình đã áp dụng trên đơn. Sửa hoặc ngừng chương trình không tính lại giảm giá đã chốt trong [ChiTietDonHang](ChiTietDonHang.md).
 
 Xem [Mô hình dữ liệu](../05-mo-hinh-du-lieu.md), [Quy tắc nghiệp vụ](../06-quy-tac-nghiep-vu.md) và [Mục lục lớp](../04-thiet-ke-lop.md).
