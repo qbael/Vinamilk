@@ -152,6 +152,23 @@ public class GiaoDienConsole {
         TaiKhoan tk = dichVu.layTaiKhoanDangNhap(maTaiKhoanDangNhap);
         inDong("Xin chào " + tk.getHoTen() + " (" + tk.layVaiTro().getTenHienThi() + ").");
         inDong("Mẹo: tại ô nhập, để trống rồi Enter để quay lại.");
+        if (tk instanceof QuanLyCuaHang) {
+            inCanhBaoTonThap();
+        }
+    }
+
+    /** Nhắc quản lý các SKU đang bán sắp hết; không có thì không in gì. */
+    private void inCanhBaoTonThap() {
+        List<BienTheSanPham> ds = dichVu.canhBaoTonThap(maTaiKhoanDangNhap);
+        if (ds.isEmpty()) {
+            return;
+        }
+        inDong("⚠ " + ds.size() + " SKU đang bán sắp hết hàng (tồn ≤ " + DichVuCuaHang.NGUONG_TON_THAP
+                + "), cần lập phiếu nhập:");
+        for (BienTheSanPham bt : ds) {
+            inDong("  - " + dichVu.timSanPham(bt.getMaSanPham()).getTenSanPham() + " – " + bt.getTenQuyCach()
+                    + ": còn " + bt.getSoLuongTon());
+        }
     }
 
     private void dangXuat() {
@@ -1173,8 +1190,11 @@ public class GiaoDienConsole {
         for (BienTheSanPham bt : ds) {
             inDong(cot(ma.get(bt.getMaBienThe()), 10) + cot(dichVu.timSanPham(bt.getMaSanPham()).getTenSanPham(), 22)
                     + cot(bt.getTenQuyCach(), 22) + cotPhai(String.valueOf(bt.getSoLuongTon()), 7) + "  "
-                    + (dichVu.dangBan(bt) ? "Đang bán" : "Ngừng bán"));
+                    + (!dichVu.dangBan(bt) ? "Ngừng bán"
+                    : bt.getSoLuongTon() == 0 ? "Đang bán  ⚠ HẾT HÀNG"
+                    : DichVuCuaHang.tonThap(bt) ? "Đang bán  ⚠ Sắp hết" : "Đang bán"));
         }
+        inDong("Ngưỡng sắp hết: tồn ≤ " + DichVuCuaHang.NGUONG_TON_THAP + " với SKU đang bán.");
     }
 
     // ================================================================ nhập liệu

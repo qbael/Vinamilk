@@ -310,6 +310,27 @@ c
 0
 0" "Không được khóa quản lý đang hoạt động cuối cùng"
 
+# ---------- cảnh báo tồn thấp
+
+moi
+kichBan "Bán gần hết kem rồi quản lý thấy cảnh báo" "$(dn demo.nhanvien)
+2
+2
+1
+$KEM
+95
+4
+c
+c
+c
+0
+$(dn demo.quanly)
+6
+2
+0
+0
+0" "Thanh toán thành công" "1 SKU đang bán sắp hết hàng \\(tồn ≤ 10\\)" "Kem vani – 1 ly 100 ml: còn 5" "Kem vani +1 ly 100 ml +5 +Đang bán  ⚠ Sắp hết"
+
 # ---------- terminal thật
 
 moi

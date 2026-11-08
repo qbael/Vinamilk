@@ -757,6 +757,24 @@ public class KiemThu {
                         .map(DichVuCuaHang.DongNhapXuatTon::maBienThe).toList().equals(List.of(huSuaChua)),
                 "NXT phát hiện tồn lệch với chứng từ");
         bo.bienThe.timTheoMa(huSuaChua).giamTon(1);
+        // Cảnh báo tồn thấp: bộ mẫu tồn ≥ 96 nên không có; hạ hũ sữa chua về đúng ngưỡng thì xuất hiện
+        dung(dv.canhBaoTonThap(ql).isEmpty(), "Bộ mẫu không có SKU tồn thấp");
+        BienTheSanPham btHu = bo.bienThe.timTheoMa(huSuaChua);
+        int tonGoc = btHu.getSoLuongTon();
+        btHu.giamTon(tonGoc - DichVuCuaHang.NGUONG_TON_THAP - 1);
+        dung(dv.canhBaoTonThap(ql).isEmpty(), "Tồn trên ngưỡng 1 đơn vị chưa cảnh báo");
+        btHu.giamTon(1);
+        dung(dv.canhBaoTonThap(ql).stream().map(BienTheSanPham::getMaBienThe).toList().equals(List.of(huSuaChua)),
+                "Tồn bằng ngưỡng thì cảnh báo");
+        // Lưu file kiểm tra tồn khớp chứng từ, nên trả tồn về trước khi gọi thao tác có lưu
+        btHu.tangTon(tonGoc - DichVuCuaHang.NGUONG_TON_THAP);
+        dv.capNhatBienThe(ql, huSuaChua, btHu.getGiaBan(), false);
+        bo.bienThe.timTheoMa(huSuaChua).giamTon(tonGoc - DichVuCuaHang.NGUONG_TON_THAP);
+        dung(dv.canhBaoTonThap(ql).isEmpty(), "SKU ngừng bán không bị cảnh báo");
+        bo.bienThe.timTheoMa(huSuaChua).tangTon(tonGoc - DichVuCuaHang.NGUONG_TON_THAP);
+        dv.capNhatBienThe(ql, huSuaChua, btHu.getGiaBan(), true);
+        dung(ton(bo, huSuaChua) == tonGoc, "Khôi phục tồn sau kiểm tra cảnh báo");
+        loi(SecurityException.class, () -> dv.canhBaoTonThap(nv), "Nhân viên không xem cảnh báo tồn");
         loi(SecurityException.class, () -> dv.nhapXuatTon(nv, homNay, homNay), "Nhân viên không xem NXT");
         loi(IllegalArgumentException.class, () -> dv.nhapXuatTon(ql, homNay, homNay.minusDays(1)), "NXT kỳ ngược bị từ chối");
 

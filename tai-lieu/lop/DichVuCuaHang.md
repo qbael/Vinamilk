@@ -28,7 +28,7 @@ Constructor nhận sáu đối tượng quản lý và `LuuTruText` do [Main](Ma
 | Thanh toán | `thanhToan(...)` | Tính lại giá/khuyến mãi, kiểm tra điểm, tồn; chốt đơn và lưu đồng thời |
 | Khuyến mãi | `themKhuyenMai(...)`, `capNhatKhuyenMai(...)`, `ngungKhuyenMai(...)` | Chỉ quản lý; kiểm tra SKU, ngày và mức giảm |
 | Nhập | `nhapHang(...)`, `xemPhieuNhap(...)` | Chỉ quản lý; tăng tồn cùng ghi nhận phiếu |
-| Báo cáo | `tongKetThuChi(...)`, `xemTonKho(...)`, `thongKeBanHang(...)`, `nhapXuatTon(...)` | Tổng hợp chứng từ đã chốt và tồn hiện tại; trả record `ThongKeBanHang`, `DongThongKe`, `DongNhapXuatTon` (lồng trong lớp, chỉ đọc) |
+| Báo cáo | `tongKetThuChi(...)`, `xemTonKho(...)`, `thongKeBanHang(...)`, `nhapXuatTon(...)`, `canhBaoTonThap(...)` | Tổng hợp chứng từ đã chốt và tồn hiện tại; cảnh báo SKU đang bán có tồn ≤ `NGUONG_TON_THAP` (10); trả record `ThongKeBanHang`, `DongThongKe`, `DongNhapXuatTon` (lồng trong lớp, chỉ đọc) |
 
 Các chữ ký là định hướng, chưa phải API hoàn chỉnh. Thao tác cần quyền phải nhận mã người gọi do phiên console cung cấp, tra lại tài khoản đang hoạt động và kiểm tra quyền tại dịch vụ; không tin vai trò do người dùng nhập. Các thao tác chỉ đọc cũng kiểm tra quyền sở hữu khi cần.
 

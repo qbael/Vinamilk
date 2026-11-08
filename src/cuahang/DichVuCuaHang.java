@@ -291,6 +291,22 @@ public class DichVuCuaHang {
         return quanLyBienThe.xuat();
     }
 
+    /** Ngưỡng cố định của đồ án: SKU đang bán còn từ mức này trở xuống thì cần nhập thêm. */
+    static final int NGUONG_TON_THAP = 10;
+
+    public static boolean tonThap(BienTheSanPham bienThe) {
+        return bienThe.getSoLuongTon() <= NGUONG_TON_THAP;
+    }
+
+    /** SKU đang bán có tồn ≤ ngưỡng, ít tồn nhất trước; SKU ngừng bán không cần nhập thêm nên bỏ qua. */
+    public List<BienTheSanPham> canhBaoTonThap(String maQuanLy) {
+        yeuCauQuanLy(maQuanLy);
+        return quanLyBienThe.xuat().stream()
+                .filter(bt -> quanLyBienThe.dangBan(bt) && tonThap(bt))
+                .sorted(Comparator.comparingInt(BienTheSanPham::getSoLuongTon))
+                .toList();
+    }
+
     // ================================================================ giỏ hàng, đặt hàng, hủy
 
     /**

@@ -182,7 +182,8 @@
 | Chênh lệch thu − chi nhập | Thu bán hàng ròng − chi nhập hàng |
 | Số đơn đã thanh toán | Số đơn hợp lệ trong kỳ |
 
-4. Có lựa chọn xem tồn hiện tại theo SKU, tách khỏi báo cáo kỳ để tránh hiểu nhầm đó là tồn tại ngày cuối kỳ.
+4. Có lựa chọn xem tồn hiện tại theo SKU, tách khỏi báo cáo kỳ để tránh hiểu nhầm đó là tồn tại ngày cuối kỳ. SKU đang bán có tồn ≤ 10 (ngưỡng cố định của đồ án) được đánh dấu "Sắp hết", tồn 0 là "HẾT HÀNG"; SKU ngừng bán không bị đánh dấu.
+5. Mỗi lần quản lý đăng nhập, nếu có SKU đang bán tồn ≤ 10 thì in danh sách cảnh báo, ít tồn nhất trước, để lập phiếu nhập (NH-01).
 
 **Đầu ra:** Báo cáo console có khoảng ngày, đơn vị tiền và các tổng số. **Lỗi cần xử lý:** Ngày không hợp lệ, ngày kết thúc trước ngày bắt đầu; kỳ không có giao dịch hiển thị các tổng bằng 0.
 
