@@ -39,6 +39,7 @@ AGENTS.md
 
 ### Dữ liệu chạy ###
 data/du-lieu.tmp
+hoa-don/
 
 ### IntelliJ (file cá nhân) ###
 .idea/workspace.xml

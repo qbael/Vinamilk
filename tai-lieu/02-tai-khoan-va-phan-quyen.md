@@ -57,7 +57,7 @@ Khi file dữ liệu chưa tồn tại, ứng dụng thông báo đây là lần
 | Thêm, sửa thông tin hoặc ngừng bán sản phẩm/SKU | Không | Không | Được |
 | Tạo, cập nhật hoặc ngừng khuyến mãi | Không | Không | Được |
 | Lập và lưu phiếu nhập, xem lịch sử nhập | Không | Không | Được |
-| Xem báo cáo thu, chi nhập hàng và tồn kho | Không | Không | Được |
+| Xem báo cáo thu, chi nhập hàng, tồn kho, thống kê bán hàng và nhập - xuất - tồn | Không | Không | Được |
 | Tạo tài khoản nhân viên hoặc quản lý | Không | Không | Được |
 | Xem danh sách, khóa hoặc mở lại tài khoản | Không | Không | Được, bảo vệ quản lý hoạt động cuối cùng |
 | Đăng xuất | Được | Được | Được |
@@ -98,10 +98,11 @@ Menu đặt hàng cho phép chọn SKU, nhập số lượng, sửa hoặc bỏ 
 4. Thanh toán đơn hàng
 5. Hủy đơn đang chờ thanh toán
 6. Tra thành viên và điểm để bán hàng
+7. Xuất hóa đơn ra file
 0. Đăng xuất
 ```
 
-Trong chi tiết đơn đã thanh toán, nhân viên có thể hiển thị lại hóa đơn. Đây chỉ là đọc lịch sử, không thanh toán lại và không tạo thêm doanh thu hoặc điểm.
+Trong chi tiết đơn đã thanh toán, nhân viên có thể hiển thị lại hóa đơn hoặc xuất lại file hóa đơn (mục 7). Đây chỉ là đọc lịch sử, không thanh toán lại và không tạo thêm doanh thu hoặc điểm.
 
 ### 4.4. Quản lý cửa hàng
 
@@ -111,7 +112,7 @@ Trong chi tiết đơn đã thanh toán, nhân viên có thể hiển thị lạ
 3. Quản lý khuyến mãi          -> Danh sách, thêm, sửa, ngừng áp dụng
 4. Nhập hàng                  -> Lập phiếu nhập, xem lịch sử nhập
 5. Quản lý tài khoản          -> Danh sách, tạo nội bộ, khóa / mở lại
-6. Báo cáo                    -> Thu bán hàng, chi nhập, chênh lệch, tồn
+6. Báo cáo                    -> Thu - chi, tồn hiện tại, thống kê bán hàng, nhập - xuất - tồn
 0. Đăng xuất
 ```
 

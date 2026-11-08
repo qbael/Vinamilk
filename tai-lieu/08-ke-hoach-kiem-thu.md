@@ -1,6 +1,6 @@
 # 08. Kế hoạch kiểm thử và thứ tự triển khai
 
-Bảng dưới ghi kết quả mong đợi. Cả 33 tình huống có kiểm chứng tự động trong `test/cuahang/KiemThu.java` (cách chạy ở [README](README.md#mã-nguồn-và-cách-chạy)); phần chỉ nằm ở giao diện, như menu đăng ký không có lựa chọn nội bộ (KT01) hay nhập chữ thay số (KT26), được kiểm tra khi chạy console, còn phần chặn sai kiểu của KT30 do trình biên dịch đảm nhận. Đối chiếu với [Quy tắc nghiệp vụ](06-quy-tac-nghiep-vu.md) và [Lưu trữ file text](07-luu-tru-file-text.md).
+Bảng dưới ghi kết quả mong đợi. Cả 36 tình huống có kiểm chứng tự động trong `test/cuahang/KiemThu.java` (cách chạy ở [README](README.md#mã-nguồn-và-cách-chạy)); phần chỉ nằm ở giao diện, như menu đăng ký không có lựa chọn nội bộ (KT01) hay nhập chữ thay số (KT26), được kiểm tra khi chạy console, còn phần chặn sai kiểu của KT30 do trình biên dịch đảm nhận. Đối chiếu với [Quy tắc nghiệp vụ](06-quy-tac-nghiep-vu.md) và [Lưu trữ file text](07-luu-tru-file-text.md).
 
 ## 1. Tình huống kiểm thử
 
@@ -39,6 +39,9 @@ Bảng dưới ghi kết quả mong đợi. Cả 33 tình huống có kiểm ch�
 | KT31 | Gọi `xoa` qua interface trên sáu manager chung; gọi `sua` trên manager đơn/phiếu | Báo không hỗ trợ, không xóa lịch sử hoặc sửa chứng từ; khóa/ngừng/hủy vẫn qua hành vi chuyên biệt |
 | KT32 | Gọi `them`/`sua`/`xoa` qua interface chi tiết khi đang soạn rồi sau khi đơn/phiếu nhận quyền sở hữu | Lúc soạn: gộp/thay/xóa đúng SKU, giữ kiểm tra tồn/giá/tràn số; sau khóa: cả ba bị chặn qua cả tham chiếu cũ, kể cả đơn chờ và dữ liệu nạp lại |
 | KT33 | Kiểm tra bộ mẫu `data/du-lieu.txt` rồi nạp bằng bộ đọc khi triển khai | Có ít nhất 50 bản ghi, không tính `VNM`/`END`; bộ hiện tại có 60 bản ghi và `END\|60`; đủ tám bảng, xác thực được tài khoản mẫu, khóa ngoại/tiền/tồn/điểm khớp lịch sử |
+| KT34 | Thống kê bán hàng tháng 10 của bộ mẫu | 5 đơn, thu ròng 237.500đ; top SKU theo doanh thu; tổng theo nhóm hàng = gộp − KM, tổng theo người thu/ngày = thu ròng; 8 đơn tạo, 1 hủy |
+| KT35 | Nhập - xuất - tồn kỳ 03–05/10 và kỳ trước phiếu nhập đầu tiên | Đầu + nhập − xuất = cuối ở mọi SKU; hũ sữa chua đầu 100, xuất 4, cuối 96; trước 01/10 tồn 0; tồn bị sửa lệch thì SKU đó được đánh dấu |
+| KT36 | Xuất file hóa đơn cho đơn đã thanh toán và đơn chờ | File `HD-20261002-84736ab2.txt` có tiêu đề, người thu, tổng tiền, mọi dòng ≤ 50 ký tự; đơn chờ bị từ chối; thanh toán qua console tự lưu file |
 
 Khi bắt đầu viết code, ưu tiên một self-check nhỏ cho công thức KT11–KT16 và vòng đọc/ghi KT24, thêm kiểm chứng KT21 cho xử lý lỗi lưu. Không chỉ kiểm tra menu chạy được; cần chứng minh tiền, điểm và tồn không bị lệch.
 

@@ -5,9 +5,16 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class DichVuCuaHang {
     static final ZoneId MUI_GIO = ZoneId.of("Asia/Ho_Chi_Minh");
@@ -609,6 +616,108 @@ public class DichVuCuaHang {
         baoCao.put("Chênh lệch thu − chi nhập", Math.subtractExact(thuRong, chiNhap));
         baoCao.put("Số đơn đã thanh toán", (long) donTrongKy.size());
         return baoCao;
+    }
+
+    /** Một dòng thống kê: tên nhóm, số lượng (SKU hoặc số đơn) và số tiền. */
+    public record DongThongKe(String ten, long soLuong, long tien) {
+        DongThongKe cong(DongThongKe khac) {
+            return new DongThongKe(ten, Math.addExact(soLuong, khac.soLuong), Math.addExact(tien, khac.tien));
+        }
+    }
+
+    /**
+     * Thống kê bán hàng trong kỳ. Tiền theo SKU/nhóm hàng là sau khuyến mãi, trước giảm điểm (điểm giảm trên
+     * cả đơn, không chia về dòng); tiền theo người thu và theo ngày là số khách thực trả.
+     */
+    public record ThongKeBanHang(int soDonThanhToan, long thuRong, int soDonTao, int soDonHuy,
+                                 List<DongThongKe> topSku, List<DongThongKe> theoNhomHang,
+                                 List<DongThongKe> theoNguoiThu, SortedMap<LocalDate, Long> thuTheoNgay) {
+    }
+
+    /** Một dòng nhập - xuất - tồn của SKU; lech = tồn đang lưu khác tổng nhập − tổng bán mọi thời điểm. */
+    public record DongNhapXuatTon(String maBienThe, String tenSanPham, String tenQuyCach, long tonDau,
+                                  long nhap, long xuat, long tonCuoi, boolean lech) {
+    }
+
+    static final int SO_SKU_BAN_CHAY = 5;
+
+    public ThongKeBanHang thongKeBanHang(String maQuanLy, LocalDate tuNgay, LocalDate denNgay) {
+        yeuCauQuanLy(maQuanLy);
+        List<DonHang> daBan = quanLyDonHang.timDaThanhToanTrongKhoang(tuNgay, denNgay);
+        Map<String, DongThongKe> theoSku = new LinkedHashMap<>();
+        Map<LoaiSanPham, DongThongKe> theoNhom = new EnumMap<>(LoaiSanPham.class);
+        Map<String, DongThongKe> theoNguoiThu = new LinkedHashMap<>();
+        SortedMap<LocalDate, Long> theoNgay = new TreeMap<>();
+        long thuRong = 0;
+        for (DonHang dh : daBan) {
+            thuRong = Math.addExact(thuRong, dh.getTongThanhToan());
+            theoNgay.merge(dh.getThoiDiemThanhToan().toLocalDate(), dh.getTongThanhToan(), Math::addExact);
+            theoNguoiThu.merge(dh.getMaNguoiThuTien(),
+                    new DongThongKe(hoTen(dh.getMaNguoiThuTien()), 1, dh.getTongThanhToan()), DongThongKe::cong);
+            for (ChiTietDonHang ct : dh.getChiTiet()) {
+                BienTheSanPham bt = quanLyBienThe.timTheoMa(ct.getMaBienThe());
+                SanPham sp = quanLySanPham.timTheoMa(bt.getMaSanPham());
+                long tien = ct.tinhTienSauKhuyenMai();
+                theoSku.merge(bt.getMaBienThe(), new DongThongKe(sp.getTenSanPham() + " – " + bt.getTenQuyCach(),
+                        ct.getSoLuong(), tien), DongThongKe::cong);
+                theoNhom.merge(sp.getLoai(), new DongThongKe(sp.getLoai().getTenHienThi(), ct.getSoLuong(), tien),
+                        DongThongKe::cong);
+            }
+        }
+        Comparator<DongThongKe> tienGiam = Comparator.comparingLong(DongThongKe::tien).reversed();
+        List<DonHang> taoTrongKy = quanLyDonHang.xuat().stream()
+                .filter(dh -> !dh.getThoiDiemTao().toLocalDate().isBefore(tuNgay)
+                        && !dh.getThoiDiemTao().toLocalDate().isAfter(denNgay))
+                .toList();
+        return new ThongKeBanHang(daBan.size(), thuRong, taoTrongKy.size(),
+                (int) taoTrongKy.stream().filter(dh -> dh.getTrangThai() == TrangThaiDonHang.DA_HUY).count(),
+                theoSku.values().stream().sorted(tienGiam).limit(SO_SKU_BAN_CHAY).toList(),
+                theoNhom.values().stream().sorted(tienGiam).toList(),
+                theoNguoiThu.values().stream().sorted(tienGiam).toList(),
+                theoNgay);
+    }
+
+    /**
+     * Nhập - xuất - tồn theo SKU trong kỳ: nhập từ phiếu nhập, xuất từ đơn đã thanh toán (theo ngày thanh
+     * toán). Tồn cuối kỳ tính lùi từ tồn hiện tại qua các giao dịch sau kỳ, tồn đầu kỳ lùi tiếp qua kỳ.
+     */
+    public List<DongNhapXuatTon> nhapXuatTon(String maQuanLy, LocalDate tuNgay, LocalDate denNgay) {
+        yeuCauQuanLy(maQuanLy);
+        if (tuNgay == null || denNgay == null || tuNgay.isAfter(denNgay)) {
+            throw new IllegalArgumentException("Khoảng ngày không hợp lệ.");
+        }
+        // Mỗi SKU 6 ô: [0..2] nhập trước/trong/sau kỳ, [3..5] xuất trước/trong/sau kỳ.
+        Map<String, long[]> luyKe = new HashMap<>();
+        for (PhieuNhap pn : quanLyPhieuNhap.xuat()) {
+            int ky = viTriKy(pn.getThoiDiemNhap().toLocalDate(), tuNgay, denNgay);
+            for (ChiTietPhieuNhap ct : pn.getChiTiet()) {
+                long[] o = luyKe.computeIfAbsent(ct.getMaBienThe(), k -> new long[6]);
+                o[ky] = Math.addExact(o[ky], ct.getSoLuong());
+            }
+        }
+        for (DonHang dh : quanLyDonHang.timTheoTrangThai(TrangThaiDonHang.DA_THANH_TOAN)) {
+            int ky = 3 + viTriKy(dh.getThoiDiemThanhToan().toLocalDate(), tuNgay, denNgay);
+            for (ChiTietDonHang ct : dh.getChiTiet()) {
+                long[] o = luyKe.computeIfAbsent(ct.getMaBienThe(), k -> new long[6]);
+                o[ky] = Math.addExact(o[ky], ct.getSoLuong());
+            }
+        }
+        List<DongNhapXuatTon> ketQua = new ArrayList<>();
+        for (BienTheSanPham bt : quanLyBienThe.xuat()) {
+            long[] o = luyKe.getOrDefault(bt.getMaBienThe(), new long[6]);
+            long ton = bt.getSoLuongTon();
+            long tonCuoi = ton - o[2] + o[5];
+            long tonDau = tonCuoi - o[1] + o[4];
+            boolean lech = ton != (o[0] + o[1] + o[2]) - (o[3] + o[4] + o[5]);
+            ketQua.add(new DongNhapXuatTon(bt.getMaBienThe(), quanLySanPham.timTheoMa(bt.getMaSanPham()).getTenSanPham(),
+                    bt.getTenQuyCach(), tonDau, o[1], o[4], tonCuoi, lech));
+        }
+        return ketQua;
+    }
+
+    /** 0 = trước kỳ, 1 = trong kỳ, 2 = sau kỳ. */
+    private static int viTriKy(LocalDate ngay, LocalDate tuNgay, LocalDate denNgay) {
+        return ngay.isBefore(tuNgay) ? 0 : ngay.isAfter(denNgay) ? 2 : 1;
     }
 
     /** Họ tên để in trên đơn/hóa đơn; không trả dữ liệu xác thực. */

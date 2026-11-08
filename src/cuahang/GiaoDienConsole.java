@@ -1,6 +1,9 @@
 package cuahang;
 
 import java.io.Console;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.Normalizer;
 import java.time.LocalDate;
@@ -8,6 +11,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,6 +29,7 @@ public class GiaoDienConsole {
     private static final DateTimeFormatter DINH_DANG_THOI_DIEM = DateTimeFormatter.ofPattern("dd/MM/uuuu HH:mm");
     private static final int DO_DAI_MA_NGAN = 8;
     private static final int RONG_HOA_DON = 50;
+    private static final Path THU_MUC_HOA_DON = Path.of("hoa-don");
 
     private final DichVuCuaHang dichVu;
     private final Scanner boDoc;
@@ -210,7 +215,8 @@ public class GiaoDienConsole {
     /** Một lượt menu bán hàng; trả false khi người dùng chọn 0. */
     private boolean menuBanHang(String tieuDe, String nhanThoat) {
         int chon = chonMenu(tieuDe, nhanThoat, "Xem / tìm sản phẩm và khuyến mãi", "Lập đơn bán tại quầy",
-                "Xem / tìm đơn hàng", "Thanh toán đơn hàng", "Hủy đơn đang chờ thanh toán", "Tra thành viên và điểm");
+                "Xem / tìm đơn hàng", "Thanh toán đơn hàng", "Hủy đơn đang chờ thanh toán", "Tra thành viên và điểm",
+                "Xuất hóa đơn ra file");
         switch (chon) {
             case 1 -> thucHien(this::xemSanPham);
             case 2 -> thucHien(this::lapDonTaiQuay);
@@ -218,6 +224,7 @@ public class GiaoDienConsole {
             case 4 -> thucHien(this::thanhToanDonCho);
             case 5 -> thucHien(this::huyDonCho);
             case 6 -> thucHien(this::traThanhVien);
+            case 7 -> thucHien(this::xuatLaiHoaDon);
             default -> {
                 return false;
             }
@@ -485,46 +492,104 @@ public class GiaoDienConsole {
 
     /** In đơn, hóa đơn (đã thanh toán) hoặc bảng tính xem trước; chỉ đọc dữ liệu đã có. */
     private void inDon(DonHang dh, boolean laXemTruoc) {
+        inDong("");
+        dongDon(dh, laXemTruoc).forEach(GiaoDienConsole::inDong);
+    }
+
+    /** Các dòng của đơn/hóa đơn, dùng chung cho console và file hóa đơn. */
+    private List<String> dongDon(DonHang dh, boolean laXemTruoc) {
+        List<String> d = new ArrayList<>();
         boolean daChot = dh.getTrangThai() == TrangThaiDonHang.DA_THANH_TOAN;
         String tieuDe = laXemTruoc ? " BẢNG TÍNH THANH TOÁN " : daChot ? " HÓA ĐƠN " : " ĐƠN HÀNG ";
         int le = (RONG_HOA_DON - tieuDe.length()) / 2;
-        inDong("");
-        inDong("=".repeat(le) + tieuDe + "=".repeat(RONG_HOA_DON - le - tieuDe.length()));
-        inDong("Mã đơn    : " + dh.getMaDonHang());
+        d.add("=".repeat(le) + tieuDe + "=".repeat(RONG_HOA_DON - le - tieuDe.length()));
+        d.add("Mã đơn    : " + dh.getMaDonHang());
         if (!laXemTruoc) {
-            inDong("Trạng thái: " + dh.getTrangThai().getTenHienThi()
+            d.add("Trạng thái: " + dh.getTrangThai().getTenHienThi()
                     + (dh.getTrangThai() == TrangThaiDonHang.CHO_THANH_TOAN ? " (GIÁ TẠM TÍNH, chưa giữ hàng)" : ""));
         }
-        inDong("Khách     : " + tenKhach(dh));
-        inDong("Người lập : " + dichVu.hoTen(dh.getMaNguoiLap()) + " — " + thoiDiem(dh.getThoiDiemTao()));
+        d.add("Khách     : " + tenKhach(dh));
+        d.add("Người lập : " + dichVu.hoTen(dh.getMaNguoiLap()) + " — " + thoiDiem(dh.getThoiDiemTao()));
         if (daChot && !laXemTruoc) {
-            inDong("Thu tiền  : " + dichVu.hoTen(dh.getMaNguoiThuTien()) + " — " + thoiDiem(dh.getThoiDiemThanhToan()));
+            d.add("Thu tiền  : " + dichVu.hoTen(dh.getMaNguoiThuTien()) + " — " + thoiDiem(dh.getThoiDiemThanhToan()));
         }
-        inDong("-".repeat(RONG_HOA_DON));
+        d.add("-".repeat(RONG_HOA_DON));
         for (ChiTietDonHang ct : dh.getChiTiet()) {
-            inDong(cot(ct.getTenSanPhamLucBan() + " – " + ct.getTenQuyCachLucBan(), RONG_HOA_DON));
-            dongTien("  " + ct.getSoLuong() + " x " + tien(ct.getDonGia()), ct.tinhTienHang());
+            d.add(cot(ct.getTenSanPhamLucBan() + " – " + ct.getTenQuyCachLucBan(), RONG_HOA_DON));
+            d.add(dongTien("  " + ct.getSoLuong() + " x " + tien(ct.getDonGia()), ct.tinhTienHang()));
             if (ct.getMaKhuyenMai() != null) {
-                dongTien("  KM: " + dichVu.tenKhuyenMai(ct.getMaKhuyenMai()), -ct.getTienGiamKhuyenMai());
+                d.add(dongTien("  KM: " + dichVu.tenKhuyenMai(ct.getMaKhuyenMai()), -ct.getTienGiamKhuyenMai()));
             }
         }
-        inDong("-".repeat(RONG_HOA_DON));
-        dongTien("Tiền hàng", dh.getTongTienHang());
-        dongTien("Giảm khuyến mãi", -dh.getTongGiamKhuyenMai());
+        d.add("-".repeat(RONG_HOA_DON));
+        d.add(dongTien("Tiền hàng", dh.getTongTienHang()));
+        d.add(dongTien("Giảm khuyến mãi", -dh.getTongGiamKhuyenMai()));
         if (daChot) {
-            dongTien("Giảm bằng điểm (" + dh.getDiemSuDung() + " điểm)", -dh.getTienGiamDiem());
-            dongTien(laXemTruoc ? "SỐ TIỀN CẦN TRẢ" : "TỔNG THANH TOÁN", dh.getTongThanhToan());
+            d.add(dongTien("Giảm bằng điểm (" + dh.getDiemSuDung() + " điểm)", -dh.getTienGiamDiem()));
+            d.add(dongTien(laXemTruoc ? "SỐ TIỀN CẦN TRẢ" : "TỔNG THANH TOÁN", dh.getTongThanhToan()));
             if (dh.getMaKhachHang() != null) {
-                inDong("Điểm trừ: " + dh.getDiemSuDung() + " | Điểm cộng: +" + dh.getDiemCong());
+                d.add("Điểm trừ: " + dh.getDiemSuDung() + " | Điểm cộng: +" + dh.getDiemCong());
             }
         } else {
-            dongTien("TẠM TÍNH", dh.getTongThanhToan());
+            d.add(dongTien("TẠM TÍNH", dh.getTongThanhToan()));
         }
-        inDong("=".repeat(RONG_HOA_DON));
+        d.add("=".repeat(RONG_HOA_DON));
+        return d;
     }
 
-    private void dongTien(String nhan, long soTien) {
-        inDong(cot(nhan, RONG_HOA_DON - 14) + cotPhai(tien(soTien), 14));
+    private static String dongTien(String nhan, long soTien) {
+        return cot(nhan, RONG_HOA_DON - 14) + cotPhai(tien(soTien), 14);
+    }
+
+    /**
+     * Ghi hóa đơn đã thanh toán ra thuMuc/HD-yyyyMMdd-<mã ngắn>.txt (UTF-8). Hóa đơn đã chốt không đổi
+     * nên ghi lại cùng file là an toàn.
+     */
+    Path xuatHoaDon(DonHang dh, Path thuMuc) throws IOException {
+        if (dh.getTrangThai() != TrangThaiDonHang.DA_THANH_TOAN) {
+            throw new IllegalStateException("Chỉ xuất hóa đơn cho đơn đã thanh toán.");
+        }
+        List<String> d = new ArrayList<>();
+        d.add(giua("CỬA HÀNG SỮA"));
+        d.add(giua("Hóa đơn bán hàng — thanh toán tại cửa hàng"));
+        d.add(giua("Đơn vị tiền: đồng"));
+        d.add("");
+        d.addAll(dongDon(dh, false));
+        d.add("");
+        d.add(giua("Cảm ơn quý khách, hẹn gặp lại!"));
+        d.add(giua("Xuất file lúc " + thoiDiem(DichVuCuaHang.bayGio())));
+        Files.createDirectories(thuMuc);
+        Path file = thuMuc.resolve("HD-" + dh.getThoiDiemThanhToan().format(DateTimeFormatter.BASIC_ISO_DATE)
+                + "-" + dh.getMaDonHang().substring(0, DO_DAI_MA_NGAN) + ".txt");
+        Files.write(file, d.stream().map(String::stripTrailing).toList(), StandardCharsets.UTF_8);
+        return file;
+    }
+
+    /** Ghi file hóa đơn và báo kết quả; lỗi ghi file không ảnh hưởng giao dịch đã lưu. */
+    private void luuFileHoaDon(DonHang dh) {
+        try {
+            inDong("Đã lưu hóa đơn: " + xuatHoaDon(dh, THU_MUC_HOA_DON).toAbsolutePath());
+        } catch (IOException e) {
+            inDong("Không ghi được file hóa đơn (" + e.getMessage() + "). Đơn vẫn đã thanh toán; "
+                    + "có thể xuất lại ở mục \"Xuất hóa đơn ra file\".");
+        }
+    }
+
+    private void xuatLaiHoaDon() {
+        List<DonHang> ds = dichVu.danhSachDon(maTaiKhoanDangNhap, TrangThaiDonHang.DA_THANH_TOAN);
+        if (ds.isEmpty()) {
+            inDong("Chưa có đơn đã thanh toán.");
+            return;
+        }
+        inBangDon(ds);
+        DonHang don = chonTheoMa(ds, DonHang::getMaDonHang, "Mã đơn cần xuất hóa đơn (Enter = quay lại)");
+        if (don != null) {
+            luuFileHoaDon(don);
+        }
+    }
+
+    private static String giua(String s) {
+        return " ".repeat(Math.max(0, (RONG_HOA_DON - s.length()) / 2)) + s;
     }
 
     private void huyDonCho() {
@@ -613,6 +678,7 @@ public class GiaoDienConsole {
         }
         inDong("Thanh toán thành công.");
         inDon(daThanhToan, false);
+        luuFileHoaDon(daThanhToan);
     }
 
     // ================================================================ quản lý: sản phẩm, SKU
@@ -983,10 +1049,13 @@ public class GiaoDienConsole {
 
     private void menuBaoCao() {
         while (phienConHieuLuc()) {
-            int chon = chonMenu("BÁO CÁO", "Quay lại", "Thu - chi theo kỳ", "Tồn kho hiện tại theo SKU");
+            int chon = chonMenu("BÁO CÁO", "Quay lại", "Thu - chi theo kỳ", "Tồn kho hiện tại theo SKU",
+                    "Thống kê bán hàng theo kỳ", "Nhập - xuất - tồn theo kỳ");
             switch (chon) {
                 case 1 -> thucHien(this::baoCaoThuChi);
                 case 2 -> thucHien(this::baoCaoTonKho);
+                case 3 -> thucHien(this::baoCaoThongKe);
+                case 4 -> thucHien(this::baoCaoNhapXuatTon);
                 default -> {
                     return;
                 }
@@ -994,12 +1063,94 @@ public class GiaoDienConsole {
         }
     }
 
-    private void baoCaoThuChi() {
+    /** Hỏi khoảng ngày; Enter ở một trong hai ô trả null. */
+    private LocalDate[] nhapKy() {
         LocalDate tuNgay = nhapNgay("Từ ngày");
         LocalDate denNgay = tuNgay == null ? null : nhapNgay("Đến ngày");
-        if (denNgay == null) {
+        return denNgay == null ? null : new LocalDate[] {tuNgay, denNgay};
+    }
+
+    private void baoCaoThongKe() {
+        LocalDate[] ky = nhapKy();
+        if (ky == null) {
             return;
         }
+        DichVuCuaHang.ThongKeBanHang tk = dichVu.thongKeBanHang(maTaiKhoanDangNhap, ky[0], ky[1]);
+        inDong("");
+        inDong("THỐNG KÊ BÁN HÀNG từ " + ngay(ky[0]) + " đến " + ngay(ky[1]));
+        inDong("=".repeat(RONG_HOA_DON + 22));
+        inDong("Đơn đã thanh toán: " + tk.soDonThanhToan() + " | Thu ròng: " + tien(tk.thuRong())
+                + (tk.soDonThanhToan() == 0 ? "" : " | Trung bình/đơn: " + tien(tk.thuRong() / tk.soDonThanhToan())));
+        inDong("Đơn tạo trong kỳ: " + tk.soDonTao() + ", đã hủy: " + tk.soDonHuy() + (tk.soDonTao() == 0 ? ""
+                : String.format(TIENG_VIET, " (%.1f%%)", 100.0 * tk.soDonHuy() / tk.soDonTao())));
+        if (tk.soDonThanhToan() == 0) {
+            inDong("Không có đơn đã thanh toán trong kỳ.");
+            return;
+        }
+        inDong("");
+        inDong("TOP " + DichVuCuaHang.SO_SKU_BAN_CHAY + " SKU THEO DOANH THU (sau khuyến mãi, trước giảm điểm)");
+        inDong(cot("#", 4) + cot("Sản phẩm – quy cách", 40) + cotPhai("SL", 6) + cotPhai("Doanh thu", 14));
+        int hang = 1;
+        for (DichVuCuaHang.DongThongKe d : tk.topSku()) {
+            inDong(cot(String.valueOf(hang++), 4) + cot(d.ten(), 40) + cotPhai(String.valueOf(d.soLuong()), 6)
+                    + cotPhai(tien(d.tien()), 14));
+        }
+        inBangCot("THEO NHÓM HÀNG (sau khuyến mãi, trước giảm điểm)", "đv", tk.theoNhomHang());
+        inBangCot("THEO NGƯỜI THU TIỀN (số khách thực trả)", "đơn", tk.theoNguoiThu());
+        inBangCot("THU RÒNG THEO NGÀY THANH TOÁN", "", tk.thuTheoNgay().entrySet().stream()
+                .map(e -> new DichVuCuaHang.DongThongKe(ngay(e.getKey()), 0, e.getValue())).toList());
+    }
+
+    /** Bảng tên – số lượng – tiền kèm thanh ngang tỉ lệ với tiền; nhanSoLuong rỗng thì bỏ cột số lượng. */
+    private void inBangCot(String tieuDe, String nhanSoLuong, List<DichVuCuaHang.DongThongKe> ds) {
+        long max = ds.stream().mapToLong(DichVuCuaHang.DongThongKe::tien).max().orElse(0);
+        inDong("");
+        inDong(tieuDe);
+        for (DichVuCuaHang.DongThongKe d : ds) {
+            inDong(cot(d.ten(), 22) + (nhanSoLuong.isEmpty() ? "" : cotPhai(d.soLuong() + " " + nhanSoLuong, 8))
+                    + cotPhai(tien(d.tien()), 14) + "  " + thanh(d.tien(), max));
+        }
+    }
+
+    /** Thanh ngang dài tối đa 20 ô, giá trị dương luôn có ít nhất 1 ô. */
+    static String thanh(long giaTri, long max) {
+        if (giaTri <= 0 || max <= 0) {
+            return "";
+        }
+        return "█".repeat(Math.max(1, (int) Math.round(20.0 * giaTri / max)));
+    }
+
+    private void baoCaoNhapXuatTon() {
+        LocalDate[] ky = nhapKy();
+        if (ky == null) {
+            return;
+        }
+        List<DichVuCuaHang.DongNhapXuatTon> ds = dichVu.nhapXuatTon(maTaiKhoanDangNhap, ky[0], ky[1]);
+        inDong("");
+        inDong("NHẬP - XUẤT - TỒN từ " + ngay(ky[0]) + " đến " + ngay(ky[1]) + " (đơn vị: SKU)");
+        Map<String, String> ma = maNgan(ds.stream().map(DichVuCuaHang.DongNhapXuatTon::maBienThe).toList());
+        inDong(cot("Mã", 10) + cot("Sản phẩm", 20) + cot("Quy cách", 22) + cotPhai("Đầu kỳ", 8) + cotPhai("Nhập", 7)
+                + cotPhai("Xuất", 7) + cotPhai("Cuối kỳ", 9));
+        int soLech = 0;
+        for (DichVuCuaHang.DongNhapXuatTon d : ds) {
+            inDong(cot(ma.get(d.maBienThe()), 10) + cot(d.tenSanPham(), 20) + cot(d.tenQuyCach(), 22)
+                    + cotPhai(String.valueOf(d.tonDau()), 8) + cotPhai(String.valueOf(d.nhap()), 7)
+                    + cotPhai(String.valueOf(d.xuat()), 7) + cotPhai(String.valueOf(d.tonCuoi()), 9)
+                    + (d.lech() ? "  ⚠ LỆCH" : ""));
+            soLech += d.lech() ? 1 : 0;
+        }
+        inDong("Nhập theo ngày nhập; xuất là hàng bán trên đơn đã thanh toán (đơn chờ/hủy không trừ tồn).");
+        inDong(soLech == 0 ? "Đối chiếu: tồn đang lưu khớp tổng nhập − tổng bán ở mọi SKU."
+                : "CẢNH BÁO: " + soLech + " SKU có tồn đang lưu khác tổng nhập − tổng bán; hãy kiểm tra dữ liệu.");
+    }
+
+    private void baoCaoThuChi() {
+        LocalDate[] ky = nhapKy();
+        if (ky == null) {
+            return;
+        }
+        LocalDate tuNgay = ky[0];
+        LocalDate denNgay = ky[1];
         Map<String, Long> baoCao = dichVu.tongKetThuChi(maTaiKhoanDangNhap, tuNgay, denNgay);
         inDong("");
         inDong("BÁO CÁO THU - CHI từ " + ngay(tuNgay) + " đến " + ngay(denNgay) + " (đơn vị: đồng)");

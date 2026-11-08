@@ -48,8 +48,8 @@ Bán 2 lốc chỉ trừ 2 ở `BT002`. Không trừ 8 hộp ở `BT001`, không
 ## Ba người dùng chính
 
 - **Khách hàng:** xem và tìm sản phẩm; đặt hàng; xem/hủy đơn đang chờ của mình; xem điểm, đề nghị sử dụng điểm khi mua hàng.
-- **Nhân viên bán hàng:** xem danh mục và tồn; lập đơn cho thành viên hoặc khách vãng lai; xử lý đơn đã đặt; xác nhận thu tiền và in hóa đơn ra console.
-- **Quản lý cửa hàng:** có chức năng bán hàng, quản lý danh mục/quy cách/giá/khuyến mãi, tạo tài khoản nội bộ, nhập hàng và xem báo cáo thu-chi.
+- **Nhân viên bán hàng:** xem danh mục và tồn; lập đơn cho thành viên hoặc khách vãng lai; xử lý đơn đã đặt; xác nhận thu tiền, in hóa đơn ra console và lưu file hóa đơn text.
+- **Quản lý cửa hàng:** có chức năng bán hàng, quản lý danh mục/quy cách/giá/khuyến mãi, tạo tài khoản nội bộ, nhập hàng, xem báo cáo thu-chi, thống kê bán hàng và nhập - xuất - tồn.
 
 Khách vãng lai không phải loại tài khoản thứ tư. Đó là đơn bán tại quầy không liên kết với `KhachHang`, nên không được tích hoặc đổi điểm.
 

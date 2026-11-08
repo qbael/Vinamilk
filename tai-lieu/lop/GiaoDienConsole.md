@@ -20,12 +20,13 @@ Giữ mã phiên thay vì giữ tham chiếu tài khoản lâu dài giúp tránh
 - `hienThiMenuKhachHang()`, `hienThiMenuNhanVien()`, `hienThiMenuQuanLy()`: lựa chọn theo vai trò.
 - Các phương thức nhập số nguyên, tiền, ngày; báo rõ lỗi và cho nhập lại/quay lại trước khi xác nhận.
 - Hiển thị danh mục, báo giá, đơn, hóa đơn, phiếu nhập và báo cáo; phân biệt giá tạm tính với giá đã chốt.
+- `xuatHoaDon(donHang, thuMuc)`: ghi hóa đơn đã thanh toán ra file text UTF-8 từ cùng các dòng in trên console; tự gọi sau khi thanh toán thành công và từ mục "Xuất hóa đơn ra file".
 - `dangXuat()`: xóa mã phiên và quay lại menu đầu.
 
 ## Ràng buộc
 
 - Dùng một cơ chế đọc dòng rồi parse để tránh lỗi trộn `nextInt()` và `nextLine()`. Không đóng bộ đọc giữa các menu.
-- Không gọi setter tồn/điểm, không tính lại hóa đơn cũ bằng giá hiện tại, không tự ghi file.
+- Không gọi setter tồn/điểm, không tính lại hóa đơn cũ bằng giá hiện tại, không ghi file dữ liệu; file duy nhất giao diện ghi là bản text của hóa đơn đã chốt trong `hoa-don/`.
 - Nhận dữ liệu xuất qua dịch vụ đã kiểm tra quyền rồi định dạng/in; `IQuanLy<T>.xuat()` chỉ trả danh sách, không tự hiển thị. Không in hash/salt hoặc dữ liệu tài khoản ngoài phạm vi được phép.
 - Menu đúng vai trò không thay thế kiểm tra quyền của [DichVuCuaHang](DichVuCuaHang.md).
 - Khách chọn số điểm; nhân viên xác nhận khách đồng ý và thu tiền. Giao diện hiển thị mức tối đa và số tiền cuối trước khi lưu.

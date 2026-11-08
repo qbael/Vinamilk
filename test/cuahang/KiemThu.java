@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.function.UnaryOperator;
 
@@ -714,6 +715,67 @@ public class KiemThu {
         dung(ngayDonCho.values().stream().allMatch(v -> v == 0), "KT25 đơn chờ/hủy không góp vào báo cáo");
         loi(IllegalArgumentException.class, () -> dv.tongKetThuChi(ql, homNay, homNay.minusDays(1)), "Kỳ ngược bị từ chối");
         loi(SecurityException.class, () -> dv.tongKetThuChi(nv, homNay, homNay), "Nhân viên không xem báo cáo");
+
+        // Thống kê bán hàng tháng 10 của bộ mẫu
+        DichVuCuaHang.ThongKeBanHang tk = dv.thongKeBanHang(ql, LocalDate.of(2026, 10, 1), LocalDate.of(2026, 10, 31));
+        dung(tk.soDonThanhToan() == 5 && tk.thuRong() == 237_500 && tk.soDonTao() == 8 && tk.soDonHuy() == 1,
+                "Thống kê: 5 đơn thanh toán, thu ròng khớp BC-01, 8 đơn tạo, 1 hủy");
+        dung(tk.topSku().size() == 5 && tk.topSku().getFirst().ten().equals("Kem vani – Lốc 6 ly 100 ml")
+                        && tk.topSku().getFirst().tien() == 66_000,
+                "Top SKU xếp theo doanh thu sau khuyến mãi");
+        dung(tk.theoNhomHang().size() == 5
+                        && tk.theoNhomHang().stream().mapToLong(DichVuCuaHang.DongThongKe::tien).sum() == 238_000,
+                "Theo nhóm hàng: đủ 5 nhóm, tổng = doanh thu gộp − giảm KM");
+        dung(tk.theoNguoiThu().getFirst().ten().equals("Trần Thị Ngân") && tk.theoNguoiThu().getFirst().soLuong() == 4
+                        && tk.theoNguoiThu().stream().mapToLong(DichVuCuaHang.DongThongKe::tien).sum() == 237_500,
+                "Theo người thu tiền: số đơn và tổng thực thu");
+        dung(tk.thuTheoNgay().size() == 5 && tk.thuTheoNgay().get(LocalDate.of(2026, 10, 2)) == 54_000
+                        && tk.thuTheoNgay().firstKey().equals(LocalDate.of(2026, 10, 2)),
+                "Thu theo ngày thanh toán, sắp tăng dần");
+        dung(dv.thongKeBanHang(ql, LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 30)).topSku().isEmpty(),
+                "Kỳ không có đơn thì thống kê rỗng");
+        loi(SecurityException.class, () -> dv.thongKeBanHang(nv, homNay, homNay), "Nhân viên không xem thống kê");
+        loi(IllegalArgumentException.class, () -> dv.thongKeBanHang(ql, homNay, homNay.minusDays(1)),
+                "Thống kê kỳ ngược bị từ chối");
+
+        // Nhập - xuất - tồn: phiếu nhập 01/10 (100 mỗi SKU); hũ sữa chua bán 4 ngày 03/10
+        String huSuaChua = "17edffd8-9df0-40d3-918f-e04773be64ac";
+        List<DichVuCuaHang.DongNhapXuatTon> nxt = dv.nhapXuatTon(ql, LocalDate.of(2026, 10, 3), LocalDate.of(2026, 10, 5));
+        DichVuCuaHang.DongNhapXuatTon hu = nxt.stream().filter(d -> d.maBienThe().equals(huSuaChua)).findFirst().orElseThrow();
+        dung(nxt.size() == 15 && hu.tonDau() == 100 && hu.nhap() == 0 && hu.xuat() == 4 && hu.tonCuoi() == 96,
+                "NXT kỳ 03–05/10: đầu 100, xuất 4, cuối 96");
+        dung(nxt.stream().allMatch(d -> d.tonDau() + d.nhap() - d.xuat() == d.tonCuoi() && !d.lech()),
+                "NXT: đầu + nhập − xuất = cuối, bộ mẫu không lệch");
+        dung(dv.nhapXuatTon(ql, LocalDate.of(2026, 10, 1), LocalDate.of(2026, 10, 31)).stream()
+                        .allMatch(d -> d.tonDau() == 0 && d.nhap() == 100),
+                "NXT tháng 10: tồn đầu 0, nhập 100 mỗi SKU");
+        dung(dv.nhapXuatTon(ql, LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 30)).stream()
+                        .allMatch(d -> d.tonDau() == 0 && d.tonCuoi() == 0),
+                "NXT trước phiếu nhập đầu tiên: tồn 0");
+        bo.bienThe.timTheoMa(huSuaChua).tangTon(1);
+        dung(dv.nhapXuatTon(ql, homNay, homNay).stream().filter(DichVuCuaHang.DongNhapXuatTon::lech)
+                        .map(DichVuCuaHang.DongNhapXuatTon::maBienThe).toList().equals(List.of(huSuaChua)),
+                "NXT phát hiện tồn lệch với chứng từ");
+        bo.bienThe.timTheoMa(huSuaChua).giamTon(1);
+        loi(SecurityException.class, () -> dv.nhapXuatTon(nv, homNay, homNay), "Nhân viên không xem NXT");
+        loi(IllegalArgumentException.class, () -> dv.nhapXuatTon(ql, homNay, homNay.minusDays(1)), "NXT kỳ ngược bị từ chối");
+
+        // Xuất hóa đơn ra file text
+        GiaoDienConsole gd = new GiaoDienConsole(dv, new Scanner(""));
+        Path thuMucHd = thuMuc.resolve("hoa-don");
+        Path fileHd = chay(() -> gd.xuatHoaDon(bo.donHang.timTheoMa("84736ab2-dd69-4a94-bb01-6c3bf0c8d129"), thuMucHd));
+        List<String> dongHd = chay(() -> Files.readAllLines(fileHd));
+        dung(fileHd.getFileName().toString().equals("HD-20261002-84736ab2.txt"), "Tên file hóa đơn theo ngày + mã ngắn");
+        dung(dongHd.stream().anyMatch(s -> s.contains("HÓA ĐƠN")) && dongHd.stream().anyMatch(s -> s.contains("Trần Thị Ngân"))
+                        && dongHd.stream().anyMatch(s -> s.startsWith("TỔNG THANH TOÁN") && s.endsWith("54.000đ")),
+                "File hóa đơn có tiêu đề, người thu và tổng tiền");
+        dung(dongHd.stream().allMatch(s -> s.length() <= 50 && s.equals(s.stripTrailing())),
+                "File hóa đơn rộng tối đa 50 ký tự, không có khoảng trắng cuối dòng");
+        loi(IllegalStateException.class,
+                () -> chay(() -> gd.xuatHoaDon(bo.donHang.timTheoMa("bc4ebe22-5123-49ab-b57f-6c8f9f3e97ed"), thuMucHd)),
+                "Đơn chờ không xuất hóa đơn");
+        dung(GiaoDienConsole.thanh(10, 20).length() == 10 && GiaoDienConsole.thanh(1, 1_000).length() == 1
+                && GiaoDienConsole.thanh(0, 5).isEmpty(), "Thanh biểu đồ tỉ lệ, giá trị dương ít nhất 1 ô");
 
         // KM-01: thêm, sửa, ngừng; người không phải quản lý chỉ thấy KM đang hiệu lực
         String maKm = dv.themKhuyenMai(ql, true, "Giảm 5% thùng sữa chua", "094d9508-3a5d-4954-b873-5638be5e0fd0",

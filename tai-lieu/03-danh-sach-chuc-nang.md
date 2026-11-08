@@ -16,11 +16,13 @@
 | DH-02 | Lập đơn tại quầy | Nhân viên, quản lý | Đơn `CHO_THANH_TOAN` cho thành viên hoặc khách vãng lai |
 | DH-03 | Xem, tìm đơn hàng | Ba loại tài khoản theo quyền | Danh sách, chi tiết và hóa đơn đã chốt nếu đã thanh toán |
 | DH-04 | Hủy đơn chưa thanh toán | Ba loại tài khoản theo quyền | Đơn chuyển từ `CHO_THANH_TOAN` sang `DA_HUY` |
-| TT-01 | Thanh toán và xuất hóa đơn console | Nhân viên, quản lý | Đơn `DA_THANH_TOAN`, tồn và điểm cập nhật đồng thời |
+| TT-01 | Thanh toán, xuất hóa đơn console và file text | Nhân viên, quản lý | Đơn `DA_THANH_TOAN`, tồn và điểm cập nhật đồng thời; file `hoa-don/HD-…txt` |
 | DI-01 | Xem và sử dụng điểm | Khách hàng; nhân viên, quản lý phục vụ bán hàng | Điểm được hiển thị hoặc quy đổi khi thanh toán |
 | KM-01 | Quản lý khuyến mãi | Quản lý | Khuyến mãi theo SKU được lưu |
 | NH-01 | Nhập hàng, xem phiếu nhập | Quản lý | Phiếu nhập, tồn tăng và chi nhập được ghi nhận |
 | BC-01 | Xem tổng kết tài chính và tồn | Quản lý | Báo cáo theo khoảng ngày, tồn hiện tại theo SKU |
+| BC-02 | Thống kê bán hàng theo kỳ | Quản lý | Top SKU, theo nhóm hàng, theo người thu, theo ngày, tỉ lệ hủy |
+| BC-03 | Nhập - xuất - tồn theo kỳ | Quản lý | Tồn đầu kỳ, nhập, xuất, tồn cuối kỳ từng SKU và đối chiếu lệch |
 
 ## 2. Quy ước xuyên suốt
 
@@ -127,7 +129,7 @@
 3. Tính lại giá hiện tại và chọn tối đa một khuyến mãi tốt nhất cho mỗi dòng. Nếu khách là thành viên, hỏi khách có dùng điểm không và dùng bao nhiêu; kiểm tra số điểm hiện có và giới hạn đổi điểm.
 4. Hiển thị bảng tính cuối cùng: tiền hàng trước giảm, giảm khuyến mãi, giảm bằng điểm, số tiền cần trả, điểm sẽ trừ và điểm sẽ cộng. Yêu cầu khách xác nhận nếu giá hoặc ưu đãi khác đơn tạm tính.
 5. Khi xác nhận thu tiền, ghi nhận người thu tiền, thời điểm thanh toán, các giá trị đã chốt; chuyển đơn thành `DA_THANH_TOAN`, trừ tồn, trừ điểm dùng và cộng điểm mới trong cùng một lần lưu an toàn.
-6. Chỉ sau khi lưu thành công mới thông báo hoàn tất và hiển thị hóa đơn. Nếu lưu thất bại sau khi nhân viên đã nhận tiền thực tế, phải báo giao dịch chưa hoàn tất, đối chiếu khoản đã nhận và xử lý lại đúng đơn; không yêu cầu khách trả lần nữa.
+6. Chỉ sau khi lưu thành công mới thông báo hoàn tất, hiển thị hóa đơn và tự lưu bản text vào `hoa-don/HD-<yyyyMMdd>-<mã ngắn>.txt` (UTF-8, rộng 50 ký tự, có đầu/chân hóa đơn). Lỗi ghi file hóa đơn chỉ được báo, không làm hỏng giao dịch đã lưu; nhân viên xuất lại bằng mục "Xuất hóa đơn ra file" trong menu bán hàng. Nếu lưu thất bại sau khi nhân viên đã nhận tiền thực tế, phải báo giao dịch chưa hoàn tất, đối chiếu khoản đã nhận và xử lý lại đúng đơn; không yêu cầu khách trả lần nữa.
 
 **Đầu ra:** Hóa đơn console và trạng thái nhất quán giữa đơn, tồn, điểm. **Lỗi cần xử lý:** Đơn không còn chờ, hàng ngừng bán/thiếu tồn, khách hàng bị khóa, điểm không đủ hoặc vượt giới hạn, khách không đồng ý tổng mới, dữ liệu tính tiền không hợp lệ hoặc lỗi lưu.
 
@@ -185,3 +187,20 @@
 **Đầu ra:** Báo cáo console có khoảng ngày, đơn vị tiền và các tổng số. **Lỗi cần xử lý:** Ngày không hợp lệ, ngày kết thúc trước ngày bắt đầu; kỳ không có giao dịch hiển thị các tổng bằng 0.
 
 Chênh lệch thu và chi nhập không phải lợi nhuận: hàng nhập trong kỳ có thể chưa bán, hàng bán có thể được nhập từ kỳ trước. Phiên bản này chưa tính giá vốn, chi phí vận hành, thuế, hoàn trả hoặc vận chuyển. Các giới hạn chung được ghi trong [Mô tả ứng dụng](01-mo-ta-ung-dung.md).
+
+### BC-02 — Thống kê bán hàng theo kỳ
+
+1. Quản lý nhập khoảng ngày như BC-01; chỉ dùng đơn `DA_THANH_TOAN` theo ngày thanh toán và giá trị đã chốt trên đơn.
+2. Hiển thị số đơn, thu ròng, giá trị trung bình mỗi đơn; số đơn tạo trong kỳ (theo ngày tạo) và số đơn trong đó đã hủy.
+3. Top 5 SKU theo doanh thu, doanh thu theo nhóm hàng: tiền sau khuyến mãi, **trước** giảm điểm, vì điểm giảm trên cả đơn và không chia về từng dòng. Tổng theo nhóm hàng bằng doanh thu gộp − giảm khuyến mãi của BC-01.
+4. Theo người thu tiền và theo ngày thanh toán: số tiền khách thực trả; tổng bằng thu bán hàng ròng của BC-01. Mỗi bảng kèm thanh ngang tỉ lệ với số tiền.
+
+**Lỗi cần xử lý:** như BC-01. Kỳ không có đơn đã thanh toán chỉ hiển thị các số đếm.
+
+### BC-03 — Nhập - xuất - tồn theo kỳ
+
+1. Quản lý nhập khoảng ngày. Với mỗi SKU: nhập = tổng số lượng trên phiếu nhập trong kỳ (theo ngày nhập); xuất = tổng số lượng trên đơn `DA_THANH_TOAN` trong kỳ (theo ngày thanh toán).
+2. Tồn cuối kỳ = tồn hiện tại − nhập sau kỳ + xuất sau kỳ; tồn đầu kỳ = tồn cuối kỳ − nhập trong kỳ + xuất trong kỳ. Không cần lưu thêm bảng tồn theo ngày.
+3. Đối chiếu: nếu tồn đang lưu khác tổng nhập − tổng bán mọi thời điểm, đánh dấu SKU đó là lệch và in cảnh báo.
+
+**Lỗi cần xử lý:** như BC-01. Đơn chờ và đơn hủy không làm thay đổi xuất vì không trừ tồn.

@@ -70,7 +70,14 @@ c
 c
 c
 0
-0" "Đã lưu đơn" "Thanh toán thành công" "TỔNG THANH TOÁN +24.000đ"
+0" "Đã lưu đơn" "Thanh toán thành công" "TỔNG THANH TOÁN +24.000đ" "Đã lưu hóa đơn: .*hoa-don/HD-[0-9]{8}-[0-9a-f]{8}\.txt"
+
+# File hóa đơn tự lưu sau khi thanh toán
+if grep -qE "^TỔNG THANH TOÁN +24.000đ$" "$TMP"/hoa-don/HD-*.txt 2>/dev/null; then
+    echo "PASS: File hóa đơn có tổng tiền"
+else
+    echo "FAIL: File hóa đơn có tổng tiền"; loi=$((loi + 1))
+fi
 
 # Chạy lại chương trình: tồn kho phải đọc từ file đã lưu (100 − 2 vừa bán; đơn đặt chưa giữ hàng)
 kichBan "Tồn kho sau khi khởi động lại" "$(dn demo.quanly)
@@ -88,6 +95,30 @@ kichBan "Quản lý xem báo cáo thu - chi" "$(dn demo.quanly)
 0
 0
 0" "BÁO CÁO THU - CHI từ 01/10/2026 đến 31/10/2026"
+
+kichBan "Quản lý xem thống kê bán hàng" "$(dn demo.quanly)
+6
+3
+01/10/2026
+31/10/2026
+0
+0
+0" "THỐNG KÊ BÁN HÀNG từ 01/10/2026" "Kem vani – Lốc 6 ly 100 ml +1 +66.000đ" "Trần Thị Ngân +4 đơn +173.500đ +█+"
+
+kichBan "Quản lý xem nhập - xuất - tồn" "$(dn demo.quanly)
+6
+4
+03/10/2026
+05/10/2026
+0
+0
+0" "NHẬP - XUẤT - TỒN từ 03/10/2026" "1 hũ 100 g +100 +0 +4 +96" "tồn đang lưu khớp"
+
+kichBan "Nhân viên xuất lại hóa đơn ra file" "$(dn demo.nhanvien)
+7
+84736ab2
+0
+0" "Đã lưu hóa đơn: .*HD-20261002-84736ab2\.txt"
 
 kichBan "Menu chặn lựa chọn sai" "9
 abc
