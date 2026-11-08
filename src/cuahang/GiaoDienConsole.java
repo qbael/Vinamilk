@@ -196,8 +196,12 @@ public class GiaoDienConsole {
     }
 
     private char[] nhapMatKhauHaiLan() {
-        char[] matKhau = nhapMatKhau("Mật khẩu (ít nhất 6 ký tự)");
-        char[] nhapLai = nhapMatKhau("Nhập lại mật khẩu");
+        return nhapMatKhauHaiLan("Mật khẩu");
+    }
+
+    private char[] nhapMatKhauHaiLan(String nhan) {
+        char[] matKhau = nhapMatKhau(nhan + " (ít nhất 6 ký tự)");
+        char[] nhapLai = nhapMatKhau("Nhập lại " + nhan.toLowerCase(TIENG_VIET));
         boolean khop = Arrays.equals(matKhau, nhapLai);
         Arrays.fill(nhapLai, '\0');
         if (!khop) {
@@ -208,32 +212,57 @@ public class GiaoDienConsole {
         return matKhau;
     }
 
+    /** Tự đổi mật khẩu: nhập mật khẩu hiện tại (Enter = quay lại) rồi mật khẩu mới hai lần. */
+    private void doiMatKhau() {
+        char[] cu = nhapMatKhau("Mật khẩu hiện tại (Enter = quay lại)");
+        char[] moi = cu.length == 0 ? null : nhapMatKhauHaiLan("Mật khẩu mới");
+        try {
+            if (moi != null) {
+                dichVu.doiMatKhau(maTaiKhoanDangNhap, cu, moi);
+                inDong("Đã đổi mật khẩu. Lần đăng nhập sau hãy dùng mật khẩu mới.");
+            }
+        } finally {
+            Arrays.fill(cu, '\0');
+            if (moi != null) {
+                Arrays.fill(moi, '\0');
+            }
+        }
+    }
+
     // ================================================================ menu theo vai trò
 
     private void hienThiMenuKhachHang(String tieuDe) {
         int chon = chonMenu(tieuDe, "Đăng xuất", "Xem / tìm sản phẩm và khuyến mãi", "Đặt hàng nhận tại cửa hàng",
-                "Xem đơn hàng của tôi", "Hủy đơn đang chờ thanh toán", "Xem điểm tích lũy");
+                "Xem đơn hàng của tôi", "Hủy đơn đang chờ thanh toán", "Xem điểm tích lũy", "Đổi mật khẩu");
         switch (chon) {
             case 1 -> thucHien(this::xemSanPham);
             case 2 -> thucHien(this::khachDatHang);
             case 3 -> thucHien(() -> xemDanhSachDon(null));
             case 4 -> thucHien(this::huyDonCho);
             case 5 -> thucHien(this::xemDiem);
+            case 6 -> thucHien(this::doiMatKhau);
             default -> dangXuat();
         }
     }
 
     private void hienThiMenuNhanVien(String tieuDe) {
-        if (!menuBanHang(tieuDe, "Đăng xuất")) {
+        if (!menuBanHang(tieuDe, "Đăng xuất", true)) {
             dangXuat();
         }
     }
 
-    /** Một lượt menu bán hàng; trả false khi người dùng chọn 0. */
-    private boolean menuBanHang(String tieuDe, String nhanThoat) {
-        int chon = chonMenu(tieuDe, nhanThoat, "Xem / tìm sản phẩm và khuyến mãi", "Lập đơn bán tại quầy",
+    /**
+     * Một lượt menu bán hàng; trả false khi người dùng chọn 0. Nhân viên có thêm mục đổi mật khẩu;
+     * quản lý đổi ở menu chính nên không lặp lại trong menu con này.
+     */
+    private boolean menuBanHang(String tieuDe, String nhanThoat, boolean coDoiMatKhau) {
+        List<String> muc = new ArrayList<>(List.of("Xem / tìm sản phẩm và khuyến mãi", "Lập đơn bán tại quầy",
                 "Xem / tìm đơn hàng", "Thanh toán đơn hàng", "Hủy đơn đang chờ thanh toán", "Tra thành viên và điểm",
-                "Xuất hóa đơn ra file");
+                "Xuất hóa đơn ra file"));
+        if (coDoiMatKhau) {
+            muc.add("Đổi mật khẩu");
+        }
+        int chon = chonMenu(tieuDe, nhanThoat, muc.toArray(String[]::new));
         switch (chon) {
             case 1 -> thucHien(this::xemSanPham);
             case 2 -> thucHien(this::lapDonTaiQuay);
@@ -242,6 +271,7 @@ public class GiaoDienConsole {
             case 5 -> thucHien(this::huyDonCho);
             case 6 -> thucHien(this::traThanhVien);
             case 7 -> thucHien(this::xuatLaiHoaDon);
+            case 8 -> thucHien(this::doiMatKhau);
             default -> {
                 return false;
             }
@@ -251,10 +281,10 @@ public class GiaoDienConsole {
 
     private void hienThiMenuQuanLy(String tieuDe) {
         int chon = chonMenu(tieuDe, "Đăng xuất", "Bán hàng", "Quản lý sản phẩm và SKU", "Quản lý khuyến mãi",
-                "Nhập hàng", "Quản lý tài khoản", "Báo cáo");
+                "Nhập hàng", "Quản lý tài khoản", "Báo cáo", "Đổi mật khẩu");
         switch (chon) {
             case 1 -> {
-                while (phienConHieuLuc() && menuBanHang("BÁN HÀNG", "Quay lại")) {
+                while (phienConHieuLuc() && menuBanHang("BÁN HÀNG", "Quay lại", false)) {
                     // lặp đến khi chọn quay lại
                 }
             }
@@ -263,6 +293,7 @@ public class GiaoDienConsole {
             case 4 -> menuNhapHang();
             case 5 -> menuTaiKhoan();
             case 6 -> menuBaoCao();
+            case 7 -> thucHien(this::doiMatKhau);
             default -> dangXuat();
         }
     }

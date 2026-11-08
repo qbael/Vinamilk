@@ -25,6 +25,7 @@ Lưu thông tin chung, xác thực và trạng thái hoạt động của tài k
 | --- | --- |
 | `public abstract VaiTro layVaiTro()` | Lớp con trả đúng vai trò của mình |
 | `boolean kiemTraMatKhau(char[] matKhau)` | Xác thực mật khẩu nhập bằng salt và tham số đã lưu |
+| `final void datMatKhau(char[] matKhau)` | Kiểm tra độ dài, sinh salt mới và băm; dùng chung cho constructor và đổi mật khẩu, chỉ gán khi băm xong |
 | `void khoa()` | Đánh dấu tài khoản ngừng hoạt động sau khi dịch vụ cho phép |
 | `void moKhoa()` | Mở lại tài khoản sau khi dịch vụ cho phép |
 
@@ -39,6 +40,7 @@ Cả ba lớp con ánh xạ vào bảng logic `TAI_KHOAN`; cột `vaiTro` giúp 
 ## Ràng buộc riêng
 
 - Tên đăng nhập được trim, chuyển chữ thường bằng `Locale.ROOT`, không rỗng và duy nhất sau chuẩn hóa. Mật khẩu không bị trim hoặc đổi chữ.
+- `salt`, `matKhauBam`, `soVongBam` chỉ đổi qua `datMatKhau`, do [DichVuCuaHang](DichVuCuaHang.md)`.doiMatKhau` gọi sau khi đã xác thực mật khẩu hiện tại.
 - Không lưu mật khẩu rõ, không in hash/salt trong menu; số vòng băm phải dương và được kiểm tra giới hạn khi đọc file.
 - Không đổi loại tài khoản sau tạo. Không xóa tài khoản để giữ tham chiếu lịch sử.
 - [DichVuCuaHang](DichVuCuaHang.md) kiểm tra quyền và bảo vệ quản lý hoạt động cuối cùng trước khi khóa. `khoa()` không tự quyết định quy tắc cần đọc cả danh sách.

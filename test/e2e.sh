@@ -331,6 +331,33 @@ $(dn demo.quanly)
 0
 0" "Thanh toán thành công" "1 SKU đang bán sắp hết hàng \\(tồn ≤ 10\\)" "Kem vani – 1 ly 100 ml: còn 5" "Kem vani +1 ly 100 ml +5 +Đang bán  ⚠ Sắp hết"
 
+# ---------- đổi mật khẩu
+
+kichBan "Khách nhập sai mật khẩu hiện tại thì không đổi được" "$(dn demo.khach01)
+6
+saimatkhau
+matkhau9
+matkhau9
+0
+$(dn demo.khach01)
+0
+0" "Mật khẩu hiện tại không đúng" "Xin chào Lê Hoàng An"
+
+kichBan "Nhân viên đổi mật khẩu rồi đăng nhập lại" "$(dn demo.nhanvien)
+8
+$MK
+MoiDoi!2026
+MoiDoi!2026
+0
+$(dn demo.nhanvien)
+$(dn demo.nhanvien MoiDoi!2026)
+0
+0" "Đã đổi mật khẩu" "Sai tên đăng nhập hoặc mật khẩu" "Xin chào Trần Thị Ngân"
+
+kichBan "Mật khẩu mới vẫn dùng được sau khi khởi động lại" "$(dn demo.nhanvien MoiDoi!2026)
+0
+0" "Xin chào Trần Thị Ngân"
+
 # ---------- terminal thật
 
 moi

@@ -430,6 +430,28 @@ public class KiemThu {
                 () -> dv.dangKyKhachHang("abc", "matkhau1".toCharArray(), "X", "12345"), "Số điện thoại sai");
         dung(bo.taiKhoan.xuat().size() == soTk, "KT02 không tạo thêm tài khoản");
 
+        // KT38: tự đổi mật khẩu
+        String saltCu = bo.taiKhoan.timTheoMa(maKh).getSalt();
+        loi(IllegalArgumentException.class, () -> dv.doiMatKhau(maKh, "saimatkhau".toCharArray(), "matkhau2".toCharArray()),
+                "KT38 sai mật khẩu hiện tại bị từ chối");
+        loi(IllegalArgumentException.class, () -> dv.doiMatKhau(maKh, "matkhau1".toCharArray(), "matkhau1".toCharArray()),
+                "KT38 mật khẩu mới trùng mật khẩu cũ bị từ chối");
+        loi(IllegalArgumentException.class, () -> dv.doiMatKhau(maKh, "matkhau1".toCharArray(), "123".toCharArray()),
+                "KT38 mật khẩu mới quá ngắn bị từ chối");
+        dung(bo.taiKhoan.timTheoMa(maKh).getSalt().equals(saltCu), "KT38 đổi lỗi không làm đổi mật khẩu");
+        dv.doiMatKhau(maKh, "matkhau1".toCharArray(), "matkhau2".toCharArray());
+        dung(!bo.taiKhoan.timTheoMa(maKh).getSalt().equals(saltCu), "KT38 đổi mật khẩu sinh salt mới");
+        loi(IllegalArgumentException.class, () -> dv.dangNhap("khach.moi", "matkhau1".toCharArray()),
+                "KT38 mật khẩu cũ không còn đăng nhập được");
+        dung(dv.dangNhap("khach.moi", "matkhau2".toCharArray()).equals(maKh), "KT38 đăng nhập bằng mật khẩu mới");
+        BoDuLieu moLaiSauDoi = new BoDuLieu(file);
+        chay(moLaiSauDoi.luuTru::docDuLieu);
+        dung(moLaiSauDoi.dichVu.dangNhap("khach.moi", "matkhau2".toCharArray()).equals(maKh),
+                "KT38 mật khẩu mới đã lưu xuống file");
+        dung(((KhachHang) moLaiSauDoi.taiKhoan.timTheoMa(maKh)).getDiemTichLuy() == 0
+                        && moLaiSauDoi.taiKhoan.timTheoMa(maKh).isDangHoatDong(),
+                "KT38 đổi mật khẩu giữ nguyên điểm và trạng thái");
+
         // Phân quyền tại dịch vụ
         loi(SecurityException.class,
                 () -> dv.taoTaiKhoanNoiBo(maKh, VaiTro.QUAN_LY_CUA_HANG, "x", mk, "X", "0900000000"), "Khách không tạo tài khoản nội bộ");

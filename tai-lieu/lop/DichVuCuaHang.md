@@ -22,7 +22,7 @@ Constructor nhận sáu đối tượng quản lý và `LuuTruText` do [Main](Ma
 
 | Nhóm | Phương thức chính | Trách nhiệm |
 | --- | --- | --- |
-| Tài khoản | `dangKyKhachHang(...)`, `dangNhap(...)`, `taoTaiKhoanNoiBo(...)`, `khoaTaiKhoan(...)`, `moKhoaTaiKhoan(...)` | Kiểm tra xác thực, tên trùng, vai trò; bảo vệ quản lý hoạt động cuối |
+| Tài khoản | `dangKyKhachHang(...)`, `dangNhap(...)`, `taoTaiKhoanNoiBo(...)`, `khoaTaiKhoan(...)`, `moKhoaTaiKhoan(...)`, `doiMatKhau(...)` | Kiểm tra xác thực, tên trùng, vai trò; bảo vệ quản lý hoạt động cuối; chỉ tự đổi mật khẩu của mình khi nhập đúng mật khẩu hiện tại |
 | Danh mục | `themSanPham(...)`, `capNhatSanPham(...)`, `themBienThe(...)`, `capNhatBienThe(...)` | Kiểm tra danh mục, giá, quy cách; không sửa tồn trực tiếp |
 | Đặt/bán | `datHang(...)`, `lapDonTaiQuay(...)`, `xemDon(...)`, `huyDon(...)` | Kiểm tra chủ đơn, hàng, số lượng và trạng thái |
 | Thanh toán | `thanhToan(...)` | Tính lại giá/khuyến mãi, kiểm tra điểm, tồn; chốt đơn và lưu đồng thời |

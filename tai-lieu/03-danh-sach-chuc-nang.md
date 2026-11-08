@@ -10,6 +10,7 @@
 | TK-01 | Đăng ký khách hàng | Người chưa đăng nhập | Tài khoản khách hàng, điểm ban đầu bằng 0 |
 | TK-02 | Đăng nhập, đăng xuất | Ba loại tài khoản | Phiên sử dụng với đúng quyền |
 | TK-03 | Quản lý tài khoản | Quản lý | Tài khoản nội bộ mới hoặc thay đổi trạng thái hoạt động |
+| TK-04 | Đổi mật khẩu | Ba loại tài khoản | Mật khẩu mới của chính mình được lưu |
 | SP-01 | Xem, tìm sản phẩm và SKU | Ba loại tài khoản | Danh mục, giá, khuyến mãi và tồn có thể bán |
 | SP-02 | Quản lý sản phẩm và SKU | Quản lý | Danh mục được cập nhật và lưu |
 | DH-01 | Đặt hàng nhận tại cửa hàng | Khách hàng | Đơn `CHO_THANH_TOAN` thuộc khách hàng |
@@ -66,6 +67,14 @@
 3. Kiểm tra không khóa quản lý đang hoạt động cuối cùng, xác nhận và lưu thay đổi.
 
 **Đầu ra:** Tài khoản mới hoặc trạng thái mới. **Lỗi cần xử lý:** Tên đăng nhập trùng, dữ liệu không hợp lệ, mã không tồn tại, thao tác làm mất quản lý hoạt động cuối cùng hoặc lỗi lưu. Không xóa tài khoản, không đổi loại sau khi tạo, không sửa trực tiếp điểm.
+
+### TK-04 — Đổi mật khẩu
+
+1. Người đang đăng nhập chọn đổi mật khẩu, nhập mật khẩu hiện tại (để trống = quay lại) rồi nhập mật khẩu mới hai lần.
+2. Kiểm tra mật khẩu hiện tại đúng, mật khẩu mới đủ 6 ký tự và khác mật khẩu hiện tại.
+3. Sinh salt mới, băm lại và lưu; phiên hiện tại tiếp tục, lần đăng nhập sau dùng mật khẩu mới.
+
+**Đầu ra:** Thông tin xác thực mới của chính tài khoản đó; điểm, trạng thái và lịch sử giữ nguyên. **Lỗi cần xử lý:** Sai mật khẩu hiện tại, nhập lại không khớp, mật khẩu mới quá ngắn hoặc trùng mật khẩu cũ, lỗi lưu (mật khẩu cũ vẫn còn hiệu lực). Không ai được đổi mật khẩu của tài khoản khác, kể cả quản lý; chưa có chức năng cấp lại mật khẩu khi quên.
 
 ## 4. Sản phẩm và đóng gói
 

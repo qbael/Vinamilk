@@ -60,6 +60,7 @@ Khi file dữ liệu chưa tồn tại, ứng dụng thông báo đây là lần
 | Xem báo cáo thu, chi nhập hàng, tồn kho, thống kê bán hàng và nhập - xuất - tồn | Không | Không | Được |
 | Tạo tài khoản nhân viên hoặc quản lý | Không | Không | Được |
 | Xem danh sách, khóa hoặc mở lại tài khoản | Không | Không | Được, bảo vệ quản lý hoạt động cuối cùng |
+| Đổi mật khẩu | Chỉ của mình, cần mật khẩu hiện tại | Chỉ của mình, cần mật khẩu hiện tại | Chỉ của mình, cần mật khẩu hiện tại |
 | Đăng xuất | Được | Được | Được |
 
 Khách hàng được đưa ra lựa chọn dùng điểm; nhân viên hoặc quản lý thực hiện thanh toán tại quầy. Khách hàng không tự đánh dấu đơn đã trả tiền và nhân viên không được đổi điểm nếu khách hàng chưa đồng ý. Khách vãng lai không được tích hoặc sử dụng điểm.
@@ -84,6 +85,7 @@ Các nhóm menu dưới đây là cách tổ chức màn hình, không phải c�
 3. Xem đơn hàng của tôi
 4. Hủy đơn đang chờ thanh toán
 5. Xem điểm tích lũy
+6. Đổi mật khẩu
 0. Đăng xuất
 ```
 
@@ -99,6 +101,7 @@ Menu đặt hàng cho phép chọn SKU, nhập số lượng, sửa hoặc bỏ 
 5. Hủy đơn đang chờ thanh toán
 6. Tra thành viên và điểm để bán hàng
 7. Xuất hóa đơn ra file
+8. Đổi mật khẩu
 0. Đăng xuất
 ```
 
@@ -113,6 +116,7 @@ Trong chi tiết đơn đã thanh toán, nhân viên có thể hiển thị lạ
 4. Nhập hàng                  -> Lập phiếu nhập, xem lịch sử nhập
 5. Quản lý tài khoản          -> Danh sách, tạo nội bộ, khóa / mở lại
 6. Báo cáo                    -> Thu - chi, tồn hiện tại, thống kê bán hàng, nhập - xuất - tồn
+7. Đổi mật khẩu
 0. Đăng xuất
 ```
 

@@ -136,6 +136,18 @@ public class DichVuCuaHang {
         return yeuCau(maNguoiGoi);
     }
 
+    /** Mọi vai trò tự đổi mật khẩu của mình; phải nhập đúng mật khẩu hiện tại, mật khẩu mới phải khác. */
+    public void doiMatKhau(String maNguoiGoi, char[] matKhauCu, char[] matKhauMoi) {
+        TaiKhoan tk = yeuCau(maNguoiGoi);
+        if (!tk.kiemTraMatKhau(matKhauCu)) {
+            throw new IllegalArgumentException("Mật khẩu hiện tại không đúng.");
+        }
+        if (tk.kiemTraMatKhau(matKhauMoi)) {
+            throw new IllegalArgumentException("Mật khẩu mới phải khác mật khẩu hiện tại.");
+        }
+        giaoDich(() -> quanLyTaiKhoan.timTheoMa(maNguoiGoi).datMatKhau(matKhauMoi));
+    }
+
     public String taoTaiKhoanNoiBo(String maQuanLy, VaiTro vaiTro, String tenDangNhap, char[] matKhau,
                                    String hoTen, String soDienThoai) {
         yeuCauQuanLy(maQuanLy);

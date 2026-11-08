@@ -21,25 +21,18 @@ public abstract class TaiKhoan {
     private final String tenDangNhap;
     private final String hoTen;
     private final String soDienThoai;
-    private final String salt;
-    private final String matKhauBam;
-    private final int soVongBam;
+    private String salt;
+    private String matKhauBam;
+    private int soVongBam;
     private boolean dangHoatDong;
 
     /** Tạo tài khoản mới: sinh mã, salt và băm mật khẩu. */
     protected TaiKhoan(String tenDangNhap, char[] matKhau, String hoTen, String soDienThoai) {
-        if (matKhau == null || matKhau.length < DO_DAI_MAT_KHAU_TOI_THIEU) {
-            throw new IllegalArgumentException("Mật khẩu phải có ít nhất " + DO_DAI_MAT_KHAU_TOI_THIEU + " ký tự.");
-        }
+        datMatKhau(matKhau);
         this.maTaiKhoan = UUID.randomUUID().toString();
         this.tenDangNhap = chuanHoaTenDangNhap(tenDangNhap);
         this.hoTen = LuuTruText.vanBan(hoTen, "Họ tên");
         this.soDienThoai = kiemTraSoDienThoai(soDienThoai);
-        byte[] saltMoi = new byte[DO_DAI_SALT];
-        NGAU_NHIEN.nextBytes(saltMoi);
-        this.salt = Base64.getEncoder().encodeToString(saltMoi);
-        this.soVongBam = SO_VONG_BAM;
-        this.matKhauBam = Base64.getEncoder().encodeToString(bam(matKhau, saltMoi, SO_VONG_BAM));
         this.dangHoatDong = true;
     }
 
@@ -111,6 +104,22 @@ public abstract class TaiKhoan {
         }
         byte[] ketQua = bam(matKhau, Base64.getDecoder().decode(salt), soVongBam);
         return MessageDigest.isEqual(ketQua, Base64.getDecoder().decode(matKhauBam));
+    }
+
+    /**
+     * Kiểm tra độ dài rồi băm mật khẩu với salt mới và số vòng hiện hành; chỉ gán khi băm xong,
+     * nên lỗi không để lại trạng thái dở dang. Chỉ gọi qua DichVuCuaHang.doiMatKhau (đã kiểm tra mật khẩu cũ).
+     */
+    final void datMatKhau(char[] matKhau) {
+        if (matKhau == null || matKhau.length < DO_DAI_MAT_KHAU_TOI_THIEU) {
+            throw new IllegalArgumentException("Mật khẩu phải có ít nhất " + DO_DAI_MAT_KHAU_TOI_THIEU + " ký tự.");
+        }
+        byte[] saltMoi = new byte[DO_DAI_SALT];
+        NGAU_NHIEN.nextBytes(saltMoi);
+        String bamMoi = Base64.getEncoder().encodeToString(bam(matKhau, saltMoi, SO_VONG_BAM));
+        this.salt = Base64.getEncoder().encodeToString(saltMoi);
+        this.soVongBam = SO_VONG_BAM;
+        this.matKhauBam = bamMoi;
     }
 
     void khoa() {
