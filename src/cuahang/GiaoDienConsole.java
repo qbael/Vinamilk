@@ -328,8 +328,10 @@ public class GiaoDienConsole {
             inBangBienThe(ds);
         }
         LocalDate homNay = DichVuCuaHang.homNay();
+        // chỉ khuyến mãi của các SKU vừa tìm thấy, không in cả danh mục
+        List<String> maTimThay = ds.stream().map(BienTheSanPham::getMaBienThe).toList();
         List<KhuyenMai> dangApDung = dichVu.danhSachKhuyenMai(maTaiKhoanDangNhap).stream()
-                .filter(km -> km.coHieuLuc(homNay)).toList();
+                .filter(km -> km.coHieuLuc(homNay) && maTimThay.contains(km.getMaBienThe())).toList();
         if (!dangApDung.isEmpty()) {
             inDong("Khuyến mãi đang áp dụng:");
             for (KhuyenMai km : dangApDung) {
@@ -442,17 +444,19 @@ public class GiaoDienConsole {
         }
         try {
             DanhSachChiTietDonHang baoGia = dichVu.baoGia(maTaiKhoanDangNhap, gio);
-            inBangDong(baoGia.xuat());
-            inDong(cot("TẠM TÍNH", 76) + cotPhai(tien(baoGia.tinhTongTienHang() - baoGia.tinhTongGiam()), 12));
+            int rongTruocThanhTien = inBangDong(baoGia.xuat());
+            inDong(cot("TẠM TÍNH", rongTruocThanhTien) + cotPhai(tien(baoGia.tinhTongTienHang() - baoGia.tinhTongGiam()), 12));
         } catch (IllegalArgumentException e) {
             inBangDong(gio.xuat());
             inDong("Lưu ý: " + e.getMessage());
         }
     }
 
-    private void inBangDong(List<ChiTietDonHang> dong) {
-        inDong(cot("STT", 4) + cot("Sản phẩm", 20) + cot("Quy cách", 20) + cotPhai("SL", 5) + cotPhai("Đơn giá", 11)
-                + cotPhai("Giảm KM", 10) + cotPhai("Thành tiền", 12));
+    /** In bảng dòng đơn; trả độ rộng các cột trước "Thành tiền" để dòng tổng thẳng cột. */
+    private int inBangDong(List<ChiTietDonHang> dong) {
+        String truocThanhTien = cot("STT", 4) + cot("Sản phẩm", 20) + cot("Quy cách", 20) + cotPhai("SL", 5)
+                + cotPhai("Đơn giá", 11) + cotPhai("Giảm KM", 10);
+        inDong(truocThanhTien + cotPhai("Thành tiền", 12));
         int stt = 1;
         for (ChiTietDonHang ct : dong) {
             inDong(cot(String.valueOf(stt++), 4) + cot(ct.getTenSanPhamLucBan(), 20) + cot(ct.getTenQuyCachLucBan(), 20)
@@ -460,6 +464,7 @@ public class GiaoDienConsole {
                     + cotPhai(ct.getTienGiamKhuyenMai() == 0 ? "" : "-" + tien(ct.getTienGiamKhuyenMai()), 10)
                     + cotPhai(tien(ct.tinhTienSauKhuyenMai()), 12));
         }
+        return truocThanhTien.length();
     }
 
     private void khachDatHang() {
@@ -1322,12 +1327,25 @@ public class GiaoDienConsole {
     }
 
     private int chonMenu(String tieuDe, String nhanThoat, String... muc) {
-        inDong("");
-        inDong("=== " + tieuDe + " ===");
+        List<String> dong = new ArrayList<>();
+        dong.add(tieuDe);
         for (int i = 0; i < muc.length; i++) {
-            inDong((i + 1) + ". " + muc[i]);
+            dong.add((i + 1) + ". " + muc[i]);
         }
-        inDong("0. " + nhanThoat);
+        dong.add("0. " + nhanThoat);
+        // NFC để chữ có dấu gõ kiểu tổ hợp vẫn đếm đúng 1 ô; khung ASCII hiện được trên mọi console
+        dong.replaceAll(s -> Normalizer.normalize(s, Normalizer.Form.NFC));
+        int rong = dong.stream().mapToInt(String::length).max().orElse(0);
+        String vien = "+" + "-".repeat(rong + 2) + "+";
+        inDong("");
+        inDong(vien);
+        for (int i = 0; i < dong.size(); i++) {
+            inDong("| " + dong.get(i) + " ".repeat(rong - dong.get(i).length()) + " |");
+            if (i == 0) {
+                inDong(vien);
+            }
+        }
+        inDong(vien);
         while (true) {
             String s = nhap("Chọn");
             try {

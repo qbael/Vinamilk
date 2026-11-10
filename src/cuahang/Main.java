@@ -10,6 +10,7 @@ import cuahang.danhsach.QuanLyTaiKhoan;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class Main {
@@ -40,6 +41,9 @@ public class Main {
                 return;
             }
             giaoDien.chay();
+        } catch (NoSuchElementException e) {
+            // hết input trước khi vào menu (vd. Ctrl+D ở câu hỏi khởi tạo): báo như mọi chỗ khác
+            System.out.println("Hết dữ liệu nhập, kết thúc chương trình.");
         } catch (IOException | RuntimeException e) {
             System.err.println("Không thể tiếp tục: " + e.getMessage());
             System.exit(1);

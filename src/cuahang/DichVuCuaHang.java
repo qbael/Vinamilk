@@ -463,7 +463,8 @@ public class DichVuCuaHang {
         List<DonHang> don = nguoiGoi instanceof KhachHang
                 ? quanLyDonHang.timTheoKhach(nguoiGoi.getMaTaiKhoan())
                 : quanLyDonHang.xuat();
-        return don.stream().filter(dh -> trangThai == null || dh.getTrangThai() == trangThai).toList();
+        return don.stream().filter(dh -> trangThai == null || dh.getTrangThai() == trangThai)
+                .sorted(Comparator.comparing(DonHang::getThoiDiemTao)).toList();
     }
 
     public DonHang xemDon(String maNguoiGoi, String maDonHang) {

@@ -58,7 +58,7 @@ Mọi thao tác ghi đều đi qua `DichVuCuaHang.giaoDich`: chụp trạng thá
 Mỗi bước ghi: **gõ gì** → **thấy gì** → **ý cần nói**. Làm theo thứ tự để dữ liệu nối tiếp nhau.
 
 ### 2.1. Đọc file và đăng ký (thêm)
-1. Chạy app → dòng đầu in `Thư mục dữ liệu: …/data`. Mở các file cho cô xem: mỗi loại có file riêng, mỗi file mẫu 50 bản ghi; mỗi dòng một bản ghi `LOAI|cột|cột…`, cuối có `END|số dòng`. *Ý: đọc/ghi file text, không dùng database.*
+1. Chạy app → dòng đầu in `Thư mục dữ liệu: …/data`. Mở các file cho cô xem: mỗi loại có file riêng, mỗi file mẫu 50 bản ghi; dòng đầu `VNM|1` (phiên bản định dạng), sau đó mỗi dòng một bản ghi `LOAI|cột|cột…`, cuối có `END|số bản ghi`. *Ý: đọc/ghi file text, không dùng database.*
 2. `2` Đăng ký: `demo.moi` / `matkhau1` / `matkhau1` / `Nguyễn Văn Demo` / `0912345678` → "Đăng ký thành công". *Ý: thêm tài khoản; chỉ tạo được khách hàng, điểm 0.*
 
 ### 2.2. Khách hàng: tìm kiếm, thêm/sửa/xóa dòng giỏ, đặt đơn
@@ -66,7 +66,7 @@ Mỗi bước ghi: **gõ gì** → **thấy gì** → **ý cần nói**. Làm th
 2. `1` Xem/tìm: gõ `sữa chua` → chỉ hiện các SKU khớp sữa chua. *Ý: tìm theo tên, nhóm, quy cách, mã.*
 3. `2` Đặt hàng:
    - `1` thêm, tìm `lốc 4 hũ` → tự chọn → số lượng `3`.
-   - `1` thêm, tìm `1 hộp 180` → `2`.
+   - `1` thêm, gõ mã `0582` (Sữa tươi có đường – 1 hộp 180 ml; gõ `1 hộp 180` sẽ khớp nhiều loại sữa tươi nên app bắt chọn mã) → `2`.
    - `2` sửa số lượng: STT `2` → `5`. *Ý: sửa dòng thứ hai trong giỏ; Enter để quay lại.*
    - `3` bỏ dòng: STT `1` → dòng biến mất, giỏ đánh số lại từ `1`. *Ý: xóa (dòng trong giỏ).*
    - `4` xác nhận → `c` → "Đặt hàng thành công. Mã đơn: xxxxxxxx". Ghi lại mã đơn.
@@ -148,7 +148,7 @@ Bắt đầu từ dữ liệu mẫu (`git restore data/`). Đánh dấu ☐ → 
 | ☐ 11 | Xem/tìm, Enter để trống | Hiện mọi SKU đang bán, có cột KM và giá sau KM |
 | ☐ 12 | Tìm `kem`, `thùng`, `xyz` | Lọc đúng; `xyz` báo không có kết quả |
 | ☐ 13 | Đặt hàng, số lượng `0`, `-1`, `abc` | Báo lỗi, cho nhập lại |
-| ☐ 14 | Đặt số lượng lớn hơn tồn (ví dụ `999`) | "Không đủ hàng … còn …, cần 999" |
+| ☐ 14 | Giỏ đang trống, đặt số lượng lớn hơn tồn (ví dụ `999`) | "Không đủ hàng … còn …, cần 999" |
 | ☐ 15 | Thêm cùng SKU 2 lần | Gộp thành 1 dòng, cộng số lượng |
 | ☐ 16 | Sửa số lượng, bỏ dòng, rồi xác nhận | Tổng tạm tính cập nhật đúng; "Đặt hàng thành công" |
 | ☐ 17 | Xác nhận khi giỏ trống | Báo giỏ hàng trống |
@@ -163,7 +163,7 @@ Bắt đầu từ dữ liệu mẫu (`git restore data/`). Đánh dấu ☐ → 
 | ☐ 21 | Thanh toán đơn `bc4ebe22`, dùng điểm vượt mức tối đa | Báo chỉ được nhập từ 0 đến mức tối đa |
 | ☐ 22 | Thanh toán, trả lời `k` ở câu "đã nhận đủ tiền?" | "Đơn vẫn chờ thanh toán", tồn và điểm không đổi |
 | ☐ 23 | Thanh toán đầy đủ | Hóa đơn console + "Đã lưu hóa đơn: …HD-….txt"; file mở được, căn thẳng cột |
-| ☐ 24 | Lập đơn cho khách vãng lai rồi thanh toán | Hóa đơn ghi "Khách vãng lai", không có dòng điểm |
+| ☐ 24 | Lập đơn cho khách vãng lai rồi thanh toán | Hóa đơn ghi "Khách vãng lai", không có dòng "Điểm trừ / Điểm cộng" (dòng "Giảm bằng điểm (0 điểm) 0đ" vẫn có) |
 | ☐ 25 | Lập đơn cho SĐT không phải thành viên | Báo không tìm thấy |
 | ☐ 26 | Xem/tìm đơn, lọc từng trạng thái | Đúng danh sách; đơn đã thanh toán hiện lại đúng hóa đơn |
 | ☐ 27 | Xuất hóa đơn ra file với `84736ab2` | Tạo `HD-20261002-84736ab2.txt` |
