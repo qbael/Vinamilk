@@ -12,8 +12,8 @@ Bảng dưới ghi kết quả mong đợi. Cả 39 tình huống có kiểm ch�
 | KT04 | Khóa quản lý hoạt động cuối cùng | Từ chối; hệ thống luôn còn quản lý truy cập được |
 | KT05 | Bán 2 lốc từ tồn lốc 20 | Tồn lốc còn 18, tồn hộp/thùng giữ nguyên |
 | KT06 | Tồn 5, chọn SKU 3 rồi chọn thêm 3 | Gộp thành 6 rồi từ chối vượt tồn, không lách qua nhiều dòng |
-| KT07 | Hai đơn chờ cùng đặt 4 khi tồn 5 | Cả hai có thể chờ; thanh toán đơn thứ nhất còn 1, đơn thứ hai bị thiếu tồn |
-| KT08 | Đặt hàng rồi hủy | Không đổi tồn, điểm hoặc thu bán; chỉ đổi trạng thái |
+| KT07 | Hai giỏ cùng chọn 4 khi tồn 5 | Đơn đầu giữ 4, giỏ thứ hai bị từ chối khi đặt; chỉ đặt thêm tối đa 1. Khởi động lại vẫn giữ hàng; thanh toán không trừ khả dụng lần nữa |
+| KT08 | Đặt đơn nhiều dòng rồi hủy | Hoàn đủ lượng giữ từng SKU; điểm và thu bán không đổi; hủy lặp không hoàn thêm |
 | KT09 | Giá tăng/khuyến mãi hết hạn sau lúc đặt | Thanh toán dùng giá/ưu đãi hiện tại, cần xác nhận bảng cuối |
 | KT10 | SKU hoặc sản phẩm cha bị ngừng bán | Không được thanh toán dòng đó; không tự bỏ dòng rồi thu tổng khác |
 | KT11 | Bài tính 60.000đ, giảm 10%, dùng 100/250 điểm | Thực trả 44.000đ, cộng 4, còn 154 điểm |
@@ -26,7 +26,7 @@ Bảng dưới ghi kết quả mong đợi. Cả 39 tình huống có kiểm ch�
 | KT18 | Sau bán, quản lý đổi tên/giá hoặc ngừng KM | Hóa đơn cũ và tổng thu cũ không đổi |
 | KT19 | Nhập 3 thùng với giá nhập 200.000đ/thùng | Tồn thùng +3, chi nhập +600.000đ; tồn hộp/lốc không đổi |
 | KT20 | Lưu lại phiếu nhập cùng mã | Từ chối, không tăng tồn/chi lần hai |
-| KT21 | Ghi file lỗi trong thanh toán/nhập/sửa giá | File chính và RAM về trạng thái cũ, không báo thành công |
+| KT21 | Ghi file lỗi trong thanh toán/nhập/sửa giá | Cả bộ file và RAM về trạng thái cũ, không báo thành công |
 | KT22 | Commit thành công nhưng chưa in thì dừng chương trình | Mở lại thấy giao dịch đã hoàn tất; không được ghi nhận thêm |
 | KT23 | File sai số cột, thiếu END, ID trùng, FK sai, điểm/tồn lệch | Báo lỗi rõ dòng hoặc mã liên quan, không nạp một phần/ghi đè |
 | KT24 | Lưu rồi mở lại chương trình | Đúng lớp con, đúng toàn bộ đơn/chi tiết, điểm, tồn và số liệu thu-chi |
@@ -38,7 +38,7 @@ Bảng dưới ghi kết quả mong đợi. Cả 39 tình huống có kiểm ch�
 | KT30 | Truyền `TaiKhoan` vào `DanhSach<SanPham>`; thử thêm/xóa qua danh sách do `xuat()` trả về | Sai kiểu bị chặn khi biên dịch; sửa cấu trúc bản xuất báo `UnsupportedOperationException`, danh sách gốc giữ nguyên |
 | KT31 | Gọi `xoa` qua interface trên sáu manager chung; gọi `sua` trên manager đơn/phiếu | Tài khoản/đơn/phiếu báo không hỗ trợ; sản phẩm/SKU/khuyến mãi xóa đúng override (mã lạ báo lỗi, SKU còn tồn bị chặn); không sửa chứng từ |
 | KT32 | Gọi `them`/`sua`/`xoa` qua interface chi tiết khi đang soạn rồi sau khi đơn/phiếu nhận quyền sở hữu | Lúc soạn: gộp/thay/xóa đúng SKU, giữ kiểm tra tồn/giá/tràn số; sau khóa: cả ba bị chặn qua cả tham chiếu cũ, kể cả đơn chờ và dữ liệu nạp lại |
-| KT33 | Kiểm tra bộ mẫu `data/du-lieu.txt` rồi nạp bằng bộ đọc khi triển khai | Có ít nhất 50 bản ghi, không tính `VNM`/`END`; bộ hiện tại có 60 bản ghi và `END\|60`; đủ tám bảng, xác thực được tài khoản mẫu, khóa ngoại/tiền/tồn/điểm khớp lịch sử |
+| KT33 | Kiểm tra tám file mẫu trong `data/` rồi nạp bằng bộ đọc | Mỗi file đúng 50 bản ghi, `VNM\|1` và `END\|50`, tổng 400; đúng loại từng file, xác thực được tài khoản mẫu, khóa ngoại/tiền/tồn/điểm khớp lịch sử; file thiếu/hỏng không làm nạp dở |
 | KT34 | Thống kê bán hàng tháng 10 của bộ mẫu | 5 đơn, thu ròng 237.500đ; top SKU theo doanh thu; tổng theo nhóm hàng = gộp − KM, tổng theo người thu/ngày = thu ròng; 8 đơn tạo, 1 hủy |
 | KT35 | Nhập - xuất - tồn kỳ 03–05/10 và kỳ trước phiếu nhập đầu tiên | Đầu + nhập − xuất = cuối ở mọi SKU; hũ sữa chua đầu 100, xuất 4, cuối 96; trước 01/10 tồn 0; tồn bị sửa lệch thì SKU đó được đánh dấu |
 | KT36 | Xuất file hóa đơn cho đơn đã thanh toán và đơn chờ | File `HD-20261002-84736ab2.txt` có tiêu đề, người thu, tổng tiền, mọi dòng ≤ 50 ký tự; đơn chờ bị từ chối; thanh toán qua console tự lưu file |

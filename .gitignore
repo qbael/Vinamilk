@@ -38,7 +38,8 @@ AGENTS.md
 *.class
 
 ### Dữ liệu chạy ###
-data/du-lieu.tmp
+data/*.tmp
+data/.phuc-hoi.txt
 hoa-don/
 
 ### IntelliJ (file cá nhân) ###

@@ -85,9 +85,9 @@ public class GiaoDienConsole {
         }
     }
 
-    /** Lần chạy đầu chưa có file dữ liệu: xác nhận rồi nhập quản lý đầu tiên. */
+    /** Lần chạy đầu chưa có bộ file dữ liệu: xác nhận rồi nhập quản lý đầu tiên. */
     public boolean khoiTaoHeThong(Path duongDan) {
-        inDong("Chưa có file dữ liệu tại: " + duongDan);
+        inDong("Chưa có dữ liệu tại thư mục: " + duongDan);
         inDong("Đây là lần khởi tạo hệ thống: bạn sẽ tạo tài khoản quản lý đầu tiên (không có mật khẩu mặc định).");
         if (!xacNhan("Khởi tạo hệ thống mới?")) {
             return false;
@@ -340,6 +340,7 @@ public class GiaoDienConsole {
     }
 
     private void inBangBienThe(List<BienTheSanPham> ds) {
+        inDong("Tồn hiển thị là lượng còn có thể đặt, đã trừ hàng đang giữ cho đơn chờ thanh toán.");
         Map<String, String> ma = maNgan(ds.stream().map(BienTheSanPham::getMaBienThe).toList());
         inDong(cot("Mã", 10) + cot("Sản phẩm", 22) + cot("Quy cách", 22) + cotPhai("Giá bán", 11) + "  "
                 + cot("KM", 9) + cotPhai("Sau KM", 11) + cotPhai("Tồn", 6) + "  Ghi chú");
@@ -357,7 +358,7 @@ public class GiaoDienConsole {
 
     /** Tìm SKU theo từ khóa rồi chọn bằng mã; trả null nếu quay lại. */
     private BienTheSanPham chonBienThe(boolean chiHangDangBan) {
-        String tuKhoa = nhap("Tìm SKU theo tên hoặc mã (Enter = quay lại)");
+        String tuKhoa = nhap("Tìm sản phẩm theo tên hoặc mã (Enter = quay lại)");
         if (tuKhoa.isEmpty()) {
             return null;
         }
@@ -387,7 +388,7 @@ public class GiaoDienConsole {
         DanhSachChiTietDonHang gio = new DanhSachChiTietDonHang();
         while (true) {
             inGio(gio);
-            int chon = chonMenu("SOẠN ĐƠN", "Hủy đơn đang soạn", "Thêm SKU", "Sửa số lượng", "Bỏ dòng", "Xác nhận");
+            int chon = chonMenu("SOẠN ĐƠN", "Hủy đơn đang soạn", "Thêm sản phẩm", "Sửa số lượng", "Bỏ dòng", "Xác nhận");
             switch (chon) {
                 case 1 -> thucHien(() -> {
                     BienTheSanPham bt = chonBienThe(true);
@@ -397,14 +398,14 @@ public class GiaoDienConsole {
                     }
                 });
                 case 2 -> thucHien(() -> {
-                    ChiTietDonHang ct = chonTheoMa(gio.xuat(), ChiTietDonHang::getMaBienThe, "Mã SKU trong giỏ");
+                    ChiTietDonHang ct = chonDongTrongGio(gio);
                     Integer soLuong = ct == null ? null : nhapSo("Số lượng mới", 1, Integer.MAX_VALUE);
                     if (soLuong != null) {
                         dichVu.suaSoLuongTrongGio(maTaiKhoanDangNhap, gio, ct.getMaBienThe(), soLuong);
                     }
                 });
                 case 3 -> thucHien(() -> {
-                    ChiTietDonHang ct = chonTheoMa(gio.xuat(), ChiTietDonHang::getMaBienThe, "Mã SKU cần bỏ");
+                    ChiTietDonHang ct = chonDongTrongGio(gio);
                     if (ct != null) {
                         dichVu.xoaKhoiGio(maTaiKhoanDangNhap, gio, ct.getMaBienThe());
                     }
@@ -421,6 +422,16 @@ public class GiaoDienConsole {
                 }
             }
         }
+    }
+
+    private ChiTietDonHang chonDongTrongGio(DanhSachChiTietDonHang gio) {
+        List<ChiTietDonHang> dong = gio.xuat();
+        if (dong.isEmpty()) {
+            inDong("Giỏ hàng đang trống.");
+            return null;
+        }
+        Integer stt = nhapSo("Số thứ tự trong giỏ (Enter = quay lại)", 1, dong.size());
+        return stt == null ? null : dong.get(stt - 1);
     }
 
     private void inGio(DanhSachChiTietDonHang gio) {
@@ -440,11 +451,11 @@ public class GiaoDienConsole {
     }
 
     private void inBangDong(List<ChiTietDonHang> dong) {
-        Map<String, String> ma = maNgan(dong.stream().map(ChiTietDonHang::getMaBienThe).toList());
-        inDong(cot("Mã", 10) + cot("Sản phẩm", 20) + cot("Quy cách", 20) + cotPhai("SL", 5) + cotPhai("Đơn giá", 11)
+        inDong(cot("STT", 4) + cot("Sản phẩm", 20) + cot("Quy cách", 20) + cotPhai("SL", 5) + cotPhai("Đơn giá", 11)
                 + cotPhai("Giảm KM", 10) + cotPhai("Thành tiền", 12));
+        int stt = 1;
         for (ChiTietDonHang ct : dong) {
-            inDong(cot(ma.get(ct.getMaBienThe()), 10) + cot(ct.getTenSanPhamLucBan(), 20) + cot(ct.getTenQuyCachLucBan(), 20)
+            inDong(cot(String.valueOf(stt++), 4) + cot(ct.getTenSanPhamLucBan(), 20) + cot(ct.getTenQuyCachLucBan(), 20)
                     + cotPhai(String.valueOf(ct.getSoLuong()), 5) + cotPhai(tien(ct.getDonGia()), 11)
                     + cotPhai(ct.getTienGiamKhuyenMai() == 0 ? "" : "-" + tien(ct.getTienGiamKhuyenMai()), 10)
                     + cotPhai(tien(ct.tinhTienSauKhuyenMai()), 12));
@@ -456,7 +467,7 @@ public class GiaoDienConsole {
         if (gio == null) {
             return;
         }
-        inDong("Nhận hàng và trả tiền tại cửa hàng. Hàng và điểm chưa được giữ; giá được tính lại khi thanh toán.");
+        inDong("Nhận hàng và trả tiền tại cửa hàng. Xác nhận đặt sẽ giữ hàng; hủy đơn sẽ hoàn tồn. Giá và điểm được tính khi thanh toán.");
         if (!xacNhan("Xác nhận đặt hàng?")) {
             return;
         }
@@ -573,7 +584,7 @@ public class GiaoDienConsole {
         d.add("Mã đơn    : " + dh.getMaDonHang());
         if (!laXemTruoc) {
             d.add("Trạng thái: " + dh.getTrangThai().getTenHienThi()
-                    + (dh.getTrangThai() == TrangThaiDonHang.CHO_THANH_TOAN ? " (GIÁ TẠM TÍNH, chưa giữ hàng)" : ""));
+                    + (dh.getTrangThai() == TrangThaiDonHang.CHO_THANH_TOAN ? " (GIÁ TẠM TÍNH, đã giữ hàng)" : ""));
         }
         d.add("Khách     : " + tenKhach(dh));
         d.add("Người lập : " + dichVu.hoTen(dh.getMaNguoiLap()) + " — " + thoiDiem(dh.getThoiDiemTao()));
@@ -1239,7 +1250,7 @@ public class GiaoDienConsole {
                     + (d.lech() ? "  ⚠ LỆCH" : ""));
             soLech += d.lech() ? 1 : 0;
         }
-        inDong("Nhập theo ngày nhập; xuất là hàng bán trên đơn đã thanh toán (đơn chờ/hủy không trừ tồn).");
+        inDong("Nhập theo ngày nhập; xuất theo ngày thanh toán. Tồn thực tế gồm cả hàng đang giữ cho đơn chờ.");
         inDong(soLech == 0 ? "Đối chiếu: tồn đang lưu khớp tổng nhập − tổng bán ở mọi SKU."
                 : "CẢNH BÁO: " + soLech + " SKU có tồn đang lưu khác tổng nhập − tổng bán; hãy kiểm tra dữ liệu.");
     }
@@ -1267,7 +1278,7 @@ public class GiaoDienConsole {
 
     private void baoCaoTonKho() {
         List<BienTheSanPham> ds = dichVu.xemTonKho(maTaiKhoanDangNhap);
-        inDong("TỒN KHO HIỆN TẠI (không phải tồn cuối kỳ của báo cáo thu - chi)");
+        inDong("TỒN KHẢ DỤNG HIỆN TẠI (đã trừ hàng đang giữ cho đơn chờ thanh toán)");
         Map<String, String> ma = maNgan(ds.stream().map(BienTheSanPham::getMaBienThe).toList());
         inDong(cot("Mã", 10) + cot("Sản phẩm", 22) + cot("Quy cách", 22) + cotPhai("Tồn", 7) + "  Trạng thái");
         for (BienTheSanPham bt : ds) {

@@ -1,0 +1,52 @@
+VNM|1
+SAN_PHAM|94329236-9ed2-4c62-b877-d61c595ffb64|Sữa tươi có đường|Vinamilk|hộp|180 ml|Sữa tươi tiệt trùng|SUA|true
+SAN_PHAM|8b8186d8-95cb-4d6d-8c56-8c8ad9b406d8|Sữa chua có đường|Vinamilk|hũ|100 g|Sữa chua ăn|SUA_CHUA|true
+SAN_PHAM|a8f710f9-a0ae-44ab-9969-c575bf65e52a|Kem vani|Vinamilk|ly|100 ml|Kem vị vani|KEM|true
+SAN_PHAM|56af9b0c-1bc0-4814-852a-ddf9bf2f28dd|Nước cam|Vfresh|chai|250 ml|Nước giải khát vị cam|NUOC_GIAI_KHAT|true
+SAN_PHAM|ce52af4b-8732-4347-9fe0-dff7743e088d|Phô mai miếng|Vinamilk|hộp|120 g|Phô mai dạng miếng|PHO_MAI|true
+SAN_PHAM|fd09ce59-d5b2-54f0-8187-8f5f7cfd660a|Sữa tươi không đường|Vinamilk|hộp|180 ml|Sữa tươi không đường, đóng gói 180 ml|SUA|true
+SAN_PHAM|37cb24f9-bab3-502b-8b3f-14d6d62b543d|Sữa chua không đường|Vinamilk|hũ|100 g|Sữa chua không đường, đóng gói 100 g|SUA_CHUA|true
+SAN_PHAM|e3724f7f-2260-5101-9f15-113478e7db4f|Kem sô cô la|Vinamilk|ly|100 ml|Kem sô cô la, đóng gói 100 ml|KEM|true
+SAN_PHAM|7b19e72e-1c67-5a5a-b0c8-1389467bcb68|Nước táo|Vfresh|chai|250 ml|Nước táo, đóng gói 250 ml|NUOC_GIAI_KHAT|true
+SAN_PHAM|7e3980e9-71c5-54a2-8777-a61f6d20e911|Phô mai lát nguyên vị|Vinamilk|hộp|120 g|Phô mai lát nguyên vị, đóng gói 120 g|PHO_MAI|true
+SAN_PHAM|35ff0f09-b7d0-526c-a56f-d2be5d64eba4|Sữa tươi ít đường|Vinamilk|hộp|180 ml|Sữa tươi ít đường, đóng gói 180 ml|SUA|true
+SAN_PHAM|d6c08ac2-1210-509a-80ba-a25f34243d0f|Sữa chua ít đường|Vinamilk|hũ|100 g|Sữa chua ít đường, đóng gói 100 g|SUA_CHUA|true
+SAN_PHAM|e58d2d94-7884-5331-bce2-9e4fc66ba1a7|Kem dâu|Vinamilk|ly|100 ml|Kem dâu, đóng gói 100 ml|KEM|true
+SAN_PHAM|282c3929-9679-547c-be81-cd7a11e0af0d|Nước đào|Vfresh|chai|250 ml|Nước đào, đóng gói 250 ml|NUOC_GIAI_KHAT|true
+SAN_PHAM|9d89a2a0-8650-5e31-971a-1fc9d461e406|Phô mai lát vị bò|Vinamilk|hộp|120 g|Phô mai lát vị bò, đóng gói 120 g|PHO_MAI|true
+SAN_PHAM|fe1e3d6d-d28a-5f79-a6ad-4fbf38f3ff49|Sữa tươi hương dâu|Vinamilk|hộp|180 ml|Sữa tươi hương dâu, đóng gói 180 ml|SUA|true
+SAN_PHAM|70afbe03-86fb-539e-b81b-dd11375c12d5|Sữa chua nha đam|Vinamilk|hũ|100 g|Sữa chua nha đam, đóng gói 100 g|SUA_CHUA|true
+SAN_PHAM|c156fc59-f457-523b-968d-1548ff5c2c9d|Kem dừa|Vinamilk|ly|100 ml|Kem dừa, đóng gói 100 ml|KEM|true
+SAN_PHAM|ec105a25-a7a8-5688-bba7-20908bf9d03d|Nước nho|Vfresh|chai|250 ml|Nước nho, đóng gói 250 ml|NUOC_GIAI_KHAT|true
+SAN_PHAM|b757d337-233b-5104-884d-ef549c3c798a|Phô mai lát vị gà|Vinamilk|hộp|120 g|Phô mai lát vị gà, đóng gói 120 g|PHO_MAI|true
+SAN_PHAM|c7bc14bd-5d3f-5fc0-b89c-99d8365f302c|Sữa tươi hương sô cô la|Vinamilk|hộp|180 ml|Sữa tươi hương sô cô la, đóng gói 180 ml|SUA|true
+SAN_PHAM|70540aa6-8e71-5b9d-a210-d851df3d8f40|Sữa chua dâu|Vinamilk|hũ|100 g|Sữa chua dâu, đóng gói 100 g|SUA_CHUA|true
+SAN_PHAM|e37c4d9c-b37e-508c-9dc3-a919fb0c74dc|Kem đậu xanh|Vinamilk|ly|100 ml|Kem đậu xanh, đóng gói 100 ml|KEM|true
+SAN_PHAM|73aafbce-9816-5530-94ee-91a69e46e85b|Nước ổi|Vfresh|chai|250 ml|Nước ổi, đóng gói 250 ml|NUOC_GIAI_KHAT|true
+SAN_PHAM|d532b958-f3f6-5c68-894e-da1c63c2d767|Phô mai lát vị nấm|Vinamilk|hộp|120 g|Phô mai lát vị nấm, đóng gói 120 g|PHO_MAI|true
+SAN_PHAM|31a9eb5b-2902-5885-bd4a-2ca078f2df64|Sữa tươi tiệt trùng nguyên kem|Vinamilk|hộp|1 lít|Sữa tươi tiệt trùng nguyên kem, đóng gói 1 lít|SUA|true
+SAN_PHAM|869f5160-9439-5e84-9d36-4f18d01bd448|Sữa chua nếp cẩm|Vinamilk|hũ|100 g|Sữa chua nếp cẩm, đóng gói 100 g|SUA_CHUA|true
+SAN_PHAM|0313851d-9b89-503d-b1c9-b28ad4318ae4|Kem sầu riêng|Vinamilk|ly|100 ml|Kem sầu riêng, đóng gói 100 ml|KEM|true
+SAN_PHAM|acab972d-5335-50f8-b076-ff8cf9b3002b|Nước xoài|Vfresh|chai|250 ml|Nước xoài, đóng gói 250 ml|NUOC_GIAI_KHAT|true
+SAN_PHAM|d83e5c1e-6adf-5595-97a6-fd5cb18a6cb9|Phô mai que|Vinamilk|hộp|120 g|Phô mai que, đóng gói 120 g|PHO_MAI|true
+SAN_PHAM|60307fa1-067d-57b1-ba62-1aa397638aae|Sữa tươi tiệt trùng tách béo|Vinamilk|hộp|1 lít|Sữa tươi tiệt trùng tách béo, đóng gói 1 lít|SUA|true
+SAN_PHAM|e0268f4a-3b0b-5619-963b-615bc0ecadcd|Sữa chua lựu đỏ|Vinamilk|hũ|100 g|Sữa chua lựu đỏ, đóng gói 100 g|SUA_CHUA|true
+SAN_PHAM|cc5e6fa8-e041-5b5d-8e37-04d4a388a043|Kem khoai môn|Vinamilk|ly|100 ml|Kem khoai môn, đóng gói 100 ml|KEM|true
+SAN_PHAM|ba240872-66d6-5d4f-9899-d7f32b09f37f|Nước dứa|Vfresh|chai|250 ml|Nước dứa, đóng gói 250 ml|NUOC_GIAI_KHAT|true
+SAN_PHAM|ef7423de-0275-582f-b725-b80731f47c26|Phô mai viên|Vinamilk|hộp|120 g|Phô mai viên, đóng gói 120 g|PHO_MAI|true
+SAN_PHAM|0258af56-139a-5f57-ab04-59cceaf5f69b|Sữa tươi Green Farm ít đường|Vinamilk|hộp|180 ml|Sữa tươi Green Farm ít đường, đóng gói 180 ml|SUA|true
+SAN_PHAM|e84ed528-54ee-5a36-8df1-73cb4917a100|Sữa chua việt quất|Vinamilk|hũ|100 g|Sữa chua việt quất, đóng gói 100 g|SUA_CHUA|true
+SAN_PHAM|ef6a734a-8c66-5e36-82ab-578eb9eddbd4|Kem cà phê|Vinamilk|ly|100 ml|Kem cà phê, đóng gói 100 ml|KEM|true
+SAN_PHAM|db49bb0c-96d4-586e-a904-efd157c59f27|Nước chanh dây|Vfresh|chai|250 ml|Nước chanh dây, đóng gói 250 ml|NUOC_GIAI_KHAT|true
+SAN_PHAM|9d8f9b14-7bf8-584d-8d55-71bf6a2d2ed0|Phô mai kem|Vinamilk|hộp|120 g|Phô mai kem, đóng gói 120 g|PHO_MAI|true
+SAN_PHAM|f2a550b0-dc31-5f4d-bc07-d05897b12e53|Sữa tươi Green Farm không đường|Vinamilk|hộp|1 lít|Sữa tươi Green Farm không đường, đóng gói 1 lít|SUA|true
+SAN_PHAM|ae269dd5-5256-569f-9791-5de251ad178f|Sữa chua trân châu|Vinamilk|hũ|100 g|Sữa chua trân châu, đóng gói 100 g|SUA_CHUA|true
+SAN_PHAM|3974662b-8dfb-572c-9621-8427e97085dd|Kem bạc hà|Vinamilk|ly|100 ml|Kem bạc hà, đóng gói 100 ml|KEM|true
+SAN_PHAM|e29d351a-d84a-5aac-8de7-2b344cae79fb|Nước cà chua|Vfresh|chai|250 ml|Nước cà chua, đóng gói 250 ml|NUOC_GIAI_KHAT|true
+SAN_PHAM|6eedab58-5591-5448-9628-1c17d4c4a624|Phô mai lát ít béo|Vinamilk|hộp|120 g|Phô mai lát ít béo, đóng gói 120 g|PHO_MAI|true
+SAN_PHAM|96466077-4f98-5cc2-adbf-65dcc953b918|Sữa tươi Organic|Vinamilk|hộp|1 lít|Sữa tươi Organic, đóng gói 1 lít|SUA|true
+SAN_PHAM|679f61a5-aea5-5053-ae9d-9b4280b84c74|Sữa chua Hy Lạp|Vinamilk|hũ|100 g|Sữa chua Hy Lạp, đóng gói 100 g|SUA_CHUA|true
+SAN_PHAM|094f9303-88f1-51f7-a43c-06f316eae45f|Kem hạt dẻ|Vinamilk|ly|100 ml|Kem hạt dẻ, đóng gói 100 ml|KEM|true
+SAN_PHAM|41ad1d26-5187-514c-a299-9da05a986a5b|Nước lựu|Vfresh|chai|250 ml|Nước lựu, đóng gói 250 ml|NUOC_GIAI_KHAT|true
+SAN_PHAM|d53c7016-2894-591d-8b4c-27413f0dd72f|Phô mai lát bổ sung canxi|Vinamilk|hộp|120 g|Phô mai lát bổ sung canxi, đóng gói 120 g|PHO_MAI|true
+END|50

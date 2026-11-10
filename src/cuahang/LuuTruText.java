@@ -48,8 +48,20 @@ public class LuuTruText {
     private static final String TIEN_TO_DONG_CUOI = "END|";
     private static final DateTimeFormatter DINH_DANG_THOI_DIEM = DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss");
 
+    private static final String[][] CAC_FILE = {
+            {"TAI_KHOAN", "tai-khoan.txt"},
+            {"SAN_PHAM", "san-pham.txt"},
+            {"BIEN_THE", "bien-the.txt"},
+            {"KHUYEN_MAI", "khuyen-mai.txt"},
+            {"PHIEU_NHAP", "phieu-nhap.txt"},
+            {"CT_PHIEU_NHAP", "chi-tiet-phieu-nhap.txt"},
+            {"DON_HANG", "don-hang.txt"},
+            {"CT_DON_HANG", "chi-tiet-don-hang.txt"}
+    };
+    private static final String HE_THONG_MOI = "MOI";
+
     private final Path duongDan;
-    private final Path duongDanTam;
+    private final Path duongDanPhucHoi;
     private final QuanLyTaiKhoan quanLyTaiKhoan;
     private final QuanLySanPham quanLySanPham;
     private final QuanLyBienTheSanPham quanLyBienThe;
@@ -61,9 +73,7 @@ public class LuuTruText {
                       QuanLyBienTheSanPham quanLyBienThe, QuanLyKhuyenMai quanLyKhuyenMai,
                       QuanLyDonHang quanLyDonHang, QuanLyPhieuNhap quanLyPhieuNhap) {
         this.duongDan = duongDan;
-        String tenFile = duongDan.getFileName().toString();
-        int cham = tenFile.lastIndexOf('.');
-        this.duongDanTam = duongDan.resolveSibling((cham > 0 ? tenFile.substring(0, cham) : tenFile) + ".tmp");
+        this.duongDanPhucHoi = duongDan.resolve(".phuc-hoi.txt");
         this.quanLyTaiKhoan = quanLyTaiKhoan;
         this.quanLySanPham = quanLySanPham;
         this.quanLyBienThe = quanLyBienThe;
@@ -77,33 +87,114 @@ public class LuuTruText {
     }
 
     public boolean tonTai() {
-        return Files.exists(duongDan);
-    }
-
-    /** Đọc file chính; file rỗng/hỏng báo lỗi và giữ nguyên file, không nạp một phần. */
-    public void docDuLieu() throws IOException {
-        String noiDung = Files.readString(duongDan, StandardCharsets.UTF_8);
-        if (noiDung.isBlank()) {
-            throw new IllegalArgumentException("File dữ liệu rỗng: " + duongDan);
+        try {
+            phucHoiNeuCan();
+        } catch (IOException e) {
+            throw new IllegalStateException("Không phục hồi được dữ liệu tại " + duongDan + ".", e);
         }
-        napTuChuoi(noiDung);
+        // Thiếu một phần bộ file là lỗi dữ liệu, không được khởi tạo đè lên phần còn lại.
+        for (String[] file : CAC_FILE) {
+            if (Files.exists(duongDan.resolve(file[1]))) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    /** Kiểm tra toàn bộ rồi mới thay nội dung sáu manager đang dùng. */
+    /** Đọc đủ tám file, kiểm tra toàn bộ rồi mới thay nội dung các manager. */
+    public void docDuLieu() throws IOException {
+        phucHoiNeuCan();
+        List<String> viTri = new ArrayList<>();
+        phanTich(docCacFile(viTri), true, viTri);
+    }
+
+    /** Bản chụp trong RAM dùng để phục hồi giao dịch, không phải file dữ liệu riêng. */
     public void napTuChuoi(String noiDung) {
         phanTich(noiDung, true);
     }
 
-    /** Ghi trạng thái RAM hiện tại: kiểm tra, ghi file tạm, rồi thay file chính nguyên tử. */
+    /** Chuẩn bị đủ file tạm và bản phục hồi trước khi thay bất kỳ file chính nào. */
     public void ghiAnToan() throws IOException {
         String noiDung = xuatThanhChuoi();
         phanTich(noiDung, false);
-        if (duongDan.getParent() != null) {
-            Files.createDirectories(duongDan.getParent());
+        boolean daCoDuLieu = tonTai();
+        String noiDungCu = daCoDuLieu ? docCacFile(null) : HE_THONG_MOI;
+        if (daCoDuLieu) {
+            phanTich(noiDungCu, false);
         }
-        Files.writeString(duongDanTam, noiDung, StandardCharsets.UTF_8);
-        // ponytail: chưa fsync file tạm; thay nguyên tử chống file ghi dở, không chống mất điện.
-        Files.move(duongDanTam, duongDan, StandardCopyOption.ATOMIC_MOVE);
+        Files.createDirectories(duongDan);
+        ghiFileTam(noiDung);
+        Path phucHoiTam = duongDan.resolve(".phuc-hoi.tmp");
+        Files.writeString(phucHoiTam, noiDungCu, StandardCharsets.UTF_8);
+        Files.move(phucHoiTam, duongDanPhucHoi, StandardCopyOption.ATOMIC_MOVE);
+        try {
+            thayCacFile();
+            Files.delete(duongDanPhucHoi);
+        } catch (IOException | RuntimeException e) {
+            try {
+                phucHoiNeuCan();
+            } catch (IOException | RuntimeException loiPhucHoi) {
+                loiPhucHoi.addSuppressed(e);
+                throw new Error("Không phục hồi được bộ file dữ liệu; dừng để tránh sai lệch.", loiPhucHoi);
+            }
+            throw e;
+        }
+    }
+
+    private String docCacFile(List<String> viTri) throws IOException {
+        List<String> banGhi = new ArrayList<>();
+        for (String[] file : CAC_FILE) {
+            Path duongDanFile = duongDan.resolve(file[1]);
+            List<String> dong = Files.readAllLines(duongDanFile, StandardCharsets.UTF_8);
+            try {
+                int soBanGhi = kiemTraKhung(dong);
+                for (int i = 1; i <= soBanGhi; i++) {
+                    if (!dong.get(i).startsWith(file[0] + "|")) {
+                        throw new IllegalArgumentException("Dòng " + (i + 1) + ": chỉ nhận bản ghi " + file[0] + ".");
+                    }
+                    banGhi.add(dong.get(i));
+                    if (viTri != null) {
+                        viTri.add("File " + duongDanFile + ", dòng " + (i + 1));
+                    }
+                }
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("File " + duongDanFile + ": " + e.getMessage(), e);
+            }
+        }
+        return dongDuLieu(banGhi);
+    }
+
+    private void ghiFileTam(String noiDung) throws IOException {
+        List<String> banGhi = noiDung.lines().skip(1).toList();
+        for (String[] file : CAC_FILE) {
+            List<String> dong = banGhi.stream().filter(d -> d.startsWith(file[0] + "|")).toList();
+            Files.writeString(duongDan.resolve(file[1] + ".tmp"), dongDuLieu(dong), StandardCharsets.UTF_8);
+        }
+    }
+
+    private void thayCacFile() throws IOException {
+        for (String[] file : CAC_FILE) {
+            Files.move(duongDan.resolve(file[1] + ".tmp"), duongDan.resolve(file[1]), StandardCopyOption.ATOMIC_MOVE);
+        }
+    }
+
+    private void phucHoiNeuCan() throws IOException {
+        if (!Files.exists(duongDanPhucHoi)) {
+            return;
+        }
+        String noiDungCu = Files.readString(duongDanPhucHoi, StandardCharsets.UTF_8);
+        if (noiDungCu.equals(HE_THONG_MOI)) {
+            for (String[] file : CAC_FILE) {
+                Files.deleteIfExists(duongDan.resolve(file[1]));
+                Files.deleteIfExists(duongDan.resolve(file[1] + ".tmp"));
+            }
+        } else {
+            phanTich(noiDungCu, false);
+            ghiFileTam(noiDungCu);
+            thayCacFile();
+        }
+        // shortcut: chưa fsync; cần bổ sung khi phải bảo đảm dữ liệu qua sự cố mất điện.
+        Files.delete(duongDanPhucHoi);
     }
 
     // ---------------------------------------------------------------- ghi
@@ -121,7 +212,7 @@ public class LuuTruText {
         }
         for (BienTheSanPham bt : quanLyBienThe.xuat()) {
             dong.add(noi("BIEN_THE", bt.getMaBienThe(), bt.getMaSanPham(), bt.getTenQuyCach(), bt.getKieuDongGoi(),
-                    bt.getSoDonViCoSo(), bt.getGiaBan(), bt.getSoLuongTon(), bt.isDangKinhDoanh()));
+                    bt.getSoDonViCoSo(), bt.getGiaBan(), bt.getSoLuongTonThucTe(), bt.isDangKinhDoanh()));
         }
         for (KhuyenMai km : quanLyKhuyenMai.xuat()) {
             Object[] loaiVaGiaTri = switch (km) {
@@ -155,6 +246,10 @@ public class LuuTruText {
                         ct.getTienGiamKhuyenMai()));
             }
         }
+        return dongDuLieu(dong);
+    }
+
+    private static String dongDuLieu(List<String> dong) {
         StringBuilder sb = new StringBuilder(DONG_DAU).append('\n');
         for (String d : dong) {
             sb.append(d).append('\n');
@@ -182,12 +277,7 @@ public class LuuTruText {
 
     // ---------------------------------------------------------------- đọc và kiểm tra
 
-    /**
-     * Phân tích vào vùng tạm và kiểm tra toàn bộ đồ thị dữ liệu.
-     * Chỉ khi hợp lệ và congBo = true mới thay nội dung sáu manager.
-     */
-    private void phanTich(String noiDung, boolean congBo) {
-        List<String> dong = noiDung.lines().toList();
+    private static int kiemTraKhung(List<String> dong) {
         if (dong.isEmpty() || !dong.getFirst().equals(DONG_DAU)) {
             throw new IllegalArgumentException("Dòng 1: phải là " + DONG_DAU + ".");
         }
@@ -200,6 +290,24 @@ public class LuuTruText {
             throw new IllegalArgumentException("Dòng " + dong.size() + ": " + dongCuoi
                     + " không khớp số bản ghi thực tế (" + soBanGhi + ").");
         }
+        return soBanGhi;
+    }
+
+    private static String viTriDong(int i, List<String> viTri) {
+        return viTri == null ? "Dòng " + (i + 1) : viTri.get(i - 1);
+    }
+
+    private void phanTich(String noiDung, boolean congBo) {
+        phanTich(noiDung, congBo, null);
+    }
+
+    /**
+     * Phân tích vào vùng tạm và kiểm tra toàn bộ đồ thị dữ liệu.
+     * Chỉ khi hợp lệ và congBo = true mới thay nội dung sáu manager.
+     */
+    private void phanTich(String noiDung, boolean congBo, List<String> viTri) {
+        List<String> dong = noiDung.lines().toList();
+        int soBanGhi = kiemTraKhung(dong);
 
         Map<String, TaiKhoan> taiKhoan = new LinkedHashMap<>();
         Map<String, SanPham> sanPham = new LinkedHashMap<>();
@@ -207,7 +315,7 @@ public class LuuTruText {
         Map<String, KhuyenMai> khuyenMai = new LinkedHashMap<>();
         Map<String, String[]> donHangTho = new LinkedHashMap<>();
         Map<String, String[]> phieuNhapTho = new LinkedHashMap<>();
-        Map<String, Integer> soDong = new HashMap<>();
+        Map<String, String> soDong = new HashMap<>();
         Map<String, DanhSachChiTietDonHang> chiTietDon = new HashMap<>();
         Map<String, DanhSachChiTietPhieuNhap> chiTietPhieu = new HashMap<>();
 
@@ -238,7 +346,7 @@ public class LuuTruText {
                     }
                     case "DON_HANG" -> {
                         dat(donHangTho, LuuTruText.vanBan(soCot(c, 14)[1], "Mã đơn hàng"), c, "mã đơn hàng");
-                        soDong.put("DON_HANG|" + c[1], i + 1);
+                        soDong.put("DON_HANG|" + c[1], viTriDong(i, viTri));
                     }
                     case "CT_DON_HANG" -> {
                         soCot(c, 9);
@@ -251,7 +359,7 @@ public class LuuTruText {
                     }
                     case "PHIEU_NHAP" -> {
                         dat(phieuNhapTho, LuuTruText.vanBan(soCot(c, 5)[1], "Mã phiếu nhập"), c, "mã phiếu nhập");
-                        soDong.put("PHIEU_NHAP|" + c[1], i + 1);
+                        soDong.put("PHIEU_NHAP|" + c[1], viTriDong(i, viTri));
                     }
                     case "CT_PHIEU_NHAP" -> {
                         soCot(c, 7);
@@ -265,7 +373,7 @@ public class LuuTruText {
                     default -> throw new IllegalArgumentException("Loại bản ghi không hợp lệ: " + c[0]);
                 }
             } catch (RuntimeException e) {
-                throw new IllegalArgumentException("Dòng " + (i + 1) + ": " + e.getMessage(), e);
+                throw new IllegalArgumentException(viTriDong(i, viTri) + ": " + e.getMessage(), e);
             }
         }
 
@@ -283,7 +391,7 @@ public class LuuTruText {
                         docInt(c[9], "diemCong"), docLong(c[10], "tongTienHang"), docLong(c[11], "tongGiamKhuyenMai"),
                         docLong(c[12], "tienGiamDiem"), docLong(c[13], "tongThanhToan"), ct));
             } catch (RuntimeException e) {
-                throw new IllegalArgumentException("Dòng " + soDong.get("DON_HANG|" + c[1]) + " (đơn " + c[1] + "): "
+                throw new IllegalArgumentException(soDong.get("DON_HANG|" + c[1]) + " (đơn " + c[1] + "): "
                         + e.getMessage(), e);
             }
         }
@@ -299,7 +407,7 @@ public class LuuTruText {
                 }
                 phieuNhap.add(new PhieuNhap(c[1], c[2], c[3], docThoiDiem(c[4], "thoiDiemNhap"), ct));
             } catch (RuntimeException e) {
-                throw new IllegalArgumentException("Dòng " + soDong.get("PHIEU_NHAP|" + c[1]) + " (phiếu " + c[1] + "): "
+                throw new IllegalArgumentException(soDong.get("PHIEU_NHAP|" + c[1]) + " (phiếu " + c[1] + "): "
                         + e.getMessage(), e);
             }
         }
@@ -309,6 +417,15 @@ public class LuuTruText {
         }
 
         kiemTraLienKet(taiKhoan, sanPham, bienThe, khuyenMai, donHang, phieuNhap);
+
+        // Lượng giữ được dựng lại từ đơn chờ, không đổi định dạng tồn thực tế trong file cũ.
+        for (DonHang dh : donHang) {
+            if (dh.getTrangThai() == TrangThaiDonHang.CHO_THANH_TOAN) {
+                for (ChiTietDonHang ct : dh.getChiTiet()) {
+                    bienThe.get(ct.getMaBienThe()).giuTon(ct.getSoLuong());
+                }
+            }
+        }
 
         if (congBo) {
             quanLyTaiKhoan.napDanhSach(new ArrayList<>(taiKhoan.values()));

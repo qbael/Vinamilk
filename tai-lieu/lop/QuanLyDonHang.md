@@ -35,4 +35,4 @@ Các phương thức dưới đây là instance; `xuat()` kế thừa `public fi
 - Thanh toán/hủy là hành vi có kiểm soát của đơn, do dịch vụ điều phối cùng tồn, điểm và lưu file. `sua`/`xoa` có mặt để thực thi hợp đồng chung nhưng luôn từ chối, không thay nguyên đơn hoặc xóa lịch sử; không thanh toán lần hai. `them` không tự đổi tồn, điểm hoặc ghi file.
 - Khoảng ngày phải hợp lệ (`tuNgay ≤ denNgay`); đơn chờ/hủy không góp vào thu bán. Báo cáo lấy số tiền đã chốt, không dùng giá danh mục hiện tại.
 - Danh sách trả về dùng `List.copyOf`, là bản sao nông; giao diện chỉ đọc, không sửa phần tử để vượt vòng đời đơn.
-- Lớp không có bảng/file riêng; các đơn và dòng con ánh xạ `DON_HANG`/`CT_DON_HANG`. [LuuTruText](LuuTruText.md) lưu toàn hệ thống một lần khi giao dịch được xác nhận.
+- Lớp quản lý không có bản ghi riêng; các đơn và dòng con lưu ở `don-hang.txt`/`chi-tiet-don-hang.txt`. [LuuTruText](LuuTruText.md) lưu toàn hệ thống một lần khi giao dịch được xác nhận.

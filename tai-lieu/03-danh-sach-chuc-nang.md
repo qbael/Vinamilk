@@ -29,17 +29,17 @@
 
 - Một `SanPham` mô tả mặt hàng, một `BienTheSanPham` là SKU có quy cách đóng gói, giá và tồn riêng. Nhóm hàng gồm sữa, sữa chua, kem, nước giải khát và phô mai; kiểu đóng gói gồm bán lẻ, lốc và thùng.
 - Số lượng trên đơn và phiếu nhập luôn là số đơn vị của SKU. Mua 2 thùng nghĩa là mua 2 đơn vị SKU thùng, không phải 2 hộp lẻ. Hệ thống không tự tách thùng thành lốc hoặc bán lẻ.
-- Đơn chờ thanh toán không giữ tồn kho, không trừ điểm và chưa tạo doanh thu. Giá, khuyến mãi và khả năng dùng điểm phải được kiểm tra lại tại quầy.
+- Đơn chờ thanh toán giữ hàng khỏi tồn khả dụng, không trừ điểm và chưa tạo doanh thu. Hủy đơn hoàn lượng đã giữ; thanh toán không trừ khả dụng lần nữa. Giá, khuyến mãi và khả năng dùng điểm được kiểm tra lại tại quầy.
 - Chỉ ghi nhận kết quả nghiệp vụ sau khi lưu thành công. Nếu việc lưu thất bại, không thông báo thành công và không giữ lại thay đổi dở dang trong bộ nhớ.
-- Dữ liệu được lưu trong một snapshot text `data/du-lieu.txt`. Cách ánh xạ đối tượng thành các bảng nằm trong [Mô hình dữ liệu](05-mo-hinh-du-lieu.md); cách ghi an toàn nằm trong [Lưu trữ file text](07-luu-tru-file-text.md).
+- Dữ liệu được lưu trong tám file text riêng theo loại bản ghi tại `data/`, có nhật ký phục hồi khi ghi theo bộ. Cách ánh xạ đối tượng thành các bảng nằm trong [Mô hình dữ liệu](05-mo-hinh-du-lieu.md); cách ghi an toàn nằm trong [Lưu trữ file text](07-luu-tru-file-text.md).
 
 ## 3. Hệ thống và tài khoản
 
 ### HT-01 — Đọc hoặc khởi tạo dữ liệu
 
-1. Khi khởi động, kiểm tra sự tồn tại của file dữ liệu.
-2. Nếu file đã tồn tại, đọc dữ liệu, kiểm tra định dạng, mã định danh, liên kết giữa các bảng và các giá trị nghiệp vụ trước khi đưa vào danh sách dùng chung.
-3. Nếu file chưa tồn tại, thông báo và yêu cầu người vận hành xác nhận khởi tạo. Khi đồng ý, nhận thông tin quản lý đầu tiên và lưu dữ liệu ban đầu; không dùng mật khẩu mặc định.
+1. Khi khởi động, phục hồi lần ghi bị gián đoạn nếu có rồi kiểm tra bộ tám file dữ liệu.
+2. Nếu đã có dữ liệu, đọc đủ tám file, kiểm tra định dạng, mã định danh, liên kết và giá trị nghiệp vụ trước khi đưa vào danh sách dùng chung. Thiếu một file là lỗi; không nạp một phần.
+3. Nếu chưa có file dữ liệu nào, thông báo và yêu cầu người vận hành xác nhận khởi tạo. Khi đồng ý, nhận thông tin quản lý đầu tiên và lưu dữ liệu ban đầu; không dùng mật khẩu mặc định.
 4. Chỉ mở menu đăng nhập sau khi nạp hoặc khởi tạo thành công.
 
 **Đầu ra:** Các danh sách quản lý sẵn sàng sử dụng. **Lỗi cần xử lý:** Không đọc được file, file rỗng/hỏng, mã trùng, tham chiếu không tồn tại, không có quản lý hoạt động hoặc không ghi được file khởi tạo. File đã tồn tại bị lỗi không được tự thay bằng dữ liệu rỗng. Nếu không xác nhận khởi tạo, thoát chương trình.
@@ -101,8 +101,8 @@
 
 1. Khách hàng chọn SKU đang bán, nhập số lượng nguyên dương; có thể sửa số lượng hoặc bỏ dòng trước khi đặt.
 2. Kiểm tra danh sách không rỗng và số lượng không vượt tồn hiện tại. SKU chọn nhiều lần được gộp vào cùng dòng.
-3. Hiển thị đơn và tổng tạm tính, kèm thông báo nhận và trả tiền tại cửa hàng; hàng và điểm chưa được giữ.
-4. Khách hàng xác nhận, chương trình gắn mã khách hàng đang đăng nhập và lưu đơn `CHO_THANH_TOAN`.
+3. Hiển thị giỏ và tổng tạm tính, kèm thông báo nhận và trả tiền tại cửa hàng; giỏ đang soạn chưa giữ hàng.
+4. Khách hàng xác nhận, chương trình gắn mã khách hàng đang đăng nhập, giữ hàng khỏi tồn khả dụng và lưu đơn `CHO_THANH_TOAN` cùng một giao dịch.
 
 **Đầu ra:** Mã đơn để tra cứu và thanh toán tại cửa hàng. **Lỗi cần xử lý:** SKU ngừng bán, hết/thiếu hàng, số lượng không hợp lệ, danh sách rỗng hoặc lỗi lưu. Không tạo đơn cho khách hàng khác bằng cách nhập mã tài khoản của họ.
 
@@ -110,7 +110,7 @@
 
 1. Nhân viên hoặc quản lý chọn khách thành viên bằng mã tài khoản, hoặc chọn khách vãng lai.
 2. Chọn SKU, nhập số lượng và điều chỉnh các dòng trước khi xác nhận.
-3. Kiểm tra tương tự DH-01 rồi lưu đơn `CHO_THANH_TOAN`. Với khách vãng lai, đơn không có mã khách hàng.
+3. Kiểm tra tương tự DH-01 rồi giữ hàng và lưu đơn `CHO_THANH_TOAN` cùng một giao dịch. Với khách vãng lai, đơn không có mã khách hàng.
 4. Chuyển sang TT-01 khi khách hàng muốn thanh toán.
 
 **Đầu ra:** Đơn tại quầy được lưu và sẵn sàng thanh toán. **Lỗi cần xử lý:** Tài khoản được gắn không phải khách hàng đang hoạt động, SKU/số lượng không hợp lệ, thiếu tồn hoặc lỗi lưu. Một đơn chỉ gắn tối đa một khách hàng thành viên.
@@ -127,17 +127,17 @@
 ### DH-04 — Hủy đơn chờ thanh toán
 
 1. Chọn đơn, kiểm tra quyền và trạng thái `CHO_THANH_TOAN`.
-2. Xác nhận hủy, chuyển trạng thái thành `DA_HUY` và lưu.
+2. Xác nhận hủy, chuyển trạng thái thành `DA_HUY`, hoàn đủ lượng đã giữ về tồn khả dụng và lưu cùng một giao dịch.
 
-**Đầu ra:** Đơn đã hủy vẫn được giữ trong lịch sử. **Lỗi cần xử lý:** Đơn đã thanh toán, đã hủy, không thuộc quyền hoặc lỗi lưu. Hủy đơn không hoàn tồn hoặc hoàn điểm vì đơn chờ chưa trừ các giá trị này.
+**Đầu ra:** Đơn đã hủy vẫn được giữ trong lịch sử; hàng được đặt tiếp. **Lỗi cần xử lý:** Đơn đã thanh toán, đã hủy, không thuộc quyền hoặc lỗi lưu. Hủy lặp không hoàn tồn lần hai; điểm không đổi.
 
 ### TT-01 — Thanh toán tại cửa hàng
 
 1. Nhân viên hoặc quản lý mở đơn `CHO_THANH_TOAN`.
-2. Kiểm tra lại quyền, khách hàng gắn với đơn nếu có, tình trạng đang bán và tồn của từng SKU.
+2. Kiểm tra lại quyền, khách hàng gắn với đơn nếu có và tình trạng đang bán của từng SKU. Đơn dùng hàng đã giữ, vẫn thanh toán được khi tồn khả dụng bằng 0.
 3. Tính lại giá hiện tại và chọn tối đa một khuyến mãi tốt nhất cho mỗi dòng. Nếu khách là thành viên, hỏi khách có dùng điểm không và dùng bao nhiêu; kiểm tra số điểm hiện có và giới hạn đổi điểm.
 4. Hiển thị bảng tính cuối cùng: tiền hàng trước giảm, giảm khuyến mãi, giảm bằng điểm, số tiền cần trả, điểm sẽ trừ và điểm sẽ cộng. Yêu cầu khách xác nhận nếu giá hoặc ưu đãi khác đơn tạm tính.
-5. Khi xác nhận thu tiền, ghi nhận người thu tiền, thời điểm thanh toán, các giá trị đã chốt; chuyển đơn thành `DA_THANH_TOAN`, trừ tồn, trừ điểm dùng và cộng điểm mới trong cùng một lần lưu an toàn.
+5. Khi xác nhận thu tiền, ghi nhận người thu tiền, thời điểm thanh toán, các giá trị đã chốt; chuyển đơn thành `DA_THANH_TOAN`, xuất hàng đã giữ, trừ điểm dùng và cộng điểm mới trong cùng một lần lưu an toàn. Tồn khả dụng không bị trừ thêm.
 6. Chỉ sau khi lưu thành công mới thông báo hoàn tất, hiển thị hóa đơn và tự lưu bản text vào `hoa-don/HD-<yyyyMMdd>-<mã ngắn>.txt` (UTF-8, rộng 50 ký tự, có đầu/chân hóa đơn). Lỗi ghi file hóa đơn chỉ được báo, không làm hỏng giao dịch đã lưu; nhân viên xuất lại bằng mục "Xuất hóa đơn ra file" trong menu bán hàng. Nếu lưu thất bại sau khi nhân viên đã nhận tiền thực tế, phải báo giao dịch chưa hoàn tất, đối chiếu khoản đã nhận và xử lý lại đúng đơn; không yêu cầu khách trả lần nữa.
 
 **Đầu ra:** Hóa đơn console và trạng thái nhất quán giữa đơn, tồn, điểm. **Lỗi cần xử lý:** Đơn không còn chờ, hàng ngừng bán/thiếu tồn, khách hàng bị khóa, điểm không đủ hoặc vượt giới hạn, khách không đồng ý tổng mới, dữ liệu tính tiền không hợp lệ hoặc lỗi lưu.
@@ -211,7 +211,7 @@ Chênh lệch thu và chi nhập không phải lợi nhuận: hàng nhập trong
 ### BC-03 — Nhập - xuất - tồn theo kỳ
 
 1. Quản lý nhập khoảng ngày. Với mỗi SKU: nhập = tổng số lượng trên phiếu nhập trong kỳ (theo ngày nhập); xuất = tổng số lượng trên đơn `DA_THANH_TOAN` trong kỳ (theo ngày thanh toán).
-2. Tồn cuối kỳ = tồn hiện tại − nhập sau kỳ + xuất sau kỳ; tồn đầu kỳ = tồn cuối kỳ − nhập trong kỳ + xuất trong kỳ. Không cần lưu thêm bảng tồn theo ngày.
+2. Tồn cuối kỳ = tồn thực tế hiện tại − nhập sau kỳ + xuất sau kỳ; tồn đầu kỳ = tồn cuối kỳ − nhập trong kỳ + xuất trong kỳ. Tồn thực tế bao gồm hàng đang giữ cho đơn chờ; màn hình danh mục/tồn hiện tại hiển thị tồn khả dụng.
 3. Đối chiếu: nếu tồn đang lưu khác tổng nhập − tổng bán mọi thời điểm, đánh dấu SKU đó là lệch và in cảnh báo.
 
-**Lỗi cần xử lý:** như BC-01. Đơn chờ và đơn hủy không làm thay đổi xuất vì không trừ tồn.
+**Lỗi cần xử lý:** như BC-01. Đơn chờ và đơn hủy không làm thay đổi xuất bán; chỉ thay đổi lượng hàng đang giữ.

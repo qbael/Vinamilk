@@ -43,7 +43,7 @@ public final class QuanLyBienTheSanPham extends DanhSach<BienTheSanPham> {
             throw new IllegalArgumentException("Sản phẩm đã có quy cách " + bienThe.getKieuDongGoi().getTenHienThi()
                     + " " + bienThe.getSoDonViCoSo() + " đơn vị.");
         }
-        if (bienThe.getSoLuongTon() != 0) {
+        if (bienThe.getSoLuongTonThucTe() != 0) {
             throw new IllegalArgumentException("SKU mới phải có tồn bằng 0; tăng tồn bằng phiếu nhập.");
         }
         danhSach.add(bienThe);
@@ -85,8 +85,8 @@ public final class QuanLyBienTheSanPham extends DanhSach<BienTheSanPham> {
         if (bt == null) {
             throw new IllegalArgumentException("Không tìm thấy SKU " + ma + ".");
         }
-        if (bt.getSoLuongTon() != 0) {
-            throw new IllegalStateException("SKU còn tồn " + bt.getSoLuongTon() + "; chỉ ngừng bán được.");
+        if (bt.getSoLuongTonThucTe() != 0) {
+            throw new IllegalStateException("SKU còn tồn " + bt.getSoLuongTonThucTe() + "; chỉ ngừng bán được.");
         }
         danhSach.remove(bt);
     }

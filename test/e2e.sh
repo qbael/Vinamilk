@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Kiểm thử end-to-end qua giao diện console: gõ sẵn phím vào stdin, đối chiếu output.
-# Chạy trên bản copy của data/ nên không đụng data/du-lieu.txt. Chạy: bash test/e2e.sh
+# Chạy trên bản copy của data/ nên không đụng các file dữ liệu gốc. Chạy: bash test/e2e.sh
 set -u
 cd "$(dirname "$0")/.."
 TMP=$(mktemp -d)
@@ -79,13 +79,13 @@ else
     echo "FAIL: File hóa đơn có tổng tiền"; loi=$((loi + 1))
 fi
 
-# Chạy lại chương trình: tồn kho phải đọc từ file đã lưu (100 − 2 vừa bán; đơn đặt chưa giữ hàng)
+# Chạy lại: 100 − 1 đơn khách đang chờ − 2 vừa bán = 97 khả dụng.
 kichBan "Tồn kho sau khi khởi động lại" "$(dn demo.quanly)
 6
 2
 0
 0
-0" "Kem vani +1 ly 100 ml +98 "
+0" "Kem vani +1 ly 100 ml +97 "
 
 kichBan "Quản lý xem báo cáo thu - chi" "$(dn demo.quanly)
 6
@@ -126,6 +126,48 @@ abc
 
 kichBan "Hết input thì thoát gọn" "1
 demo.khach01" "Hết dữ liệu nhập, kết thúc chương trình."
+
+# ---------- sửa/bỏ dòng giỏ theo số thứ tự
+
+moi
+kichBan "Sửa/bỏ dòng theo STT, kiểm tra nhập và đánh số lại" "$(dn demo.nhanvien)
+2
+2
+2
+3
+1
+$KEM
+1
+1
+83e324f1
+1
+2
+
+3
+
+2
+2
+
+2
+0
+3
+abc
+2
+3
+3
+1
+2
+1
+2
+4
+c
+c
+c
+0
+0" "Giỏ hàng đang trống" "STT +Sản phẩm" "Số thứ tự trong giỏ \\(Enter = quay lại\\)" \
+    "Hãy nhập số từ 1 đến 2" "Hãy nhập một số nguyên hợp lệ" \
+    "^2 +Kem vani +Lốc 6 ly 100 ml +3 +66.000đ" "^1 +Kem vani +Lốc 6 ly 100 ml +2 +66.000đ" \
+    "Thanh toán thành công" "TỔNG THANH TOÁN +132.000đ"
 
 # ---------- đăng ký, hủy đơn, thanh toán thành viên
 
@@ -284,7 +326,7 @@ hộp
 0
 0
 0" "Đã thêm sản phẩm"
-SP_MOI=$(grep '|Sữa thử xóa|' "$TMP/data/du-lieu.txt" | cut -d'|' -f2 | cut -c1-8)
+SP_MOI=$(grep '|Sữa thử xóa|' "$TMP/data/san-pham.txt" | cut -d'|' -f2 | cut -c1-8)
 
 kichBan "Không xóa được mục còn SKU, còn khuyến mãi hoặc đã có giao dịch" "$(dn demo.quanly)
 2
@@ -321,7 +363,7 @@ c
 0
 0" "Đã thêm SKU" "Đã thêm khuyến mãi" "Khuyến mãi đã được áp dụng trên đơn hàng" "Sản phẩm còn 1 SKU" \
     "SKU còn 1 khuyến mãi" "SKU đã có trên phiếu nhập"
-KM_MOI=$(grep '|KM thử xóa|' "$TMP/data/du-lieu.txt" | cut -d'|' -f2 | cut -c1-8)
+KM_MOI=$(grep '|KM thử xóa|' "$TMP/data/khuyen-mai.txt" | cut -d'|' -f2 | cut -c1-8)
 
 kichBan "Xóa khuyến mãi, SKU rồi sản phẩm chưa có giao dịch" "$(dn demo.quanly)
 3
@@ -339,7 +381,7 @@ c
 0
 0
 0" "Đã xóa khuyến mãi" "Đã xóa SKU" "Đã xóa sản phẩm"
-if grep -qE "Sữa thử xóa|Lốc 4 hộp 110 ml|KM thử xóa" "$TMP/data/du-lieu.txt"; then
+if grep -qE "Sữa thử xóa|Lốc 4 hộp 110 ml|KM thử xóa" "$TMP"/data/*.txt; then
     echo "FAIL: Mục đã xóa vẫn còn trong file dữ liệu"; loi=$((loi + 1))
 else
     echo "PASS: Mục đã xóa không còn trong file dữ liệu"
@@ -405,7 +447,7 @@ $(dn demo.quanly)
 2
 0
 0
-0" "Thanh toán thành công" "1 SKU đang bán sắp hết hàng \\(tồn ≤ 10\\)" "Kem vani – 1 ly 100 ml: còn 5" "Kem vani +1 ly 100 ml +5 +Đang bán  ⚠ Sắp hết"
+0" "Thanh toán thành công" "[0-9]+ SKU đang bán sắp hết hàng \\(tồn ≤ 10\\)" "Kem vani – 1 ly 100 ml: còn 5" "Kem vani +1 ly 100 ml +5 +Đang bán  ⚠ Sắp hết"
 
 # ---------- đổi mật khẩu
 

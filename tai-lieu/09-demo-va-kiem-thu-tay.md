@@ -5,7 +5,7 @@ Tài liệu dùng khi trình bày đồ án: hiểu luồng chạy, demo đủ c
 ## 0. Chuẩn bị (làm trước buổi demo)
 
 ```bash
-git restore data/du-lieu.txt          # về đúng bộ dữ liệu mẫu
+git restore data/          # về đúng bộ dữ liệu mẫu
 rm -rf out hoa-don
 javac -d out $(find src -name '*.java')
 java -cp out cuahang.Main
@@ -40,7 +40,7 @@ bash test/e2e.sh
 ## 1. Luồng của app
 
 ```text
-Main ─ tạo 6 danh sách QuanLy... + LuuTruText + DichVuCuaHang ─ đọc data/du-lieu.txt
+Main ─ tạo 6 danh sách QuanLy... + LuuTruText + DichVuCuaHang ─ đọc đủ 8 file text trong data/
   └─ GiaoDienConsole.chay()
        ├─ Đăng ký (chỉ tạo khách hàng) / Đăng nhập
        └─ Menu theo vai trò (đa hình: tk.layVaiTro())
@@ -49,26 +49,26 @@ Main ─ tạo 6 danh sách QuanLy... + LuuTruText + DichVuCuaHang ─ đọc da
             └─ Quản lý    : bán hàng + sản phẩm/SKU + khuyến mãi + nhập hàng + tài khoản + báo cáo
 ```
 
-Vòng đời một đơn: **khách đặt** (giá tạm tính, chưa trừ tồn) → **nhân viên thanh toán** (tính lại giá, chọn khuyến mãi tốt nhất, hỏi dùng điểm) → **lưu 1 lần**: đơn `DA_THANH_TOAN` + trừ tồn + trừ/cộng điểm → **hóa đơn** console và `hoa-don/HD-…txt` → **báo cáo** thu-chi, thống kê, nhập - xuất - tồn. Đơn chờ có thể hủy (`DA_HUY`); đơn đã thanh toán không sửa/xóa.
+Vòng đời một đơn: **khách đặt** (giá tạm tính, giữ ngay tồn khả dụng) → **nhân viên thanh toán** (tính lại giá, chọn khuyến mãi tốt nhất, hỏi dùng điểm) → **lưu 1 lần**: đơn `DA_THANH_TOAN` + xuất hàng đã giữ + trừ/cộng điểm → **hóa đơn** console và `hoa-don/HD-…txt` → **báo cáo** thu-chi, thống kê, nhập - xuất - tồn. Đơn chờ có thể hủy (`DA_HUY`) để hoàn tồn khả dụng; thanh toán không trừ khả dụng lần nữa. Đơn đã thanh toán không sửa/xóa.
 
-Mọi thao tác ghi đều đi qua `DichVuCuaHang.giaoDich`: chụp trạng thái → đổi dữ liệu → ghi file tạm rồi đổi tên (`LuuTruText.ghiAnToan`). Lưu lỗi thì phục hồi, không báo thành công.
+Mọi thao tác ghi đều đi qua `DichVuCuaHang.giaoDich`: chụp trạng thái → đổi dữ liệu → chuẩn bị tám file tạm, ghi nhật ký rồi thay bộ file (`LuuTruText.ghiAnToan`). Lưu lỗi thì phục hồi, không báo thành công.
 
 ## 2. Kịch bản demo cho cô (~12 phút)
 
 Mỗi bước ghi: **gõ gì** → **thấy gì** → **ý cần nói**. Làm theo thứ tự để dữ liệu nối tiếp nhau.
 
 ### 2.1. Đọc file và đăng ký (thêm)
-1. Chạy app → dòng đầu in `File dữ liệu: …/data/du-lieu.txt`. Mở file cho cô xem: mỗi dòng một bản ghi `LOAI|cột|cột…`, cuối có `END|số dòng`. *Ý: đọc/ghi file text, không dùng database.*
+1. Chạy app → dòng đầu in `Thư mục dữ liệu: …/data`. Mở các file cho cô xem: mỗi loại có file riêng, mỗi file mẫu 50 bản ghi; mỗi dòng một bản ghi `LOAI|cột|cột…`, cuối có `END|số dòng`. *Ý: đọc/ghi file text, không dùng database.*
 2. `2` Đăng ký: `demo.moi` / `matkhau1` / `matkhau1` / `Nguyễn Văn Demo` / `0912345678` → "Đăng ký thành công". *Ý: thêm tài khoản; chỉ tạo được khách hàng, điểm 0.*
 
 ### 2.2. Khách hàng: tìm kiếm, thêm/sửa/xóa dòng giỏ, đặt đơn
 1. `1` đăng nhập `demo.moi` / `matkhau1`.
-2. `1` Xem/tìm: gõ `sữa chua` → chỉ hiện 3 SKU sữa chua. *Ý: tìm theo tên, nhóm, quy cách, mã.*
+2. `1` Xem/tìm: gõ `sữa chua` → chỉ hiện các SKU khớp sữa chua. *Ý: tìm theo tên, nhóm, quy cách, mã.*
 3. `2` Đặt hàng:
    - `1` thêm, tìm `lốc 4 hũ` → tự chọn → số lượng `3`.
    - `1` thêm, tìm `1 hộp 180` → `2`.
-   - `2` sửa số lượng: mã `0582` → `5`. *Ý: sửa.*
-   - `3` bỏ dòng: mã `e22b` → dòng biến mất. *Ý: xóa (dòng trong giỏ).*
+   - `2` sửa số lượng: STT `2` → `5`. *Ý: sửa dòng thứ hai trong giỏ; Enter để quay lại.*
+   - `3` bỏ dòng: STT `1` → dòng biến mất, giỏ đánh số lại từ `1`. *Ý: xóa (dòng trong giỏ).*
    - `4` xác nhận → `c` → "Đặt hàng thành công. Mã đơn: xxxxxxxx". Ghi lại mã đơn.
 4. `3` Xem đơn của tôi → thấy "Chờ thanh toán". `6` Đổi mật khẩu (tùy thời gian). `0` đăng xuất.
 
@@ -77,7 +77,7 @@ Mỗi bước ghi: **gõ gì** → **thấy gì** → **ý cần nói**. Làm th
 2. `4` Thanh toán → nhập mã đơn vừa đặt → xem bảng tính → `c` → in **HÓA ĐƠN** và dòng `Đã lưu hóa đơn: …/hoa-don/HD-….txt`. Mở file cho cô xem.
 3. `2` Lập đơn tại quầy → `1` khách thành viên → `0900000005` → `1` thêm, tìm `f9f1` → `2` → `4` → `c` lưu → `c` thanh toán ngay → dùng `6` điểm → `c` đồng ý → `c` thu tiền → "Giảm bằng điểm (6 điểm) -600đ". *Ý: 1 điểm = 100đ, tối đa 20% tiền sau KM; điểm cộng = tiền trả / 10.000.*
 4. `3` Xem/tìm đơn → `3` "Đã thanh toán" → nhập mã để xem lại hóa đơn. *Ý: tìm/lọc đơn theo trạng thái.*
-5. `5` Hủy đơn chờ → `64ee` → `c`. *Ý: đơn hủy vẫn giữ lịch sử, không hoàn tồn vì đơn chờ chưa trừ.*
+5. `5` Hủy đơn chờ → `64ee` → `c`. *Ý: đơn hủy vẫn giữ lịch sử và hoàn đủ lượng hàng đã giữ về tồn khả dụng.*
 
 ### 2.4. Quản lý: đủ thêm, sửa, xóa, tìm trên danh mục
 1. Đăng nhập `demo.quanly`. Nếu có SKU tồn ≤ 10 sẽ thấy cảnh báo ngay dưới lời chào.
@@ -106,7 +106,7 @@ Mỗi bước ghi: **gõ gì** → **thấy gì** → **ý cần nói**. Làm th
 | Kế thừa | `TaiKhoan` → `KhachHang`, `NhanVienBanHang`, `QuanLyCuaHang`; `KhuyenMai` → `KhuyenMaiPhanTram`, `KhuyenMaiSoTien`; `DanhSach<T>` → 8 lớp danh sách |
 | Đa hình | `danhsach/QuanLyKhuyenMai.java:36` gọi `km.tinhTienGiam(...)` không cần biết lớp con; `GiaoDienConsole.java:122` chọn menu theo `tk.layVaiTro()`; biến `IQuanLy<SanPham>` gọi đúng `them/sua/xoa` của `QuanLySanPham` |
 | Lớp danh sách | `DanhSach<T>` giữ `List<T>`; `QuanLySanPham`, `QuanLyDonHang`… có `them/sua/xoa/xuat` và các hàm tìm `timTheoMa`, `timTheoTen`… |
-| File text | `LuuTruText.docDuLieu()` (dòng 84) và `ghiAnToan()` (dòng 98, ghi file tạm rồi `ATOMIC_MOVE`); `GiaoDienConsole.xuatHoaDon` ghi hóa đơn |
+| File text | `LuuTruText.docDuLieu()` đọc đủ tám file và `ghiAnToan()` dùng file tạm, nhật ký phục hồi và `ATOMIC_MOVE`; `GiaoDienConsole.xuatHoaDon` ghi hóa đơn |
 | static | Thuộc tính: `DonHang.TIEN_MOI_DIEM`, `TaiKhoan.SO_VONG_BAM`, `DichVuCuaHang.NGUONG_TON_THAP`; phương thức: `TaiKhoan.chuanHoaTenDangNhap`, `DonHang.diemToiDaTheoTien`, `GiaoDienConsole.tien` |
 | abstract | `TaiKhoan.layVaiTro()`, `KhuyenMai.tinhTienGiam()`, `DanhSach.them/sua/xoa()` |
 | interface | `IQuanLy<T>` (xuat, them, sua, xoa) do `DanhSach<T>` implements; `ChinhSachGiamGia` do `KhuyenMai` implements |
@@ -117,20 +117,20 @@ Mỗi bước ghi: **gõ gì** → **thấy gì** → **ý cần nói**. Làm th
 - **Đa hình nằm ở đâu?** Xem bảng trên; ví dụ hay nhất là chọn khuyến mãi tốt nhất: một vòng lặp gọi `tinhTienGiam` trên cả hai loại.
 - **Interface khác lớp trừu tượng thế nào?** `IQuanLy` chỉ là hợp đồng (không có dữ liệu); `DanhSach` là lớp trừu tượng có thuộc tính `danhSach` và code dùng chung `xuat`, `timDauTien`, `loc`.
 - **Vì sao SKU tách khỏi sản phẩm?** Cùng một sữa có hộp lẻ, lốc, thùng với giá và tồn riêng; bán 2 lốc chỉ trừ tồn SKU lốc.
-- **Mất điện giữa lúc lưu thì sao?** Ghi ra `du-lieu.tmp` rồi đổi tên nguyên khối; file chính chỉ là bản cũ hoặc bản mới, không bị ghi dở. Khi đọc, app kiểm tra liên kết và tồn/điểm khớp lịch sử; file hỏng thì báo lỗi, không tự ghi đè.
+- **Mất điện giữa lúc lưu thì sao?** Chuẩn bị tám file tạm, lưu nhật ký trạng thái cũ rồi mới thay từng file. Nếu lần ghi bị gián đoạn, lần chạy sau dùng nhật ký phục hồi cả bộ cũ trước khi đọc; chưa có `fsync` nên không cam kết chống mất điện hay hỏng ổ đĩa. App kiểm tra liên kết, tồn và điểm khi đọc; dữ liệu lỗi được báo, không tự khởi tạo đè.
 - **Sao chia package mà nhiều phương thức đổi dữ liệu lại `public`?** `DichVuCuaHang` (package `cuahang`) cần gọi `tangTon`, `congDiem`… của lớp ở package con, nên Java bắt phải `public`. Quy ước: chỉ `DichVuCuaHang` và `LuuTruText` gọi chúng, giao diện luôn đi qua `DichVuCuaHang.giaoDich` để có lưu file và phục hồi khi lỗi.
 - **Mật khẩu lưu thế nào?** Không lưu rõ: PBKDF2 + salt ngẫu nhiên riêng từng tài khoản; đổi mật khẩu sinh salt mới.
 - **Giá đổi thì hóa đơn cũ có đổi không?** Không: dòng đơn chụp tên, giá, khuyến mãi lúc thanh toán.
 
 ## 3. Checklist test tay toàn bộ app
 
-Bắt đầu từ dữ liệu mẫu (`git restore data/du-lieu.txt`). Đánh dấu ☐ → ☑ khi đúng. Làm xong nhớ `git restore data/du-lieu.txt` và `rm -rf hoa-don`.
+Bắt đầu từ dữ liệu mẫu (`git restore data/`). Đánh dấu ☐ → ☑ khi đúng. Làm xong nhớ `git restore data/` và `rm -rf hoa-don`.
 
 ### 3.1. Khởi động và tài khoản
 
 | # | Thao tác | Kết quả mong đợi |
 | --- | --- | --- |
-| ☐ 1 | Chạy app | In đường dẫn file dữ liệu, hiện menu CỬA HÀNG SỮA |
+| ☐ 1 | Chạy app | In đường dẫn thư mục dữ liệu, hiện menu CỬA HÀNG SỮA |
 | ☐ 2 | Menu gõ `9`, rồi `abc` | "Lựa chọn không hợp lệ", hỏi lại |
 | ☐ 3 | Đăng nhập `demo.khach01` mật khẩu sai | "Sai tên đăng nhập hoặc mật khẩu" |
 | ☐ 4 | Đăng ký trùng tên `DEMO.KHACH01` | "Tên đăng nhập đã được sử dụng" |
@@ -183,7 +183,7 @@ Bắt đầu từ dữ liệu mẫu (`git restore data/du-lieu.txt`). Đánh d�
 | ☐ 36 | Ngừng KM rồi thử sửa mở lại | Không mở lại được |
 | ☐ 37 | Xóa KM `6828eb46`; xóa SKU `f9f193ce`; xóa sản phẩm Kem vani | Cả ba bị chặn kèm lý do |
 | ☐ 38 | Tạo sản phẩm → SKU → KM mới rồi xóa sản phẩm, xóa SKU | Bị chặn ("còn SKU", "còn khuyến mãi") |
-| ☐ 39 | Xóa KM → SKU → sản phẩm mới tạo; mở `data/du-lieu.txt` | Ba lần "Đã xóa"; không còn trong file |
+| ☐ 39 | Xóa KM → SKU → sản phẩm mới tạo; mở `data/khuyen-mai.txt`, `data/bien-the.txt`, `data/san-pham.txt` | Ba lần "Đã xóa"; không còn trong file |
 | ☐ 40 | Nhập hàng: thêm 2 dòng, sửa 1 dòng, bỏ 1 dòng, ghi nhận | Tồn tăng đúng; lịch sử phiếu nhập có phiếu mới |
 | ☐ 41 | Nhập hàng cùng SKU với giá khác | Báo phải chọn một đơn giá |
 | ☐ 42 | Tạo nhân viên trùng tên đăng nhập | Bị từ chối |
@@ -201,6 +201,6 @@ Bắt đầu từ dữ liệu mẫu (`git restore data/du-lieu.txt`). Đánh d�
 | # | Thao tác | Kết quả mong đợi |
 | --- | --- | --- |
 | ☐ 51 | Sau các bước trên, thoát và chạy lại | Mọi đơn, tồn, điểm, tài khoản giữ đúng như trước khi thoát |
-| ☐ 52 | Sửa tay một dòng trong `data/du-lieu.txt` cho sai (xóa một cột) rồi chạy | App báo lỗi rõ dòng, **không** ghi đè file; `git restore` để sửa |
-| ☐ 53 | Đổi tên `data/du-lieu.txt` rồi chạy | Hỏi "Khởi tạo hệ thống mới?"; `k` thì thoát, `c` thì tạo quản lý đầu tiên. Đổi tên lại sau khi thử |
+| ☐ 52 | Sửa tay một dòng trong `data/san-pham.txt` cho sai (xóa một cột) rồi chạy | App báo lỗi rõ dòng, **không** ghi đè file; `git restore` để sửa |
+| ☐ 53 | Đổi tên cả thư mục `data/` rồi chạy | Hỏi "Khởi tạo hệ thống mới?"; `k` thì thoát, `c` thì tạo quản lý đầu tiên. Xóa bộ mới tạo nếu có rồi đổi tên thư mục cũ lại sau khi thử |
 | ☐ 54 | Gõ Ctrl+D ở bất kỳ ô nhập nào | "Hết dữ liệu nhập, kết thúc chương trình." |

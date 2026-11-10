@@ -6,9 +6,9 @@
 
 ## Trách nhiệm
 
-1. Xác định đường dẫn file dữ liệu của dự án và tạo một lần sáu đối tượng quản lý theo thứ tự dưới đây.
+1. Xác định đường dẫn thư mục dữ liệu `data/` của dự án và tạo một lần sáu đối tượng quản lý theo thứ tự dưới đây.
 2. Tạo [LuuTruText](LuuTruText.md), truyền `Path` và đúng sáu đối tượng quản lý đó qua constructor.
-3. Nếu file tồn tại, nạp và kiểm tra; nếu chưa tồn tại, yêu cầu xác nhận khởi tạo và nhập quản lý đầu tiên. File lỗi không được tự khởi tạo lại.
+3. Phục hồi lần ghi bị gián đoạn nếu có; nếu có dữ liệu, nạp và kiểm tra đủ tám file. Chỉ khi chưa có file nào mới yêu cầu xác nhận khởi tạo và nhập quản lý đầu tiên. Bộ file thiếu/hỏng không được tự khởi tạo lại.
 4. Tạo [DichVuCuaHang](DichVuCuaHang.md), truyền đúng sáu đối tượng quản lý trên cùng đối tượng lưu trữ qua constructor.
 5. Tạo [GiaoDienConsole](GiaoDienConsole.md), truyền dịch vụ và bộ đọc console; chạy menu sau khi có dữ liệu hợp lệ.
 6. Báo lỗi khởi động hoặc kết thúc chương trình rõ ràng; đóng tài nguyên khi kết thúc.

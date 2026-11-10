@@ -2,7 +2,7 @@
 
 ## 1. Thiết kế như bảng dữ liệu, triển khai bằng đối tượng
 
-“Bảng” trong tài liệu chỉ là cách tổ chức dữ liệu có khóa và quan hệ, không phải bảng SQL. Chương trình đọc các bản ghi vào đối tượng Java và quản lý bằng danh sách. Các lớp dịch vụ và quản lý danh sách không phải thực thể nên không có bảng riêng.
+“Bảng” trong tài liệu chỉ là cách tổ chức dữ liệu có khóa và quan hệ, không phải bảng SQL. Chương trình đọc các bản ghi vào đối tượng Java và quản lý bằng danh sách. Các lớp dịch vụ và quản lý danh sách không phải thực thể nên không có bảng riêng. Mỗi bảng logic dưới đây được lưu trong một file text riêng tại `data/`; xem [tên file và định dạng](07-luu-tru-file-text.md).
 
 | Bảng logic | Lớp trong RAM | Khóa chính | Khóa ngoại / liên kết |
 | --- | --- | --- | --- |
@@ -59,6 +59,7 @@ BIEN_THE|maBienThe|maSanPham|tenQuyCach|kieuDongGoi|soDonViCoSo|giaBan|soLuongTo
 
 - Sản phẩm: tên, thương hiệu, đơn vị cơ sở, định lượng không rỗng; mô tả có thể trống. Nhóm hàng thuộc `LoaiSanPham`.
 - Biến thể: tên quy cách không rỗng, giá bán > 0, tồn ≥ 0. `BAN_LE` có 1 đơn vị cơ sở; `LOC` và `THUNG` có số đơn vị cơ sở > 1.
+- `soLuongTon` trong file là tồn thực tế. Lượng giữ được tính từ các đơn `CHO_THANH_TOAN` khi nạp; `getSoLuongTon()` và giao diện trả tồn khả dụng = tồn thực tế − lượng giữ. Không cần đổi định dạng file cũ.
 - Không trùng bộ `(maSanPham, kieuDongGoi, soDonViCoSo)`. Hai thùng 24 và 48 đơn vị là hai biến thể hợp lệ; thùng 24 không được tạo hai lần cho cùng sản phẩm.
 - Mã và liên kết sản phẩm–SKU không đổi sau tạo. Nếu đổi định lượng, đơn vị cơ sở hay cấu tạo quy cách làm thành hàng khác, tạo sản phẩm/SKU mới. Không dùng sửa tên để biến sữa 180 ml đã có lịch sử thành sữa 1 lít.
 - Mục đã có giao dịch không xóa, dùng cờ ngừng kinh doanh. Chỉ xóa hẳn được mục **chưa phát sinh giao dịch**: SKU không nằm trên đơn/phiếu nhập và không còn khuyến mãi; sản phẩm không còn SKU. SKU chỉ bán được khi cả SKU và sản phẩm cha đang kinh doanh.

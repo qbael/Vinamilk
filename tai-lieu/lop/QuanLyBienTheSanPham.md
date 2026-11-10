@@ -36,4 +36,4 @@ Các phương thức dưới đây là instance; `xuat()` kế thừa `public fi
 - `sua` chỉ đổi giá và trạng thái bằng các hành vi trên. Mã, lớp cụ thể, sản phẩm cha, tên/cấu tạo quy cách, kiểu đóng gói, số đơn vị cơ sở và tồn phải giữ nguyên; từ chối dữ liệu đổi tồn hoặc chuyển SKU sang hàng khác.
 - Tồn lẻ/lốc/thùng độc lập. Mua một lốc giảm một đơn vị SKU lốc; không tự tháo thùng hay đổi sang tồn hộp lẻ.
 - Danh sách trả về dùng `List.copyOf`, chỉ bảo vệ cấu trúc. Giao diện không được sửa phần tử trực tiếp.
-- Lớp không có bảng/file riêng; phần tử ánh xạ `BIEN_THE`. [LuuTruText](LuuTruText.md) đọc/ghi cùng các chứng từ để giữ tồn nhất quán.
+- Lớp quản lý không có bản ghi riêng; phần tử ánh xạ `BIEN_THE` trong `bien-the.txt`. [LuuTruText](LuuTruText.md) đọc/ghi cùng các chứng từ để giữ tồn nhất quán.
