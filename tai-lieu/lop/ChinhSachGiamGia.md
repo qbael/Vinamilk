@@ -22,7 +22,7 @@ Phương thức không thay đổi giá, tồn, điểm hoặc dữ liệu đơn
 
 ## Quan hệ và đa hình
 
-[KhuyenMai](KhuyenMai.md) implements interface này; [KhuyenMaiPhanTram](KhuyenMaiPhanTram.md) và [KhuyenMaiSoTien](KhuyenMaiSoTien.md) cung cấp hai cách tính. Nơi tính giá gọi qua `ChinhSachGiamGia` hoặc `KhuyenMai`, Java chọn đúng override tại runtime.
+[KhuyenMai](KhuyenMai.md) implements interface này; [KhuyenMaiPhanTram](KhuyenMaiPhanTram.md), [KhuyenMaiSoTien](KhuyenMaiSoTien.md) và [KhuyenMaiMuaTang](KhuyenMaiMuaTang.md) cung cấp ba cách tính. Nơi tính giá gọi qua `ChinhSachGiamGia` hoặc `KhuyenMai`, Java chọn đúng override tại runtime.
 
 Việc kiểm tra SKU, thời hạn và chọn chương trình tốt nhất thuộc [QuanLyKhuyenMai](QuanLyKhuyenMai.md)/[DichVuCuaHang](DichVuCuaHang.md). Interface chỉ nhận giá và lượng để tính giảm, không tự xác định chương trình có đủ điều kiện áp dụng hay không.
 

@@ -8,7 +8,7 @@ Quản lý chương trình khuyến mãi và chọn một chương trình đem l
 
 | Thuộc tính | Ý nghĩa |
 | --- | --- |
-| `danhSach` kế thừa từ `DanhSach<KhuyenMai>` | Chứa cả `KhuyenMaiPhanTram` và `KhuyenMaiSoTien`; không khai báo lại trường danh sách |
+| `danhSach` kế thừa từ `DanhSach<KhuyenMai>` | Chứa `KhuyenMaiPhanTram`, `KhuyenMaiSoTien`, `KhuyenMaiMuaTang`; không khai báo lại trường danh sách |
 | `private final QuanLyBienTheSanPham quanLyBienTheSanPham` | Manager SKU được truyền qua constructor, từ chối `null`; dùng kiểm tra SKU áp dụng |
 
 [Main](Main.md) tạo một manager dùng chung, truyền cùng tham chiếu cho dịch vụ và lưu trữ; `quanLyBienTheSanPham` cũng là manager SKU dùng chung đó.

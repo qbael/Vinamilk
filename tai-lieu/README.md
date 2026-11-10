@@ -9,14 +9,14 @@ Bản thiết kế cho ứng dụng Java chạy bằng console, lưu dữ liệu
 | [01 — Mô tả ứng dụng](01-mo-ta-ung-dung.md) | Mục tiêu, phạm vi, sản phẩm và quy cách bán |
 | [02 — Tài khoản và phân quyền](02-tai-khoan-va-phan-quyen.md) | Ba vai trò, quyền truy cập, menu |
 | [03 — Danh sách chức năng](03-danh-sach-chuc-nang.md) | Chức năng và các luồng thao tác chính |
-| [04 — Tổng quan thiết kế lớp](04-thiet-ke-lop.md) | Kiến trúc, minh chứng OOP, mục lục 32 tài liệu riêng cho từng class/interface/enum |
+| [04 — Tổng quan thiết kế lớp](04-thiet-ke-lop.md) | Kiến trúc, minh chứng OOP, mục lục 33 tài liệu riêng cho từng class/interface/enum |
 | [05 — Mô hình dữ liệu](05-mo-hinh-du-lieu.md) | Bảng logic, khóa chính/ngoại, từ điển cột và sơ đồ quan hệ |
 | [06 — Quy tắc nghiệp vụ](06-quy-tac-nghiep-vu.md) | Vòng đời đơn, công thức tiền/điểm, tồn kho và thu-chi |
 | [07 — Lưu trữ file text](07-luu-tru-file-text.md) | Định dạng UTF-8, đọc/ghi, khôi phục khi lưu lỗi và bộ dữ liệu mẫu |
-| [08 — Kế hoạch kiểm thử](08-ke-hoach-kiem-thu.md) | 39 tình huống kiểm chứng và thứ tự triển khai |
+| [08 — Kế hoạch kiểm thử](08-ke-hoach-kiem-thu.md) | 40 tình huống kiểm chứng và thứ tự triển khai |
 | [09 — Demo và kiểm thử tay](09-demo-va-kiem-thu-tay.md) | Luồng app, kịch bản demo theo yêu cầu đề, câu hỏi thường gặp, checklist test tay |
 
-Thư mục `lop/` có **32 file riêng**, ví dụ [TaiKhoan](lop/TaiKhoan.md), [BienTheSanPham](lop/BienTheSanPham.md), [IQuanLy](lop/IQuanLy.md), [DanhSach](lop/DanhSach.md), [QuanLySanPham](lop/QuanLySanPham.md). Mỗi file mô tả một kiểu Java; xem toàn bộ tại [mục lục lớp](04-thiet-ke-lop.md). Tổng cộng có 41 file Markdown: mục lục này, 8 tài liệu theo chủ đề và 32 tài liệu lớp.
+Thư mục `lop/` có **33 file riêng**, ví dụ [TaiKhoan](lop/TaiKhoan.md), [BienTheSanPham](lop/BienTheSanPham.md), [IQuanLy](lop/IQuanLy.md), [DanhSach](lop/DanhSach.md), [QuanLySanPham](lop/QuanLySanPham.md). Mỗi file mô tả một kiểu Java; xem toàn bộ tại [mục lục lớp](04-thiet-ke-lop.md). Tổng cộng có 42 file Markdown: mục lục này, 8 tài liệu theo chủ đề và 33 tài liệu lớp.
 
 ## Những lựa chọn chính
 
@@ -37,8 +37,8 @@ Ví dụ `QuanLySanPham extends DanhSach<SanPham>` thực hiện `IQuanLy<SanPha
 
 ## Mã nguồn và cách chạy
 
-- `src/cuahang/`: 32 file `.java`, mỗi lớp/interface/enum trong thiết kế một file, chia 6 package: `cuahang` (giao diện, dịch vụ, lưu trữ, `Main`) và `taikhoan`, `sanpham`, `khuyenmai`, `donhang`, `danhsach` ([bảng package](04-thiet-ke-lop.md#1-cách-chia-trách-nhiệm)). Điểm vào duy nhất là `cuahang.Main`.
-- `test/cuahang/KiemThu.java`: một file self-check (không dùng framework) kiểm chứng các tình huống trong [kế hoạch kiểm thử](08-ke-hoach-kiem-thu.md). File này nằm ngoài `src/` nên không làm đổi con số 32 kiểu.
+- `src/cuahang/`: 33 file `.java`, mỗi lớp/interface/enum trong thiết kế một file, chia 6 package: `cuahang` (giao diện, dịch vụ, lưu trữ, `Main`) và `taikhoan`, `sanpham`, `khuyenmai`, `donhang`, `danhsach` ([bảng package](04-thiet-ke-lop.md#1-cách-chia-trách-nhiệm)). Điểm vào duy nhất là `cuahang.Main`.
+- `test/cuahang/KiemThu.java`: một file self-check (không dùng framework) kiểm chứng các tình huống trong [kế hoạch kiểm thử](08-ke-hoach-kiem-thu.md). File này nằm ngoài `src/` nên không làm đổi con số 33 kiểu.
 
 Chạy từ thư mục gốc dự án (đường dẫn thư mục dữ liệu là `data/` tính từ thư mục chạy; chương trình in đường dẫn tuyệt đối khi khởi động):
 
@@ -69,5 +69,6 @@ Các điểm tài liệu thiết kế chưa quy định cụ thể, được ch�
 - Màn hình hiển thị 8 ký tự đầu của UUID (kéo dài nếu hai mã cùng danh sách trùng phần đầu); khi nhập có thể gõ mã đầy đủ hoặc phần đầu duy nhất. File vẫn lưu UUID đầy đủ.
 - Mật khẩu ít nhất 6 ký tự; số điện thoại bắt đầu bằng 0, gồm 10–11 chữ số; tên đăng nhập không chứa khoảng trắng.
 - Dòng trong giỏ đang soạn chưa mang khuyến mãi; khuyến mãi tốt nhất được tính cho cả dòng khi báo giá, lưu đơn và thanh toán.
+- Mua X tặng Y: quản lý vào `3. Quản lý khuyến mãi → 2. Thêm → chọn SKU → 3. Mua X tặng Y cùng SKU`, nhập tên, số lượng mua/tặng và thời hạn. Có thể sửa cả hai số lượng. Giỏ nhập tổng hàng nhận: mua 3 tặng 2 thì chọn 5 trả 3, mua 1 tặng 1 thì chọn 2 trả 1; tồn gồm cả hàng tặng.
 - Thanh toán gồm hai bước: `xemTruocThanhToan` tính bảng cuối trên bản sao của đơn; `thanhToan` tính lại, đối chiếu với tổng khách đã xác nhận rồi chốt đơn + tồn + điểm trong một lần lưu.
 - Ngoài phương thức trong tài liệu lớp, mã có thêm vài phương thức nội bộ: `TaiKhoan.banSaoVoiTrangThai`, `DonHang.banSao`, các tiện ích `protected` tìm/lọc/kiểm tra trùng trong `DanhSach<T>`.

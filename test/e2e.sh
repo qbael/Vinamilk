@@ -311,6 +311,79 @@ $KEM
 0
 0" "1 ly 100 ml +12.000đ +-50% +6.000đ"
 
+# ---------- mua X tặng Y: tạo, sửa, thanh toán và ngừng qua các lần khởi động
+
+moi
+kichBan "Quản lý tạo mua 3 tặng 2" "$(dn demo.quanly)
+3
+2
+$KEM
+3
+Kem mua 3 tặng 2
+3
+2
+01/01/2026
+31/12/2099
+1
+0
+0
+0" "Đã thêm khuyến mãi" "Kem mua 3 tặng 2.*Mua 3 tặng 2.*Đang áp dụng"
+KM_MUA_TANG=$(grep '|Kem mua 3 tặng 2|' "$TMP/data/khuyen-mai.txt" | cut -d'|' -f2 | cut -c1-8)
+
+kichBan "Nhận 5 ly kem trả tiền 3" "$(dn demo.nhanvien)
+2
+2
+1
+$KEM
+5
+4
+c
+c
+c
+0
+0" "1 ly 100 ml +12.000đ +Mua 3 tặng 2" "Thanh toán thành công" "TỔNG THANH TOÁN +36.000đ"
+
+kichBan "Sửa mua 3 tặng 2 thành mua 1 tặng 1" "$(dn demo.quanly)
+3
+3
+$KM_MUA_TANG
+Kem mua 1 tặng 1
+1
+1
+
+
+1
+0
+0
+0" "Đã cập nhật khuyến mãi" "Kem mua 1 tặng 1.*Mua 1 tặng 1"
+
+kichBan "Nhận 4 ly kem trả tiền 2, giữ và xuất đủ 4" "$(dn demo.nhanvien)
+2
+2
+1
+$KEM
+4
+4
+c
+c
+c
+0
+0" "Số lượng là tổng hàng nhận" "1 ly 100 ml +12.000đ +Mua 1 tặng 1" \
+    "Thanh toán thành công" "TỔNG THANH TOÁN +24.000đ"
+
+kichBan "Mở lại thấy tồn đã giảm cả ly kem tặng" "$(dn demo.quanly)
+6
+2
+0
+3
+4
+$KM_MUA_TANG
+c
+1
+0
+0
+0" "Kem vani +1 ly 100 ml +91 " "Đã ngừng khuyến mãi" "Kem mua 1 tặng 1.*Mua 1 tặng 1.*Đã ngừng"
+
 # ---------- quản lý: xóa hẳn mục chưa có giao dịch
 
 moi

@@ -32,6 +32,9 @@ Với một dòng: `g` là giá bán một SKU, `q` là số lượng, `T = g ×
 | --- | --- |
 | Giảm phần trăm `p` | `floor(T × p / 100)`; `1 ≤ p ≤ 100` |
 | Giảm số tiền `a`/SKU | `min(a, g) × q`; `a > 0` |
+| Mua X tặng Y cùng SKU | `g × floor(q / (X + Y)) × Y`; X và Y nguyên dương, tổng không tràn `int`; `q` là tổng hàng nhận, gồm hàng tặng |
+
+Quản lý tự nhập và sửa X, Y. Mua 3 tặng 2: chọn 5 trả tiền 3, chọn 9 trả tiền 7; mua 1 tặng 1: chọn 2 trả tiền 1. Chỉ giảm theo nhóm đủ X + Y, hàng dư tính bình thường. Không tự cộng thêm hàng ngoài số lượng đã nhập. Giữ/xuất tồn và hoàn khi hủy tính trên toàn bộ hàng nhận, bao gồm hàng tặng. Không tặng chéo SKU, kể cả cùng sản phẩm khác quy cách.
 
 Chương trình hợp lệ khi đúng SKU, đang áp dụng và `tuNgay ≤ ngày thanh toán ≤ denNgay`. Tính bằng số nguyên đồng; phần trăm làm tròn xuống **trên cả dòng**, không làm tròn từng đơn vị rồi nhân lượng. Phải tránh hoặc phát hiện tràn số ở bước nhân trung gian.
 

@@ -17,7 +17,7 @@ Mỗi lớp/interface/enum có một tài liệu `.md` riêng trong thư mục `
 | `cuahang` | `Main`, `GiaoDienConsole`, `DichVuCuaHang`, `LuuTruText` |
 | `cuahang.taikhoan` | `TaiKhoan`, `KhachHang`, `NhanVienBanHang`, `QuanLyCuaHang`, `VaiTro` |
 | `cuahang.sanpham` | `SanPham`, `BienTheSanPham`, `LoaiSanPham`, `KieuDongGoi` |
-| `cuahang.khuyenmai` | `ChinhSachGiamGia`, `KhuyenMai`, `KhuyenMaiPhanTram`, `KhuyenMaiSoTien` |
+| `cuahang.khuyenmai` | `ChinhSachGiamGia`, `KhuyenMai`, `KhuyenMaiPhanTram`, `KhuyenMaiSoTien`, `KhuyenMaiMuaTang` |
 | `cuahang.donhang` | `DonHang`, `ChiTietDonHang`, `TrangThaiDonHang`, `PhieuNhap`, `ChiTietPhieuNhap` |
 | `cuahang.danhsach` | `IQuanLy`, `DanhSach`, sáu lớp `QuanLy…` (trừ `QuanLyCuaHang`), `DanhSachChiTietDonHang`, `DanhSachChiTietPhieuNhap` |
 
@@ -45,7 +45,7 @@ Mỗi tài liệu dưới đây mô tả trách nhiệm, thuộc tính, phương
 | --- | --- |
 | Tài khoản | [TaiKhoan — abstract](lop/TaiKhoan.md), [KhachHang](lop/KhachHang.md), [NhanVienBanHang](lop/NhanVienBanHang.md), [QuanLyCuaHang](lop/QuanLyCuaHang.md) |
 | Danh mục | [SanPham](lop/SanPham.md), [BienTheSanPham](lop/BienTheSanPham.md) |
-| Khuyến mãi | [ChinhSachGiamGia — interface](lop/ChinhSachGiamGia.md), [KhuyenMai — abstract](lop/KhuyenMai.md), [KhuyenMaiPhanTram](lop/KhuyenMaiPhanTram.md), [KhuyenMaiSoTien](lop/KhuyenMaiSoTien.md) |
+| Khuyến mãi | [ChinhSachGiamGia — interface](lop/ChinhSachGiamGia.md), [KhuyenMai — abstract](lop/KhuyenMai.md), [KhuyenMaiPhanTram](lop/KhuyenMaiPhanTram.md), [KhuyenMaiSoTien](lop/KhuyenMaiSoTien.md), [KhuyenMaiMuaTang](lop/KhuyenMaiMuaTang.md) |
 | Chứng từ | [DonHang](lop/DonHang.md), [ChiTietDonHang](lop/ChiTietDonHang.md), [PhieuNhap](lop/PhieuNhap.md), [ChiTietPhieuNhap](lop/ChiTietPhieuNhap.md) |
 | Hợp đồng và lớp cha danh sách | [IQuanLy — interface](lop/IQuanLy.md), [DanhSach — abstract generic](lop/DanhSach.md) |
 | Quản lý danh sách chung | [QuanLyTaiKhoan](lop/QuanLyTaiKhoan.md), [QuanLySanPham](lop/QuanLySanPham.md), [QuanLyBienTheSanPham](lop/QuanLyBienTheSanPham.md), [QuanLyKhuyenMai](lop/QuanLyKhuyenMai.md), [QuanLyDonHang](lop/QuanLyDonHang.md), [QuanLyPhieuNhap](lop/QuanLyPhieuNhap.md) |
@@ -53,7 +53,7 @@ Mỗi tài liệu dưới đây mô tả trách nhiệm, thuộc tính, phương
 | Điều phối và giao diện | [DichVuCuaHang](lop/DichVuCuaHang.md), [LuuTruText](lop/LuuTruText.md), [GiaoDienConsole](lop/GiaoDienConsole.md), [Main](lop/Main.md) |
 | Enum | [VaiTro](lop/VaiTro.md), [LoaiSanPham](lop/LoaiSanPham.md), [KieuDongGoi](lop/KieuDongGoi.md), [TrangThaiDonHang](lop/TrangThaiDonHang.md) |
 
-Tổng cộng **32 kiểu Java**: 23 class thông thường, 3 abstract class, 2 interface và 4 enum. Số này bao gồm một interface quản lý, một lớp cha generic và tám lớp danh sách cụ thể.
+Tổng cộng **33 kiểu Java**: 24 class thông thường, 3 abstract class, 2 interface và 4 enum. Số này bao gồm một interface quản lý, một lớp cha generic và tám lớp danh sách cụ thể.
 
 ## 4. Interface và lớp cha generic cho danh sách
 
@@ -75,7 +75,7 @@ Ba loại tài khoản cùng kế thừa trực tiếp `TaiKhoan`; quản lý c�
 
 Năm nhóm hàng dùng enum vì chưa có hành vi riêng cần override. Quy cách là đối tượng `BienTheSanPham` gắn với sản phẩm bằng mã; không tạo các lớp `Sua`, `Kem`, `PhoMai` chỉ để đổi nhãn. Mỗi SKU có giá và tồn độc lập.
 
-`List<KhuyenMai>` chứa cả hai lớp khuyến mãi. Khi gọi `tinhTienGiam`, Java chọn đúng phương thức override của đối tượng. Phân loại bản ghi khi đọc/ghi text thuộc biên lưu trữ; công thức tính giảm giá sử dụng đa hình.
+`List<KhuyenMai>` chứa cả ba lớp khuyến mãi. Khi gọi `tinhTienGiam`, Java chọn đúng phương thức override của đối tượng. Phân loại bản ghi khi đọc/ghi text thuộc biên lưu trữ; công thức tính giảm giá sử dụng đa hình.
 
 `DichVuCuaHang`, `LuuTruText`, `GiaoDienConsole` là đối tượng instance, tạo một lần trong `Main` và truyền tham chiếu qua constructor. Chưa cần lớp `HoaDon`, `GioHang`, `LichSuDiem` hoặc `BaoCao` riêng: dùng dữ liệu đơn hàng, chi tiết và phép tổng hợp chứng từ.
 
@@ -98,6 +98,7 @@ classDiagram
     ChinhSachGiamGia <|.. KhuyenMai
     KhuyenMai <|-- KhuyenMaiPhanTram
     KhuyenMai <|-- KhuyenMaiSoTien
+    KhuyenMai <|-- KhuyenMaiMuaTang
     SanPham "1" --> "0..*" BienTheSanPham : có quy cách
     DonHang "1" *-- "1" DanhSachChiTietDonHang
     DanhSachChiTietDonHang "1" *-- "1..*" ChiTietDonHang

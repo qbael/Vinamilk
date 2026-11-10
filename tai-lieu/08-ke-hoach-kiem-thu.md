@@ -1,6 +1,6 @@
 # 08. Kế hoạch kiểm thử và thứ tự triển khai
 
-Bảng dưới ghi kết quả mong đợi. Cả 39 tình huống có kiểm chứng tự động trong `test/cuahang/KiemThu.java` (cách chạy ở [README](README.md#mã-nguồn-và-cách-chạy)); phần chỉ nằm ở giao diện, như menu đăng ký không có lựa chọn nội bộ (KT01) hay nhập chữ thay số (KT26), được kiểm tra khi chạy console, còn phần chặn sai kiểu của KT30 do trình biên dịch đảm nhận. Đối chiếu với [Quy tắc nghiệp vụ](06-quy-tac-nghiep-vu.md) và [Lưu trữ file text](07-luu-tru-file-text.md).
+Bảng dưới ghi kết quả mong đợi. Cả 40 tình huống có kiểm chứng tự động trong `test/cuahang/KiemThu.java` (cách chạy ở [README](README.md#mã-nguồn-và-cách-chạy)); phần chỉ nằm ở giao diện, như menu đăng ký không có lựa chọn nội bộ (KT01) hay nhập chữ thay số (KT26), được kiểm tra khi chạy console, còn phần chặn sai kiểu của KT30 do trình biên dịch đảm nhận. Đối chiếu với [Quy tắc nghiệp vụ](06-quy-tac-nghiep-vu.md) và [Lưu trữ file text](07-luu-tru-file-text.md).
 
 ## 1. Tình huống kiểm thử
 
@@ -45,6 +45,7 @@ Bảng dưới ghi kết quả mong đợi. Cả 39 tình huống có kiểm ch�
 | KT37 | Hạ tồn một SKU về 11, 10; ngừng bán SKU đó; nhân viên gọi cảnh báo | Bộ mẫu không cảnh báo; 11 chưa, 10 có cảnh báo; SKU ngừng bán bị bỏ qua; nhân viên bị từ chối; quản lý đăng nhập thấy danh sách sắp hết |
 | KT38 | Đổi mật khẩu với mật khẩu hiện tại sai, mật khẩu mới trùng cũ hoặc quá ngắn, rồi đổi đúng | Ba trường hợp lỗi bị từ chối, salt giữ nguyên; đổi đúng thì mật khẩu cũ hết hiệu lực, mật khẩu mới đăng nhập được kể cả sau khi mở lại file; điểm và trạng thái giữ nguyên |
 | KT39 | Xóa KM đã áp dụng, SKU đã có phiếu nhập, sản phẩm còn SKU, SKU còn KM; rồi xóa KM → SKU → sản phẩm mới tạo | Bốn ca đầu bị từ chối kèm lý do; chuỗi xóa mục chưa giao dịch thành công và không còn trong file sau khi mở lại; nhân viên không xóa được |
+| KT40 | Mua X tặng Y: tỷ lệ 2/1, 3/2, 1/1; gộp dòng, cạnh tranh với giảm %, sửa hai số lượng, lưu/mở lại, hủy và thanh toán | Chỉ nhóm đủ X + Y mới tặng Y; giữ/xuất/hoàn cả hàng tặng. Từ chối số 0/âm, cấu hình sai và tràn số. Đọc được bản ghi mua 2 tặng 1 cũ; giữ nguyên hóa đơn đã chốt |
 
 Khi bắt đầu viết code, ưu tiên một self-check nhỏ cho công thức KT11–KT16 và vòng đọc/ghi KT24, thêm kiểm chứng KT21 cho xử lý lỗi lưu. Không chỉ kiểm tra menu chạy được; cần chứng minh tiền, điểm và tồn không bị lệch.
 

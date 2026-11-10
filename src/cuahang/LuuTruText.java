@@ -14,6 +14,7 @@ import cuahang.donhang.DonHang;
 import cuahang.donhang.PhieuNhap;
 import cuahang.donhang.TrangThaiDonHang;
 import cuahang.khuyenmai.KhuyenMai;
+import cuahang.khuyenmai.KhuyenMaiMuaTang;
 import cuahang.khuyenmai.KhuyenMaiPhanTram;
 import cuahang.khuyenmai.KhuyenMaiSoTien;
 import cuahang.sanpham.BienTheSanPham;
@@ -218,6 +219,7 @@ public class LuuTruText {
             Object[] loaiVaGiaTri = switch (km) {
                 case KhuyenMaiPhanTram pt -> new Object[]{"PHAN_TRAM", pt.getTyLePhanTram()};
                 case KhuyenMaiSoTien st -> new Object[]{"SO_TIEN", st.getSoTienGiamMoiDonVi()};
+                case KhuyenMaiMuaTang mt -> new Object[]{"MUA_TANG", mt.getSoLuongMua() + "," + mt.getSoLuongTang()};
                 default -> throw new IllegalStateException("Loại khuyến mãi không lưu được: " + km.getClass());
             };
             dong.add(noi("KHUYEN_MAI", km.getMaKhuyenMai(), loaiVaGiaTri[0], km.getTenKhuyenMai(), km.getMaBienThe(),
@@ -559,6 +561,20 @@ public class LuuTruText {
         return switch (c[2]) {
             case "PHAN_TRAM" -> new KhuyenMaiPhanTram(c[1], c[3], c[4], tu, den, apDung, docInt(c[8], "giaTri"));
             case "SO_TIEN" -> new KhuyenMaiSoTien(c[1], c[3], c[4], tu, den, apDung, docLong(c[8], "giaTri"));
+            case "MUA_2_TANG_1" -> {
+                if (!c[8].isEmpty()) {
+                    throw new IllegalArgumentException("Mua 2 tặng 1 có quy tắc cố định; giaTri phải để trống.");
+                }
+                yield new KhuyenMaiMuaTang(c[1], c[3], c[4], tu, den, apDung, 2, 1);
+            }
+            case "MUA_TANG" -> {
+                String[] soLuong = c[8].split(",", -1);
+                if (soLuong.length != 2) {
+                    throw new IllegalArgumentException("Mua X tặng Y cần giaTri dạng X,Y, ví dụ 3,2.");
+                }
+                yield new KhuyenMaiMuaTang(c[1], c[3], c[4], tu, den, apDung,
+                        docInt(soLuong[0], "soLuongMua"), docInt(soLuong[1], "soLuongTang"));
+            }
             default -> throw new IllegalArgumentException("Loại khuyến mãi không hợp lệ: " + c[2]);
         };
     }

@@ -1,6 +1,7 @@
 package cuahang.danhsach;
 
 import cuahang.khuyenmai.KhuyenMai;
+import cuahang.khuyenmai.KhuyenMaiMuaTang;
 import cuahang.khuyenmai.KhuyenMaiPhanTram;
 import cuahang.khuyenmai.KhuyenMaiSoTien;
 
@@ -74,6 +75,10 @@ public final class QuanLyKhuyenMai extends DanhSach<KhuyenMai> {
         switch (cu) {
             case KhuyenMaiPhanTram pt -> pt.doiTyLePhanTram(((KhuyenMaiPhanTram) duLieuMoi).getTyLePhanTram());
             case KhuyenMaiSoTien st -> st.doiSoTienGiamMoiDonVi(((KhuyenMaiSoTien) duLieuMoi).getSoTienGiamMoiDonVi());
+            case KhuyenMaiMuaTang mt -> {
+                KhuyenMaiMuaTang moi = (KhuyenMaiMuaTang) duLieuMoi;
+                mt.doiSoLuongMuaTang(moi.getSoLuongMua(), moi.getSoLuongTang());
+            }
             default -> throw new IllegalArgumentException("Loại khuyến mãi không hỗ trợ.");
         }
         if (!duLieuMoi.isDangApDung()) {

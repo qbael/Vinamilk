@@ -9,7 +9,7 @@
 | `TAI_KHOAN` | `KhachHang`, `NhanVienBanHang`, `QuanLyCuaHang` | `maTaiKhoan` | Không có |
 | `SAN_PHAM` | `SanPham` | `maSanPham` | Không có |
 | `BIEN_THE` | `BienTheSanPham` | `maBienThe` | `maSanPham → SAN_PHAM` |
-| `KHUYEN_MAI` | `KhuyenMaiPhanTram`, `KhuyenMaiSoTien` | `maKhuyenMai` | `maBienThe → BIEN_THE` |
+| `KHUYEN_MAI` | `KhuyenMaiPhanTram`, `KhuyenMaiSoTien`, `KhuyenMaiMuaTang` | `maKhuyenMai` | `maBienThe → BIEN_THE` |
 | `DON_HANG` | `DonHang` | `maDonHang` | `maKhachHang`, `maNguoiLap`, `maNguoiThuTien → TAI_KHOAN` |
 | `CT_DON_HANG` | `ChiTietDonHang` | `(maDonHang, maBienThe)` | `maDonHang → DON_HANG`, `maBienThe → BIEN_THE`, `maKhuyenMai → KHUYEN_MAI` nếu có |
 | `PHIEU_NHAP` | `PhieuNhap` | `maPhieuNhap` | `maNguoiNhap → TAI_KHOAN` |
@@ -72,6 +72,8 @@ KHUYEN_MAI|maKhuyenMai|loaiKhuyenMai|tenKhuyenMai|maBienThe|tuNgay|denNgay|dangA
 
 - `loaiKhuyenMai = PHAN_TRAM`: `giaTri` ánh xạ vào `tyLePhanTram` (1–100).
 - `loaiKhuyenMai = SO_TIEN`: `giaTri` ánh xạ vào `soTienGiamMoiDonVi` (> 0).
+- `loaiKhuyenMai = MUA_TANG`: `giaTri` dạng `X,Y`, ví dụ `3,2`. Cả hai số nguyên dương, tổng không vượt `Integer.MAX_VALUE`; số lượng trong giỏ đã gồm hàng tặng.
+- Bản ghi cũ `MUA_2_TANG_1` với `giaTri` trống vẫn đọc được thành X = 2, Y = 1, giữ nguyên mã và được ghi bằng dạng `MUA_TANG|...|2,1` ở lần lưu tiếp theo.
 - Mỗi chương trình áp dụng một SKU; muốn cùng chương trình cho nhiều SKU thì tạo từng bản ghi. Chưa cần bảng trung gian nhiều–nhiều.
 - Ngày bắt đầu ≤ ngày kết thúc; bao gồm cả hai đầu ngày. Chương trình đã áp dụng trên đơn (kể cả đơn chờ/hủy) không xóa, chỉ sửa/ngừng cho lần bán tiếp theo; chương trình chưa áp dụng xóa hẳn được. `maBienThe` và loại giảm không đổi sau tạo; đổi đối tượng/loại áp dụng thì tạo chương trình mới.
 

@@ -101,7 +101,7 @@ Mỗi bước ghi: **gõ gì** → **thấy gì** → **ý cần nói**. Làm th
 
 | Yêu cầu | Mở file nào, nói gì |
 | --- | --- |
-| ≥ 15 lớp | 32 file trong `src/cuahang/`, chia 6 package theo nhóm: 26 class, 2 interface, 4 enum ([thiết kế lớp](04-thiet-ke-lop.md)) |
+| ≥ 15 lớp | 33 file trong `src/cuahang/`, chia 6 package theo nhóm: 27 class, 2 interface, 4 enum ([thiết kế lớp](04-thiet-ke-lop.md)) |
 | Constructor | Mọi lớp có constructor tường minh; lớp thực thể có 2 constructor: tạo mới (sinh mã, kiểm tra) và dựng lại từ file, ví dụ `SanPham`, `DonHang`, `TaiKhoan` |
 | Kế thừa | `TaiKhoan` → `KhachHang`, `NhanVienBanHang`, `QuanLyCuaHang`; `KhuyenMai` → `KhuyenMaiPhanTram`, `KhuyenMaiSoTien`; `DanhSach<T>` → 8 lớp danh sách |
 | Đa hình | `danhsach/QuanLyKhuyenMai.java:36` gọi `km.tinhTienGiam(...)` không cần biết lớp con; `GiaoDienConsole.java:122` chọn menu theo `tk.layVaiTro()`; biến `IQuanLy<SanPham>` gọi đúng `them/sua/xoa` của `QuanLySanPham` |
@@ -114,7 +114,7 @@ Mỗi bước ghi: **gõ gì** → **thấy gì** → **ý cần nói**. Làm th
 ### 2.6. Câu cô hay hỏi
 
 - **Sao đơn hàng, tài khoản, phiếu nhập không xóa được?** Chúng là chứng từ/lịch sử: xóa làm sai báo cáo, điểm, tồn. Thay vào đó có hủy đơn chờ, khóa tài khoản. Sản phẩm/SKU/khuyến mãi xóa được khi chưa có giao dịch.
-- **Đa hình nằm ở đâu?** Xem bảng trên; ví dụ hay nhất là chọn khuyến mãi tốt nhất: một vòng lặp gọi `tinhTienGiam` trên cả hai loại.
+- **Đa hình nằm ở đâu?** Xem bảng trên; ví dụ hay nhất là chọn khuyến mãi tốt nhất: một vòng lặp gọi `tinhTienGiam` trên cả ba loại.
 - **Interface khác lớp trừu tượng thế nào?** `IQuanLy` chỉ là hợp đồng (không có dữ liệu); `DanhSach` là lớp trừu tượng có thuộc tính `danhSach` và code dùng chung `xuat`, `timDauTien`, `loc`.
 - **Vì sao SKU tách khỏi sản phẩm?** Cùng một sữa có hộp lẻ, lốc, thùng với giá và tồn riêng; bán 2 lốc chỉ trừ tồn SKU lốc.
 - **Mất điện giữa lúc lưu thì sao?** Chuẩn bị tám file tạm, lưu nhật ký trạng thái cũ rồi mới thay từng file. Nếu lần ghi bị gián đoạn, lần chạy sau dùng nhật ký phục hồi cả bộ cũ trước khi đọc; chưa có `fsync` nên không cam kết chống mất điện hay hỏng ổ đĩa. App kiểm tra liên kết, tồn và điểm khi đọc; dữ liệu lỗi được báo, không tự khởi tạo đè.

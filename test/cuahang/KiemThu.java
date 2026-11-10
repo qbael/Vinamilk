@@ -15,6 +15,7 @@ import cuahang.donhang.DonHang;
 import cuahang.donhang.PhieuNhap;
 import cuahang.donhang.TrangThaiDonHang;
 import cuahang.khuyenmai.KhuyenMai;
+import cuahang.khuyenmai.KhuyenMaiMuaTang;
 import cuahang.khuyenmai.KhuyenMaiPhanTram;
 import cuahang.khuyenmai.KhuyenMaiSoTien;
 import cuahang.sanpham.BienTheSanPham;
@@ -51,6 +52,7 @@ public class KiemThu {
 
     public static void main(String[] args) {
         kiemThuCongThuc();
+        kiemThuMuaTang();
         kiemThuChiTiet();
         kiemThuQuanLy();
         kiemThuLuuTru();
@@ -151,6 +153,121 @@ public class KiemThu {
         xemTruoc.chotThanhToan(gio(dong(2, 30_000, "KM10", 6_000)), "NV1", t0, 0);
         dung(don3.getTrangThai() == TrangThaiDonHang.CHO_THANH_TOAN && xemTruoc.getTongThanhToan() == 54_000,
                 "Xem trước thanh toán không đổi đơn thật");
+    }
+
+    // ---------- KT40: mua X tặng Y cùng SKU ----------
+
+    static void kiemThuMuaTang() {
+        LocalDate homNay = DichVuCuaHang.homNay();
+        KhuyenMaiMuaTang km = new KhuyenMaiMuaTang("Mua 2 tặng 1", "BT", homNay, homNay.plusDays(1), 2, 1);
+        long[] giam = {0, 0, 10_000, 10_000, 10_000, 20_000, 20_000, 20_000, 30_000};
+        for (int i = 0; i < giam.length; i++) {
+            dung(km.tinhTienGiam(10_000, i + 1) == giam[i], "Mua 2 tặng 1: tổng nhận " + (i + 1));
+        }
+        dung(km.tinhTienGiam(Long.MAX_VALUE / 3, 3) == Long.MAX_VALUE / 3, "Mua tặng tính được tiền lớn");
+        loi(IllegalArgumentException.class, () -> km.tinhTienGiam(0, 3), "Mua tặng không nhận đơn giá 0");
+        loi(IllegalArgumentException.class, () -> km.tinhTienGiam(10_000, 0), "Mua tặng không nhận số lượng 0");
+        loi(IllegalArgumentException.class, () -> km.tinhTienGiam(10_000, -1), "Mua tặng không nhận số lượng âm");
+        loi(ArithmeticException.class, () -> km.tinhTienGiam(Long.MAX_VALUE, 3), "Mua tặng từ chối tràn tiền hàng");
+        dung(km.coHieuLuc(homNay) && km.coHieuLuc(homNay.plusDays(1)) && !km.coHieuLuc(homNay.plusDays(2)),
+                "Mua tặng kiểm tra hai ngày biên và ngày hết hạn");
+        KhuyenMaiMuaTang baTangHai = new KhuyenMaiMuaTang("Mua 3 tặng 2", "BT", homNay, homNay, 3, 2);
+        long[] giamBaTangHai = {0, 0, 0, 0, 20_000, 20_000, 20_000, 20_000, 20_000, 40_000};
+        for (int i = 0; i < giamBaTangHai.length; i++) {
+            dung(baTangHai.tinhTienGiam(10_000, i + 1) == giamBaTangHai[i], "Mua 3 tặng 2: tổng nhận " + (i + 1));
+        }
+        KhuyenMaiMuaTang motTangMot = new KhuyenMaiMuaTang("Mua 1 tặng 1", "BT", homNay, homNay, 1, 1);
+        dung(motTangMot.tinhTienGiam(10_000, 1) == 0 && motTangMot.tinhTienGiam(10_000, 2) == 10_000
+                && motTangMot.tinhTienGiam(10_000, 3) == 10_000 && motTangMot.tinhTienGiam(10_000, 4) == 20_000,
+                "Mua 1 tặng 1 chỉ miễn tiền theo nhóm đủ 2");
+        loi(IllegalArgumentException.class, () -> new KhuyenMaiMuaTang("x", "BT", homNay, homNay, 0, 1), "Số mua phải dương");
+        loi(IllegalArgumentException.class, () -> new KhuyenMaiMuaTang("x", "BT", homNay, homNay, 1, 0), "Số tặng phải dương");
+        loi(IllegalArgumentException.class, () -> new KhuyenMaiMuaTang("x", "BT", homNay, homNay, -1, 2), "Số mua không âm");
+        loi(ArithmeticException.class, () -> new KhuyenMaiMuaTang("x", "BT", homNay, homNay, Integer.MAX_VALUE, 1),
+                "Từ chối nhóm mua + tặng tràn int");
+        dung(new KhuyenMaiMuaTang("x", "BT", homNay, homNay, 1, Integer.MAX_VALUE - 1)
+                .tinhTienGiam(1, Integer.MAX_VALUE) == Integer.MAX_VALUE - 1L, "Lượng tặng lớn không tràn số");
+
+        Path file = chay(() -> Files.createTempDirectory("vnm-muatang"));
+        BoDuLieu bo = new BoDuLieu(file);
+        DichVuCuaHang dv = bo.dichVu;
+        String ql = dv.khoiTaoHeThong("quanly", "matkhau1".toCharArray(), "Quản lý", "0900000001");
+        String kh = dv.dangKyKhachHang("khach", "matkhau1".toCharArray(), "Khách", "0900000002");
+        String sp = dv.themSanPham(ql, "Sữa thử", "Vinamilk", "hộp", "180 ml", null, LoaiSanPham.SUA);
+        String sku = dv.themBienThe(ql, sp, "1 hộp 180 ml", KieuDongGoi.BAN_LE, 1, 10_000);
+        String skuKhac = dv.themBienThe(ql, sp, "Lốc 4 hộp", KieuDongGoi.LOC, 4, 38_000);
+        DanhSachChiTietPhieuNhap phieu = new DanhSachChiTietPhieuNhap();
+        dv.themVaoPhieuNhap(ql, phieu, sku, 8, 7_000);
+        dv.nhapHang(ql, "NCC", phieu);
+        String maKm = dv.themKhuyenMaiMuaTang(ql, "Sữa mua 2 tặng 1", sku, homNay, homNay.plusDays(1), 2, 1);
+        dv.themKhuyenMai(ql, true, "Giảm 10%", sku, homNay, homNay.plusDays(1), 10);
+        dung(bo.khuyenMai.timTotNhat(sku, homNay, 10_000, 2) instanceof KhuyenMaiPhanTram, "Chưa đủ 3 chọn 10%");
+        dung(bo.khuyenMai.timTotNhat(sku, homNay, 10_000, 3).getMaKhuyenMai().equals(maKm),
+                "Đủ 3 chọn mua 2 tặng 1, không cộng chồng 10%");
+        dung(bo.khuyenMai.timTotNhat(skuKhac, homNay, 38_000, 3) == null, "Không tặng chéo quy cách");
+        loi(SecurityException.class, () -> dv.themKhuyenMaiMuaTang(kh, "x", sku, homNay, homNay, 2, 1),
+                "Khách không tạo được khuyến mãi mua tặng");
+        loi(IllegalArgumentException.class, () -> dv.themKhuyenMaiMuaTang(ql, "x", "khong-co", homNay, homNay, 2, 1),
+                "Mua tặng phải tham chiếu SKU tồn tại");
+        loi(IllegalArgumentException.class, () -> dv.capNhatKhuyenMai(ql, maKm, "x", homNay, homNay, 1),
+                "Sửa mua tặng phải truyền đủ hai số lượng");
+        dv.capNhatKhuyenMaiMuaTang(ql, maKm, "Sữa mua 3 tặng 2", homNay, homNay.plusDays(2), 3, 2);
+        BoDuLieu tuyChinh = new BoDuLieu(file);
+        chay(tuyChinh.luuTru::docDuLieu);
+        KhuyenMaiMuaTang daLuu = (KhuyenMaiMuaTang) tuyChinh.khuyenMai.timTheoMa(maKm);
+        dung(daLuu.getSoLuongMua() == 3 && daLuu.getSoLuongTang() == 2 && daLuu.tinhTienGiam(10_000, 5) == 20_000,
+                "Mở lại giữ đúng cấu hình mua 3 tặng 2");
+        String truocSuaLoi = bo.luuTru.xuatThanhChuoi();
+        loi(IllegalArgumentException.class, () -> dv.capNhatKhuyenMaiMuaTang(ql, maKm, "Sai", homNay, homNay, 1, 0),
+                "Không sửa sang số tặng 0");
+        dung(bo.luuTru.xuatThanhChuoi().equals(truocSuaLoi), "Sửa lỗi giữ nguyên cấu hình cũ");
+        dv.capNhatKhuyenMaiMuaTang(ql, maKm, "Sữa mua 1 tặng 1", homNay, homNay.plusDays(2), 1, 1);
+        dung(bo.khuyenMai.timTheoMa(maKm).tinhTienGiam(10_000, 4) == 20_000, "Sửa tiếp thành mua 1 tặng 1");
+        dv.capNhatKhuyenMaiMuaTang(ql, maKm, "Sữa tặng 1 khi nhận 3", homNay, homNay.plusDays(2), 2, 1);
+        dung(bo.khuyenMai.timTheoMa(maKm).getTenKhuyenMai().equals("Sữa tặng 1 khi nhận 3"), "Sửa tên và thời hạn");
+
+        BoDuLieu moLai = new BoDuLieu(file);
+        chay(moLai.luuTru::docDuLieu);
+        dung(moLai.khuyenMai.timTheoMa(maKm) instanceof KhuyenMaiMuaTang
+                && moLai.luuTru.xuatThanhChuoi().equals(bo.luuTru.xuatThanhChuoi()), "Lưu/mở lại đúng loại và dữ liệu");
+        String hopLe = moLai.luuTru.xuatThanhChuoi();
+        for (String sai : List.of("", "3", "3,", "0,1", "3,-2", "3,2,1", "2147483647,1", "abc,1")) {
+            String saiGiaTri = suaDong(hopLe, "KHUYEN_MAI|" + maKm + "|", d -> d.substring(0, d.lastIndexOf('|') + 1) + sai);
+            loi(IllegalArgumentException.class, () -> moLai.luuTru.napTuChuoi(saiGiaTri), "Từ chối mua tặng sai: " + sai);
+        }
+        dung(moLai.luuTru.xuatThanhChuoi().equals(hopLe), "Nạp lỗi không thay dữ liệu hiện có");
+        String dinhDangCu = suaDong(hopLe, "KHUYEN_MAI|" + maKm + "|",
+                d -> d.substring(0, d.lastIndexOf('|') + 1).replace("|MUA_TANG|", "|MUA_2_TANG_1|"));
+        BoDuLieu duLieuCu = new BoDuLieu(file);
+        duLieuCu.luuTru.napTuChuoi(dinhDangCu);
+        KhuyenMaiMuaTang kmCu = (KhuyenMaiMuaTang) duLieuCu.khuyenMai.timTheoMa(maKm);
+        dung(kmCu.getSoLuongMua() == 2 && kmCu.getSoLuongTang() == 1
+                && duLieuCu.luuTru.xuatThanhChuoi().equals(hopLe), "Đọc được mua 2 tặng 1 cũ, giữ nguyên mã");
+
+        DanhSachChiTietDonHang gio = new DanhSachChiTietDonHang();
+        dv.themVaoGio(kh, gio, sku, 1);
+        dv.themVaoGio(kh, gio, sku, 2);
+        dung(dv.baoGia(kh, gio).tinhTongGiam() == 10_000, "Gộp 1 + 2 cùng SKU vẫn tặng 1");
+        String donHuy = dv.datHang(kh, gio);
+        dung(ton(bo, sku) == 5 && dv.xemDon(kh, donHuy).getTongThanhToan() == 20_000, "Nhận 3 trả 2, giữ đủ 3");
+        dv.huyDon(kh, donHuy);
+        dung(ton(bo, sku) == 8, "Hủy hoàn cả hàng tặng");
+        dv.suaSoLuongTrongGio(kh, gio, sku, 6);
+        String don = dv.datHang(kh, gio);
+        dung(ton(bo, sku) == 2 && dv.xemDon(kh, don).getTongThanhToan() == 40_000, "Nhận 6 trả 4, giữ đủ 6");
+        loi(IllegalArgumentException.class, () -> dv.themVaoGio(kh, new DanhSachChiTietDonHang(), sku, 3),
+                "Hàng tặng cũng cần đủ tồn");
+        DonHang daTra = thanhToan(dv, ql, don, 0);
+        dung(ton(bo, sku) == 2 && bo.bienThe.timTheoMa(sku).getSoLuongTonThucTe() == 2
+                && daTra.getChiTiet().getFirst().getSoLuong() == 6 && daTra.getTongThanhToan() == 40_000,
+                "Xuất đủ 6, không trừ khả dụng hai lần");
+        dv.ngungKhuyenMai(ql, maKm);
+        dung(!bo.khuyenMai.timTheoMa(maKm).isDangApDung(), "Ngừng được mua tặng");
+        dung(daTra.getTongThanhToan() == 40_000 && daTra.getTongGiamKhuyenMai() == 20_000, "Hóa đơn cũ không đổi");
+        BoDuLieu sauThanhToan = new BoDuLieu(file);
+        chay(sauThanhToan.luuTru::docDuLieu);
+        dung(!sauThanhToan.khuyenMai.timTheoMa(maKm).isDangApDung() && ton(sauThanhToan, sku) == 2
+                && sauThanhToan.donHang.timTheoMa(don).getTongThanhToan() == 40_000, "Mở lại sau thanh toán và ngừng");
     }
 
     // ---------- KT27, KT30, KT32: danh sách chi tiết ----------

@@ -157,8 +157,8 @@
 
 ### KM-01 — Quản lý khuyến mãi
 
-1. Quản lý chọn SKU và loại khuyến mãi: giảm theo phần trăm hoặc giảm số tiền trên một đơn vị SKU.
-2. Nhập giá trị giảm, thời gian bắt đầu/kết thúc và trạng thái áp dụng.
+1. Quản lý chọn SKU và loại khuyến mãi: giảm theo phần trăm, giảm số tiền trên một đơn vị SKU hoặc mua X tặng Y cùng SKU.
+2. Nhập tên, thời gian bắt đầu/kết thúc; nhập mức giảm với phần trăm/số tiền. Với mua X tặng Y, nhập hai số nguyên dương X và Y, được sửa về sau. Số lượng trong giỏ gồm cả hàng tặng: mua 3 tặng 2 thì nhận 5 trả 3; mua 1 tặng 1 thì nhận 2 trả 1.
 3. Kiểm tra dữ liệu, xác nhận và lưu. Có thể cập nhật hoặc ngừng chương trình cho các lần thanh toán sau.
 4. Chương trình tạo nhầm, chưa áp dụng cho đơn nào (kể cả đơn chờ, đơn hủy) thì xóa hẳn được; đã áp dụng thì chỉ ngừng.
 

@@ -8,6 +8,7 @@ import cuahang.donhang.DonHang;
 import cuahang.donhang.PhieuNhap;
 import cuahang.donhang.TrangThaiDonHang;
 import cuahang.khuyenmai.KhuyenMai;
+import cuahang.khuyenmai.KhuyenMaiMuaTang;
 import cuahang.khuyenmai.KhuyenMaiPhanTram;
 import cuahang.khuyenmai.KhuyenMaiSoTien;
 import cuahang.sanpham.BienTheSanPham;
@@ -343,14 +344,14 @@ public class GiaoDienConsole {
         inDong("Tồn hiển thị là lượng còn có thể đặt, đã trừ hàng đang giữ cho đơn chờ thanh toán.");
         Map<String, String> ma = maNgan(ds.stream().map(BienTheSanPham::getMaBienThe).toList());
         inDong(cot("Mã", 10) + cot("Sản phẩm", 22) + cot("Quy cách", 22) + cotPhai("Giá bán", 11) + "  "
-                + cot("KM", 9) + cotPhai("Sau KM", 11) + cotPhai("Tồn", 6) + "  Ghi chú");
+                + cot("KM", 14) + cotPhai("Sau KM/1", 11) + cotPhai("Tồn", 6) + "  Ghi chú");
         for (BienTheSanPham bt : ds) {
             boolean dangBan = dichVu.dangBan(bt);
             KhuyenMai km = dangBan ? dichVu.khuyenMaiHienHanh(bt) : null;
             String ghiChu = !dangBan ? "Ngừng bán" : bt.getSoLuongTon() == 0 ? "Hết hàng" : "";
             inDong(cot(ma.get(bt.getMaBienThe()), 10) + cot(dichVu.timSanPham(bt.getMaSanPham()).getTenSanPham(), 22)
                     + cot(bt.getTenQuyCach(), 22) + cotPhai(tien(bt.getGiaBan()), 11) + "  "
-                    + cot(km == null ? "" : mucGiam(km), 9)
+                    + cot(km == null ? "" : mucGiam(km), 14)
                     + cotPhai(km == null ? "" : tien(bt.getGiaBan() - km.tinhTienGiam(bt.getGiaBan(), 1)), 11)
                     + cotPhai(String.valueOf(bt.getSoLuongTon()), 6) + "  " + ghiChu);
         }
@@ -927,12 +928,12 @@ public class GiaoDienConsole {
         }
         LocalDate homNay = DichVuCuaHang.homNay();
         Map<String, String> ma = maNgan(ds.stream().map(KhuyenMai::getMaKhuyenMai).toList());
-        inDong(cot("Mã", 10) + cot("Tên", 26) + cot("SKU", 30) + cot("Mức", 10) + cot("Thời gian", 25) + "Trạng thái");
+        inDong(cot("Mã", 10) + cot("Tên", 26) + cot("SKU", 30) + cot("Mức", 14) + cot("Thời gian", 25) + "Trạng thái");
         for (KhuyenMai km : ds) {
             String trangThai = !km.isDangApDung() ? "Đã ngừng" : km.coHieuLuc(homNay) ? "Đang áp dụng"
                     : homNay.isBefore(km.getTuNgay()) ? "Chưa tới ngày" : "Hết hạn";
             inDong(cot(ma.get(km.getMaKhuyenMai()), 10) + cot(km.getTenKhuyenMai(), 26) + cot(tenSku(km.getMaBienThe()), 30)
-                    + cot(mucGiam(km), 10) + cot(ngay(km.getTuNgay()) + " – " + ngay(km.getDenNgay()), 25) + trangThai);
+                    + cot(mucGiam(km), 14) + cot(ngay(km.getTuNgay()) + " – " + ngay(km.getDenNgay()), 25) + trangThai);
         }
     }
 
@@ -941,18 +942,35 @@ public class GiaoDienConsole {
         if (bt == null) {
             return;
         }
-        int loai = chonMenu("LOẠI GIẢM", "Quay lại", "Giảm theo phần trăm", "Giảm số tiền mỗi đơn vị SKU");
+        int loai = chonMenu("LOẠI GIẢM", "Quay lại", "Giảm theo phần trăm", "Giảm số tiền mỗi đơn vị SKU", "Mua X tặng Y cùng SKU");
         if (loai == 0) {
             return;
         }
         String ten = nhap("Tên chương trình");
-        Long giaTri = loai == 1 ? toLong(nhapSo("Tỷ lệ giảm (%)", 1, 100)) : nhapTien("Số tiền giảm mỗi SKU", 1);
+        Long giaTri = 0L;
+        Integer soLuongMua = null;
+        Integer soLuongTang = null;
+        if (loai == 1) {
+            giaTri = toLong(nhapSo("Tỷ lệ giảm (%)", 1, 100));
+        } else if (loai == 2) {
+            giaTri = nhapTien("Số tiền giảm mỗi SKU", 1);
+        } else {
+            soLuongMua = nhapSo("Số lượng mua (Enter = quay lại)", 1, Integer.MAX_VALUE);
+            soLuongTang = soLuongMua == null ? null : nhapSo("Số lượng tặng (Enter = quay lại)", 1, Integer.MAX_VALUE);
+            if (soLuongTang == null) {
+                return;
+            }
+        }
         LocalDate tuNgay = giaTri == null ? null : nhapNgay("Từ ngày");
         LocalDate denNgay = tuNgay == null ? null : nhapNgay("Đến ngày");
         if (denNgay == null) {
             return;
         }
-        dichVu.themKhuyenMai(maTaiKhoanDangNhap, loai == 1, ten, bt.getMaBienThe(), tuNgay, denNgay, giaTri);
+        if (loai == 3) {
+            dichVu.themKhuyenMaiMuaTang(maTaiKhoanDangNhap, ten, bt.getMaBienThe(), tuNgay, denNgay, soLuongMua, soLuongTang);
+        } else {
+            dichVu.themKhuyenMai(maTaiKhoanDangNhap, loai == 1, ten, bt.getMaBienThe(), tuNgay, denNgay, giaTri);
+        }
         inDong("Đã thêm khuyến mãi.");
     }
 
@@ -964,16 +982,32 @@ public class GiaoDienConsole {
             return;
         }
         inDong("Enter để giữ nguyên giá trị trong [ ]. SKU và loại giảm không đổi được.");
-        boolean laPhanTram = km instanceof KhuyenMaiPhanTram;
-        long giaTriCu = km instanceof KhuyenMaiPhanTram pt ? pt.getTyLePhanTram() : ((KhuyenMaiSoTien) km).getSoTienGiamMoiDonVi();
+        long giaTriCu = km instanceof KhuyenMaiPhanTram pt ? pt.getTyLePhanTram()
+                : km instanceof KhuyenMaiSoTien st ? st.getSoTienGiamMoiDonVi() : 0;
         String ten = giuNguyen(nhap("Tên [" + km.getTenKhuyenMai() + "]"), km.getTenKhuyenMai());
-        Long giaTri = laPhanTram ? toLong(nhapSo("Tỷ lệ % [" + giaTriCu + "]", 1, 100))
-                : nhapTien("Số tiền giảm mỗi SKU [" + tien(giaTriCu) + "]", 1);
+        Long giaTri = null;
+        Integer soLuongMua = null;
+        Integer soLuongTang = null;
+        if (km instanceof KhuyenMaiPhanTram) {
+            giaTri = toLong(nhapSo("Tỷ lệ % [" + giaTriCu + "]", 1, 100));
+        } else if (km instanceof KhuyenMaiSoTien) {
+            giaTri = nhapTien("Số tiền giảm mỗi SKU [" + tien(giaTriCu) + "]", 1);
+        } else if (km instanceof KhuyenMaiMuaTang mt) {
+            soLuongMua = nhapSo("Số lượng mua [" + mt.getSoLuongMua() + "]", 1, Integer.MAX_VALUE);
+            soLuongTang = nhapSo("Số lượng tặng [" + mt.getSoLuongTang() + "]", 1, Integer.MAX_VALUE);
+        }
         LocalDate tuNgay = nhapNgay("Từ ngày [" + ngay(km.getTuNgay()) + "]");
         LocalDate denNgay = nhapNgay("Đến ngày [" + ngay(km.getDenNgay()) + "]");
-        dichVu.capNhatKhuyenMai(maTaiKhoanDangNhap, km.getMaKhuyenMai(), ten,
-                tuNgay == null ? km.getTuNgay() : tuNgay, denNgay == null ? km.getDenNgay() : denNgay,
-                giaTri == null ? giaTriCu : giaTri);
+        if (km instanceof KhuyenMaiMuaTang mt) {
+            dichVu.capNhatKhuyenMaiMuaTang(maTaiKhoanDangNhap, km.getMaKhuyenMai(), ten,
+                    tuNgay == null ? km.getTuNgay() : tuNgay, denNgay == null ? km.getDenNgay() : denNgay,
+                    soLuongMua == null ? mt.getSoLuongMua() : soLuongMua,
+                    soLuongTang == null ? mt.getSoLuongTang() : soLuongTang);
+        } else {
+            dichVu.capNhatKhuyenMai(maTaiKhoanDangNhap, km.getMaKhuyenMai(), ten,
+                    tuNgay == null ? km.getTuNgay() : tuNgay, denNgay == null ? km.getDenNgay() : denNgay,
+                    giaTri == null ? giaTriCu : giaTri);
+        }
         inDong("Đã cập nhật khuyến mãi cho các lần thanh toán sau.");
     }
 
@@ -1494,6 +1528,7 @@ public class GiaoDienConsole {
         return switch (km) {
             case KhuyenMaiPhanTram pt -> "-" + pt.getTyLePhanTram() + "%";
             case KhuyenMaiSoTien st -> "-" + tien(st.getSoTienGiamMoiDonVi());
+            case KhuyenMaiMuaTang mt -> "Mua " + mt.getSoLuongMua() + " tặng " + mt.getSoLuongTang();
             default -> "";
         };
     }

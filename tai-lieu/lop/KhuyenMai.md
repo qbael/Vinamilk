@@ -30,9 +30,9 @@ Constructor kiểm tra mã, tên, SKU và khoảng ngày; thuộc tính là `pri
 
 ## Quan hệ, lưu trữ và ràng buộc
 
-- Implements [ChinhSachGiamGia](ChinhSachGiamGia.md); hai lớp con là [KhuyenMaiPhanTram](KhuyenMaiPhanTram.md) và [KhuyenMaiSoTien](KhuyenMaiSoTien.md).
+- Implements [ChinhSachGiamGia](ChinhSachGiamGia.md); ba lớp con là [KhuyenMaiPhanTram](KhuyenMaiPhanTram.md), [KhuyenMaiSoTien](KhuyenMaiSoTien.md) và [KhuyenMaiMuaTang](KhuyenMaiMuaTang.md).
 - Tham chiếu một [BienTheSanPham](BienTheSanPham.md). Muốn áp dụng cho nhiều SKU thì tạo từng chương trình; chưa có bảng quan hệ nhiều–nhiều.
-- [QuanLyKhuyenMai](QuanLyKhuyenMai.md) giữ `List<KhuyenMai>` chứa cả hai lớp con. Khi tính ưu đãi dùng đa hình, không thay bằng chuỗi điều kiện phân loại.
+- [QuanLyKhuyenMai](QuanLyKhuyenMai.md) giữ `List<KhuyenMai>` chứa cả ba lớp con. Khi tính ưu đãi dùng đa hình, không thay bằng chuỗi điều kiện phân loại.
 - Ánh xạ vào `KHUYEN_MAI`; cột `loaiKhuyenMai` xác định lớp con, cột `giaTri` chứa giá trị riêng của lớp con. Không cần thuộc tính loại có setter trong lớp cha.
 - Ngày bắt đầu không sau ngày kết thúc. Không đổi mã SKU hoặc kiểu giảm sau tạo; trường hợp đó tạo chương trình mới.
 - Không xóa chương trình đã áp dụng trên đơn. Sửa hoặc ngừng chương trình không tính lại giảm giá đã chốt trong [ChiTietDonHang](ChiTietDonHang.md).

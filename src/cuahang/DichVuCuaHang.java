@@ -14,6 +14,7 @@ import cuahang.donhang.DonHang;
 import cuahang.donhang.PhieuNhap;
 import cuahang.donhang.TrangThaiDonHang;
 import cuahang.khuyenmai.KhuyenMai;
+import cuahang.khuyenmai.KhuyenMaiMuaTang;
 import cuahang.khuyenmai.KhuyenMaiPhanTram;
 import cuahang.khuyenmai.KhuyenMaiSoTien;
 import cuahang.sanpham.BienTheSanPham;
@@ -655,11 +656,35 @@ public class DichVuCuaHang {
         return km.getMaKhuyenMai();
     }
 
-    /** Sửa tên, thời hạn và mức giảm cho các lần thanh toán sau; không đổi SKU/loại giảm. */
+    public String themKhuyenMaiMuaTang(String maQuanLy, String tenKhuyenMai, String maBienThe,
+                                       LocalDate tuNgay, LocalDate denNgay, int soLuongMua, int soLuongTang) {
+        yeuCauQuanLy(maQuanLy);
+        timBienTheCoSan(maBienThe);
+        KhuyenMai km = new KhuyenMaiMuaTang(tenKhuyenMai, maBienThe, tuNgay, denNgay, soLuongMua, soLuongTang);
+        giaoDich(() -> quanLyKhuyenMai.them(km));
+        return km.getMaKhuyenMai();
+    }
+
+    public void capNhatKhuyenMaiMuaTang(String maQuanLy, String maKhuyenMai, String tenKhuyenMai,
+                                        LocalDate tuNgay, LocalDate denNgay, int soLuongMua, int soLuongTang) {
+        yeuCauQuanLy(maQuanLy);
+        KhuyenMai cu = timKhuyenMaiCoSan(maKhuyenMai);
+        if (!(cu instanceof KhuyenMaiMuaTang)) {
+            throw new IllegalArgumentException("Chương trình này không phải khuyến mãi mua X tặng Y.");
+        }
+        KhuyenMai moi = new KhuyenMaiMuaTang(cu.getMaKhuyenMai(), tenKhuyenMai, cu.getMaBienThe(),
+                tuNgay, denNgay, cu.isDangApDung(), soLuongMua, soLuongTang);
+        giaoDich(() -> quanLyKhuyenMai.sua(maKhuyenMai, moi));
+    }
+
+    /** Sửa tên, thời hạn và mức giảm của khuyến mãi phần trăm hoặc số tiền. */
     public void capNhatKhuyenMai(String maQuanLy, String maKhuyenMai, String tenKhuyenMai, LocalDate tuNgay,
                                  LocalDate denNgay, long giaTri) {
         yeuCauQuanLy(maQuanLy);
         KhuyenMai cu = timKhuyenMaiCoSan(maKhuyenMai);
+        if (cu instanceof KhuyenMaiMuaTang) {
+            throw new IllegalArgumentException("Hãy nhập số lượng mua và số lượng tặng để sửa khuyến mãi này.");
+        }
         giaoDich(() -> quanLyKhuyenMai.sua(maKhuyenMai,
                 banSaoKhuyenMai(cu, tenKhuyenMai, tuNgay, denNgay, cu.isDangApDung(), giaTri)));
     }
@@ -670,10 +695,7 @@ public class DichVuCuaHang {
         if (!cu.isDangApDung()) {
             throw new IllegalStateException("Chương trình đã ngừng áp dụng.");
         }
-        long giaTri = cu instanceof KhuyenMaiPhanTram pt ? pt.getTyLePhanTram()
-                : ((KhuyenMaiSoTien) cu).getSoTienGiamMoiDonVi();
-        giaoDich(() -> quanLyKhuyenMai.sua(maKhuyenMai,
-                banSaoKhuyenMai(cu, cu.getTenKhuyenMai(), cu.getTuNgay(), cu.getDenNgay(), false, giaTri)));
+        giaoDich(() -> quanLyKhuyenMai.timTheoMa(maKhuyenMai).ngungApDung());
     }
 
     private KhuyenMai timKhuyenMaiCoSan(String maKhuyenMai) {

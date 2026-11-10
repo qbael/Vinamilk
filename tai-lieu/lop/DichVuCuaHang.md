@@ -26,7 +26,7 @@ Constructor nhận sáu đối tượng quản lý và `LuuTruText` do [Main](Ma
 | Danh mục | `themSanPham(...)`, `capNhatSanPham(...)`, `themBienThe(...)`, `capNhatBienThe(...)`, `xoaBienThe(...)`, `xoaSanPham(...)` | Kiểm tra danh mục, giá, quy cách; không sửa tồn trực tiếp; chỉ xóa SKU chưa có giao dịch, sản phẩm không còn SKU |
 | Đặt/bán | `datHang(...)`, `lapDonTaiQuay(...)`, `xemDon(...)`, `huyDon(...)` | Kiểm tra chủ đơn, hàng, số lượng và trạng thái; giữ tồn khi đặt, hoàn khi hủy trong cùng giao dịch |
 | Thanh toán | `thanhToan(...)` | Tính lại giá/khuyến mãi, kiểm tra điểm, tồn; chốt đơn và lưu đồng thời |
-| Khuyến mãi | `themKhuyenMai(...)`, `capNhatKhuyenMai(...)`, `ngungKhuyenMai(...)`, `xoaKhuyenMai(...)` | Chỉ quản lý; kiểm tra SKU, ngày và mức giảm; chỉ xóa chương trình chưa áp dụng cho đơn nào |
+| Khuyến mãi | `themKhuyenMai(...)`, `themKhuyenMaiMuaTang(...)`, `capNhatKhuyenMai(...)`, `capNhatKhuyenMaiMuaTang(...)`, `ngungKhuyenMai(...)`, `xoaKhuyenMai(...)` | Chỉ quản lý; kiểm tra SKU, ngày, mức giảm hoặc hai số lượng mua/tặng; chỉ xóa chương trình chưa áp dụng cho đơn nào |
 | Nhập | `nhapHang(...)`, `xemPhieuNhap(...)` | Chỉ quản lý; tăng tồn cùng ghi nhận phiếu |
 | Báo cáo | `tongKetThuChi(...)`, `xemTonKho(...)`, `thongKeBanHang(...)`, `nhapXuatTon(...)`, `canhBaoTonThap(...)` | Tổng hợp chứng từ đã chốt và tồn hiện tại; cảnh báo SKU đang bán có tồn ≤ `NGUONG_TON_THAP` (10); trả record `ThongKeBanHang`, `DongThongKe`, `DongNhapXuatTon` (lồng trong lớp, chỉ đọc) |
 

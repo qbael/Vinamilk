@@ -16,7 +16,7 @@ Dữ liệu được tách thành tám file text UTF-8, mỗi loại bản ghi m
 | [chi-tiet-don-hang.txt](../data/chi-tiet-don-hang.txt) | `CT_DON_HANG` | 50 |
 | **Tổng** | **8 loại** | **400** |
 
-Các lớp con tài khoản dùng chung file `tai-khoan.txt`, phân biệt bằng `vaiTro`; hai lớp khuyến mãi dùng chung file `khuyen-mai.txt`, phân biệt bằng `loaiKhuyenMai`. Enum, interface và lớp quản lý không có file dữ liệu riêng. Tồn và điểm vẫn là thuộc tính trong bản ghi SKU/tài khoản, được đối chiếu với chứng từ; không tạo thêm bảng tồn/điểm/doanh thu.
+Các lớp con tài khoản dùng chung file `tai-khoan.txt`, phân biệt bằng `vaiTro`; ba lớp khuyến mãi dùng chung file `khuyen-mai.txt`, phân biệt bằng `loaiKhuyenMai`. Enum, interface và lớp quản lý không có file dữ liệu riêng. Tồn và điểm vẫn là thuộc tính trong bản ghi SKU/tài khoản, được đối chiếu với chứng từ; không tạo thêm bảng tồn/điểm/doanh thu.
 
 Quy ước định dạng cho **từng file**:
 
