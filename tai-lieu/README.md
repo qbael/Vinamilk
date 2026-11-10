@@ -37,7 +37,7 @@ Ví dụ `QuanLySanPham extends DanhSach<SanPham>` thực hiện `IQuanLy<SanPha
 
 ## Mã nguồn và cách chạy
 
-- `src/cuahang/`: 32 file `.java`, mỗi lớp/interface/enum trong thiết kế một file, cùng package `cuahang`. Điểm vào duy nhất là `cuahang.Main`.
+- `src/cuahang/`: 32 file `.java`, mỗi lớp/interface/enum trong thiết kế một file, chia 6 package: `cuahang` (giao diện, dịch vụ, lưu trữ, `Main`) và `taikhoan`, `sanpham`, `khuyenmai`, `donhang`, `danhsach` ([bảng package](04-thiet-ke-lop.md#1-cách-chia-trách-nhiệm)). Điểm vào duy nhất là `cuahang.Main`.
 - `test/cuahang/KiemThu.java`: một file self-check (không dùng framework) kiểm chứng các tình huống trong [kế hoạch kiểm thử](08-ke-hoach-kiem-thu.md). File này nằm ngoài `src/` nên không làm đổi con số 32 kiểu.
 
 Chạy từ thư mục gốc dự án (đường dẫn dữ liệu là `data/du-lieu.txt` tính từ thư mục chạy; chương trình in đường dẫn tuyệt đối khi khởi động):

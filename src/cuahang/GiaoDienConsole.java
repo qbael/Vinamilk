@@ -1,5 +1,24 @@
 package cuahang;
 
+import cuahang.danhsach.DanhSachChiTietDonHang;
+import cuahang.danhsach.DanhSachChiTietPhieuNhap;
+import cuahang.donhang.ChiTietDonHang;
+import cuahang.donhang.ChiTietPhieuNhap;
+import cuahang.donhang.DonHang;
+import cuahang.donhang.PhieuNhap;
+import cuahang.donhang.TrangThaiDonHang;
+import cuahang.khuyenmai.KhuyenMai;
+import cuahang.khuyenmai.KhuyenMaiPhanTram;
+import cuahang.khuyenmai.KhuyenMaiSoTien;
+import cuahang.sanpham.BienTheSanPham;
+import cuahang.sanpham.KieuDongGoi;
+import cuahang.sanpham.LoaiSanPham;
+import cuahang.sanpham.SanPham;
+import cuahang.taikhoan.KhachHang;
+import cuahang.taikhoan.QuanLyCuaHang;
+import cuahang.taikhoan.TaiKhoan;
+import cuahang.taikhoan.VaiTro;
+
 import java.io.Console;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -413,7 +432,7 @@ public class GiaoDienConsole {
         try {
             DanhSachChiTietDonHang baoGia = dichVu.baoGia(maTaiKhoanDangNhap, gio);
             inBangDong(baoGia.xuat());
-            inDong(cot("TẠM TÍNH", 70) + cotPhai(tien(baoGia.tinhTongTienHang() - baoGia.tinhTongGiam()), 12));
+            inDong(cot("TẠM TÍNH", 76) + cotPhai(tien(baoGia.tinhTongTienHang() - baoGia.tinhTongGiam()), 12));
         } catch (IllegalArgumentException e) {
             inBangDong(gio.xuat());
             inDong("Lưu ý: " + e.getMessage());
@@ -981,9 +1000,10 @@ public class GiaoDienConsole {
                 case 2 -> thucHien(() -> {
                     ChiTietPhieuNhap ct = chonTheoMa(phieu.xuat(), ChiTietPhieuNhap::getMaBienThe, "Mã SKU trên phiếu");
                     Integer soLuong = ct == null ? null : nhapSo("Số lượng mới", 1, Integer.MAX_VALUE);
-                    Long gia = soLuong == null ? null : nhapTien("Giá nhập mới", 1);
-                    if (gia != null) {
-                        dichVu.suaDongPhieuNhap(maTaiKhoanDangNhap, phieu, ct.getMaBienThe(), soLuong, gia);
+                    if (soLuong != null) {
+                        Long gia = nhapTien("Giá nhập mới [" + tien(ct.getDonGiaNhap()) + "] (Enter = giữ nguyên)", 1);
+                        dichVu.suaDongPhieuNhap(maTaiKhoanDangNhap, phieu, ct.getMaBienThe(), soLuong,
+                                gia == null ? ct.getDonGiaNhap() : gia);
                     }
                 });
                 case 3 -> thucHien(() -> {

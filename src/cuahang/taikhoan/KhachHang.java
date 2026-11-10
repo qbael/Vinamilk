@@ -1,4 +1,4 @@
-package cuahang;
+package cuahang.taikhoan;
 
 public class KhachHang extends TaiKhoan {
     private int diemTichLuy;
@@ -8,7 +8,7 @@ public class KhachHang extends TaiKhoan {
         this.diemTichLuy = 0;
     }
 
-    KhachHang(String maTaiKhoan, String tenDangNhap, String salt, int soVongBam, String matKhauBam,
+    public KhachHang(String maTaiKhoan, String tenDangNhap, String salt, int soVongBam, String matKhauBam,
               String hoTen, String soDienThoai, boolean dangHoatDong, int diemTichLuy) {
         super(maTaiKhoan, tenDangNhap, salt, soVongBam, matKhauBam, hoTen, soDienThoai, dangHoatDong);
         if (diemTichLuy < 0) {
@@ -23,24 +23,24 @@ public class KhachHang extends TaiKhoan {
     }
 
     @Override
-    KhachHang banSaoVoiTrangThai(boolean dangHoatDongMoi) {
+    public KhachHang banSaoVoiTrangThai(boolean dangHoatDongMoi) {
         return new KhachHang(getMaTaiKhoan(), getTenDangNhap(), getSalt(), getSoVongBam(), getMatKhauBam(),
                 getHoTen(), getSoDienThoai(), dangHoatDongMoi, diemTichLuy);
     }
 
     @Override
-    boolean cungThongTinCoDinh(TaiKhoan khac) {
+    public boolean cungThongTinCoDinh(TaiKhoan khac) {
         return super.cungThongTinCoDinh(khac) && diemTichLuy == ((KhachHang) khac).diemTichLuy;
     }
 
-    void congDiem(int soDiem) {
+    public void congDiem(int soDiem) {
         if (soDiem < 0) {
             throw new IllegalArgumentException("Số điểm cộng không được âm.");
         }
         diemTichLuy = Math.addExact(diemTichLuy, soDiem);
     }
 
-    void truDiem(int soDiem) {
+    public void truDiem(int soDiem) {
         if (soDiem < 0) {
             throw new IllegalArgumentException("Số điểm trừ không được âm.");
         }

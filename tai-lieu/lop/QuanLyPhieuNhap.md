@@ -24,7 +24,7 @@ Các phương thức dưới đây là instance; `xuat()` kế thừa `public fi
 | `void them(PhieuNhap phieuNhap)` | Từ chối `null`, trùng mã hoặc phiếu không hợp lệ; không cho ghi nhận lần hai |
 | `void sua(String ma, PhieuNhap duLieuMoi)` | Ném `UnsupportedOperationException("Không được sửa phiếu nhập đã ghi nhận.")` |
 | `void xoa(String ma)` | Ném `UnsupportedOperationException("Không được xóa phiếu nhập đã ghi nhận.")` |
-| `void napDanhSach(List<PhieuNhap> duLieuDaKiemTra)` | Package-private, chỉ phục vụ nạp/phục hồi: kiểm tra toàn bộ lô trước khi `clear`/`addAll`; giữ dữ liệu đã chốt, không tăng tồn hoặc ghi nhận lại phiếu |
+| `void napDanhSach(List<PhieuNhap> duLieuDaKiemTra)` | Public vì `LuuTruText` ở package khác gọi, nhưng chỉ phục vụ nạp/phục hồi: kiểm tra toàn bộ lô trước khi `clear`/`addAll`; giữ dữ liệu đã chốt, không tăng tồn hoặc ghi nhận lại phiếu |
 
 ## Quan hệ và ràng buộc
 

@@ -1,4 +1,6 @@
-package cuahang;
+package cuahang.sanpham;
+
+import cuahang.LuuTruText;
 
 import java.util.UUID;
 
@@ -19,7 +21,7 @@ public class BienTheSanPham {
     }
 
     /** Dựng lại SKU đã có mã: nạp file hoặc làm duLieuMoi cho QuanLyBienTheSanPham.sua. */
-    BienTheSanPham(String maBienThe, String maSanPham, String tenQuyCach, KieuDongGoi kieuDongGoi,
+    public BienTheSanPham(String maBienThe, String maSanPham, String tenQuyCach, KieuDongGoi kieuDongGoi,
                    int soDonViCoSo, long giaBan, int soLuongTon, boolean dangKinhDoanh) {
         this.maBienThe = LuuTruText.vanBan(maBienThe, "Mã SKU");
         this.maSanPham = LuuTruText.vanBan(maSanPham, "Mã sản phẩm");
@@ -49,19 +51,19 @@ public class BienTheSanPham {
         }
     }
 
-    void doiGia(long giaMoi) {
+    public void doiGia(long giaMoi) {
         kiemTraGia(giaMoi);
         giaBan = giaMoi;
     }
 
-    void tangTon(int soLuong) {
+    public void tangTon(int soLuong) {
         if (soLuong <= 0) {
             throw new IllegalArgumentException("Lượng tăng tồn phải dương.");
         }
         soLuongTon = Math.addExact(soLuongTon, soLuong);
     }
 
-    void giamTon(int soLuong) {
+    public void giamTon(int soLuong) {
         if (soLuong <= 0) {
             throw new IllegalArgumentException("Lượng giảm tồn phải dương.");
         }
@@ -71,16 +73,16 @@ public class BienTheSanPham {
         soLuongTon -= soLuong;
     }
 
-    void ngungKinhDoanh() {
+    public void ngungKinhDoanh() {
         dangKinhDoanh = false;
     }
 
-    void moKinhDoanh() {
+    public void moKinhDoanh() {
         dangKinhDoanh = true;
     }
 
     /** Các trường xác định quy cách, không được đổi qua sửa (kể cả tồn). */
-    boolean cungQuyCach(BienTheSanPham khac) {
+    public boolean cungQuyCach(BienTheSanPham khac) {
         return maBienThe.equals(khac.maBienThe)
                 && maSanPham.equals(khac.maSanPham)
                 && tenQuyCach.equals(khac.tenQuyCach)
@@ -90,7 +92,7 @@ public class BienTheSanPham {
     }
 
     /** Khóa tự nhiên (maSanPham, kieuDongGoi, soDonViCoSo). */
-    boolean trungQuyCach(BienTheSanPham khac) {
+    public boolean trungQuyCach(BienTheSanPham khac) {
         return maSanPham.equals(khac.maSanPham)
                 && kieuDongGoi == khac.kieuDongGoi
                 && soDonViCoSo == khac.soDonViCoSo;

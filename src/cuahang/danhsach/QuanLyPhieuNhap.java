@@ -1,4 +1,6 @@
-package cuahang;
+package cuahang.danhsach;
+
+import cuahang.donhang.PhieuNhap;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -41,7 +43,7 @@ public final class QuanLyPhieuNhap extends DanhSach<PhieuNhap> {
         throw new UnsupportedOperationException("Không được xóa phiếu nhập đã ghi nhận.");
     }
 
-    void napDanhSach(List<PhieuNhap> duLieuDaKiemTra) {
+    public void napDanhSach(List<PhieuNhap> duLieuDaKiemTra) {
         kiemTraKhongTrung(duLieuDaKiemTra, PhieuNhap::getMaPhieuNhap, "mã phiếu nhập");
         thayToanBo(duLieuDaKiemTra);
     }

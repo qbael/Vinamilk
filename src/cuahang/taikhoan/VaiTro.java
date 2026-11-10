@@ -1,4 +1,4 @@
-package cuahang;
+package cuahang.taikhoan;
 
 public enum VaiTro {
     KHACH_HANG("Khách hàng"),

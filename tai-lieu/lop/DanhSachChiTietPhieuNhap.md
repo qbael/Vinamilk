@@ -20,7 +20,7 @@ Quản lý chi tiết thuộc đúng một [PhieuNhap](PhieuNhap.md), theo quan 
 | `void them(ChiTietPhieuNhap chiTiet)` | Override: thêm mới hoặc cộng lượng vào dòng cùng SKU và cùng đơn giá nhập |
 | `void sua(String maBienThe, ChiTietPhieuNhap duLieuMoi)` | Override: thay dòng khi đang soạn, giữ cùng SKU; kiểm tra lượng, giá nhập và thành tiền trước khi thay |
 | `void xoa(String maBienThe)` | Override: xóa dòng khi đang soạn; báo lỗi nếu không tìm thấy |
-| `void khoaChinhSua()` | Package-private: đặt `daChot = true`, không có thao tác mở khóa |
+| `void khoaChinhSua()` | Public vì `DonHang`/`PhieuNhap` ở package `cuahang.donhang` gọi khi chốt: đặt `daChot = true`, không có thao tác mở khóa |
 | `long tinhTongTien()` | Tổng `tinhThanhTien()` của các dòng |
 
 ## Quan hệ và ràng buộc

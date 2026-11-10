@@ -1,4 +1,7 @@
-package cuahang;
+package cuahang.donhang;
+
+import cuahang.LuuTruText;
+import cuahang.danhsach.DanhSachChiTietPhieuNhap;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,7 +19,7 @@ public class PhieuNhap {
         this(UUID.randomUUID().toString(), maNguoiNhap, tenNguonNhap, thoiDiemNhap, chiTiet);
     }
 
-    PhieuNhap(String maPhieuNhap, String maNguoiNhap, String tenNguonNhap, LocalDateTime thoiDiemNhap,
+    public PhieuNhap(String maPhieuNhap, String maNguoiNhap, String tenNguonNhap, LocalDateTime thoiDiemNhap,
               DanhSachChiTietPhieuNhap chiTiet) {
         this.maPhieuNhap = LuuTruText.vanBan(maPhieuNhap, "Mã phiếu nhập");
         this.maNguoiNhap = LuuTruText.vanBan(maNguoiNhap, "Mã người nhập");

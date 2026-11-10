@@ -1,4 +1,7 @@
-package cuahang;
+package cuahang.donhang;
+
+import cuahang.LuuTruText;
+import cuahang.danhsach.DanhSachChiTietDonHang;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -35,7 +38,7 @@ public class DonHang {
     }
 
     /** Dựng lại đơn đã lưu; kiểm tra toàn bộ bất biến rồi khóa chi tiết. */
-    DonHang(String maDonHang, String maKhachHang, String maNguoiLap, String maNguoiThuTien,
+    public DonHang(String maDonHang, String maKhachHang, String maNguoiLap, String maNguoiThuTien,
             LocalDateTime thoiDiemTao, LocalDateTime thoiDiemThanhToan, TrangThaiDonHang trangThai,
             int diemSuDung, int diemCong, long tongTienHang, long tongGiamKhuyenMai, long tienGiamDiem,
             long tongThanhToan, DanhSachChiTietDonHang chiTiet) {
@@ -99,7 +102,7 @@ public class DonHang {
     }
 
     /** Số điểm tối đa theo tiền: tiền giảm điểm không vượt 20% sau khuyến mãi. */
-    static int diemToiDaTheoTien(long sauKhuyenMai) {
+    public static int diemToiDaTheoTien(long sauKhuyenMai) {
         return (int) Math.min(sauKhuyenMai / TIEN_TOI_THIEU_MOI_DIEM_DUNG, Integer.MAX_VALUE);
     }
 
@@ -124,7 +127,7 @@ public class DonHang {
      * Chốt thanh toán bằng các dòng đã tính lại giá/khuyến mãi hiện hành.
      * Dòng mới phải giữ đúng bộ SKU và số lượng đã đặt. Không trừ tồn/điểm, không ghi file.
      */
-    void chotThanhToan(DanhSachChiTietDonHang chiTietMoi, String maNguoiThuTien, LocalDateTime thoiDiem,
+    public void chotThanhToan(DanhSachChiTietDonHang chiTietMoi, String maNguoiThuTien, LocalDateTime thoiDiem,
                        int diemSuDung) {
         kiemTraDangCho();
         kiemTraChiTietMoi(chiTietMoi);
@@ -163,7 +166,7 @@ public class DonHang {
         return ketQua;
     }
 
-    void huy() {
+    public void huy() {
         kiemTraDangCho();
         trangThai = TrangThaiDonHang.DA_HUY;
     }
@@ -178,7 +181,7 @@ public class DonHang {
     }
 
     /** Bản sao tách rời để xem trước bảng tính thanh toán mà không đụng vào đơn thật. */
-    DonHang banSao() {
+    public DonHang banSao() {
         DanhSachChiTietDonHang dong = new DanhSachChiTietDonHang();
         chiTiet.xuat().forEach(dong::them);
         return new DonHang(maDonHang, maKhachHang, maNguoiLap, maNguoiThuTien, thoiDiemTao, thoiDiemThanhToan,

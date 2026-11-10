@@ -1,4 +1,6 @@
-package cuahang;
+package cuahang.danhsach;
+
+import cuahang.donhang.ChiTietPhieuNhap;
 
 public final class DanhSachChiTietPhieuNhap extends DanhSach<ChiTietPhieuNhap> {
     private boolean daChot = false;
@@ -65,7 +67,7 @@ public final class DanhSachChiTietPhieuNhap extends DanhSach<ChiTietPhieuNhap> {
         }
     }
 
-    void khoaChinhSua() {
+    public void khoaChinhSua() {
         daChot = true;
     }
 

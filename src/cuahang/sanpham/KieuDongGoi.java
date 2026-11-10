@@ -1,4 +1,4 @@
-package cuahang;
+package cuahang.sanpham;
 
 public enum KieuDongGoi {
     BAN_LE("Bán lẻ"),

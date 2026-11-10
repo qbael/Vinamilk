@@ -1,4 +1,4 @@
-package cuahang;
+package cuahang.danhsach;
 
 import java.util.ArrayList;
 import java.util.HashSet;

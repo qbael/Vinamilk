@@ -1,4 +1,4 @@
-package cuahang;
+package cuahang.khuyenmai;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -11,7 +11,7 @@ public class KhuyenMaiPhanTram extends KhuyenMai {
         this(UUID.randomUUID().toString(), tenKhuyenMai, maBienThe, tuNgay, denNgay, true, tyLePhanTram);
     }
 
-    KhuyenMaiPhanTram(String maKhuyenMai, String tenKhuyenMai, String maBienThe, LocalDate tuNgay,
+    public KhuyenMaiPhanTram(String maKhuyenMai, String tenKhuyenMai, String maBienThe, LocalDate tuNgay,
                       LocalDate denNgay, boolean dangApDung, int tyLePhanTram) {
         super(maKhuyenMai, tenKhuyenMai, maBienThe, tuNgay, denNgay, dangApDung);
         kiemTraTyLe(tyLePhanTram);
@@ -31,7 +31,7 @@ public class KhuyenMaiPhanTram extends KhuyenMai {
         return tienHang / 100 * tyLePhanTram + tienHang % 100 * tyLePhanTram / 100;
     }
 
-    void doiTyLePhanTram(int tyLeMoi) {
+    public void doiTyLePhanTram(int tyLeMoi) {
         kiemTraTyLe(tyLeMoi);
         tyLePhanTram = tyLeMoi;
     }

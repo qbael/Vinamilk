@@ -1,4 +1,6 @@
-package cuahang;
+package cuahang.khuyenmai;
+
+import cuahang.LuuTruText;
 
 import java.time.LocalDate;
 
@@ -45,7 +47,7 @@ public abstract class KhuyenMai implements ChinhSachGiamGia {
     @Override
     public abstract long tinhTienGiam(long donGia, int soLuong);
 
-    void capNhatThongTin(String tenKhuyenMai, LocalDate tuNgay, LocalDate denNgay) {
+    public void capNhatThongTin(String tenKhuyenMai, LocalDate tuNgay, LocalDate denNgay) {
         String ten = LuuTruText.vanBan(tenKhuyenMai, "Tên khuyến mãi");
         kiemTraKhoangNgay(tuNgay, denNgay);
         this.tenKhuyenMai = ten;
@@ -53,7 +55,7 @@ public abstract class KhuyenMai implements ChinhSachGiamGia {
         this.denNgay = denNgay;
     }
 
-    void ngungApDung() {
+    public void ngungApDung() {
         dangApDung = false;
     }
 

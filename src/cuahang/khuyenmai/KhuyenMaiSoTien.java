@@ -1,4 +1,4 @@
-package cuahang;
+package cuahang.khuyenmai;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -11,7 +11,7 @@ public class KhuyenMaiSoTien extends KhuyenMai {
         this(UUID.randomUUID().toString(), tenKhuyenMai, maBienThe, tuNgay, denNgay, true, soTienGiamMoiDonVi);
     }
 
-    KhuyenMaiSoTien(String maKhuyenMai, String tenKhuyenMai, String maBienThe, LocalDate tuNgay,
+    public KhuyenMaiSoTien(String maKhuyenMai, String tenKhuyenMai, String maBienThe, LocalDate tuNgay,
                     LocalDate denNgay, boolean dangApDung, long soTienGiamMoiDonVi) {
         super(maKhuyenMai, tenKhuyenMai, maBienThe, tuNgay, denNgay, dangApDung);
         kiemTraSoTien(soTienGiamMoiDonVi);
@@ -31,7 +31,7 @@ public class KhuyenMaiSoTien extends KhuyenMai {
         return Math.multiplyExact(Math.min(soTienGiamMoiDonVi, donGia), soLuong);
     }
 
-    void doiSoTienGiamMoiDonVi(long soTienMoi) {
+    public void doiSoTienGiamMoiDonVi(long soTienMoi) {
         kiemTraSoTien(soTienMoi);
         soTienGiamMoiDonVi = soTienMoi;
     }

@@ -1,4 +1,8 @@
-package cuahang;
+package cuahang.danhsach;
+
+import cuahang.khuyenmai.KhuyenMai;
+import cuahang.khuyenmai.KhuyenMaiPhanTram;
+import cuahang.khuyenmai.KhuyenMaiSoTien;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -88,7 +92,7 @@ public final class QuanLyKhuyenMai extends DanhSach<KhuyenMai> {
         danhSach.remove(km);
     }
 
-    void napDanhSach(List<KhuyenMai> duLieuDaKiemTra) {
+    public void napDanhSach(List<KhuyenMai> duLieuDaKiemTra) {
         kiemTraKhongTrung(duLieuDaKiemTra, KhuyenMai::getMaKhuyenMai, "mã khuyến mãi");
         thayToanBo(duLieuDaKiemTra);
     }

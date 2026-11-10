@@ -1,4 +1,8 @@
-package cuahang;
+package cuahang.danhsach;
+
+import cuahang.taikhoan.KhachHang;
+import cuahang.taikhoan.QuanLyCuaHang;
+import cuahang.taikhoan.TaiKhoan;
 
 import java.util.List;
 
@@ -74,7 +78,7 @@ public final class QuanLyTaiKhoan extends DanhSach<TaiKhoan> {
         throw new UnsupportedOperationException("Không được xóa tài khoản; hãy khóa tài khoản qua dịch vụ.");
     }
 
-    void napDanhSach(List<TaiKhoan> duLieuDaKiemTra) {
+    public void napDanhSach(List<TaiKhoan> duLieuDaKiemTra) {
         kiemTraKhongTrung(duLieuDaKiemTra, TaiKhoan::getMaTaiKhoan, "mã tài khoản");
         kiemTraKhongTrung(duLieuDaKiemTra, TaiKhoan::getTenDangNhap, "tên đăng nhập");
         thayToanBo(duLieuDaKiemTra);

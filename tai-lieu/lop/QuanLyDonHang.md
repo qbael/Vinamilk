@@ -26,7 +26,7 @@ Các phương thức dưới đây là instance; `xuat()` kế thừa `public fi
 | `void them(DonHang donHang)` | Từ chối `null`, trùng mã, chứng từ rỗng hoặc không hợp lệ |
 | `void sua(String ma, DonHang duLieuMoi)` | Ném `UnsupportedOperationException("Không được sửa trực tiếp đơn hàng; hãy dùng nghiệp vụ thanh toán hoặc hủy qua dịch vụ.")` |
 | `void xoa(String ma)` | Ném `UnsupportedOperationException("Không được xóa đơn hàng; hãy hủy đơn chờ qua dịch vụ.")` |
-| `void napDanhSach(List<DonHang> duLieuDaKiemTra)` | Package-private, chỉ phục vụ nạp/phục hồi: kiểm tra toàn bộ lô và vòng đời trước khi `clear`/`addAll`; giữ trạng thái và số tiền đã chốt, không xử lý như thêm đơn mới |
+| `void napDanhSach(List<DonHang> duLieuDaKiemTra)` | Public vì `LuuTruText` ở package khác gọi, nhưng chỉ phục vụ nạp/phục hồi: kiểm tra toàn bộ lô và vòng đời trước khi `clear`/`addAll`; giữ trạng thái và số tiền đã chốt, không xử lý như thêm đơn mới |
 
 ## Quan hệ và ràng buộc
 

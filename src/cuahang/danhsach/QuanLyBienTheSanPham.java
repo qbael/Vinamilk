@@ -1,4 +1,7 @@
-package cuahang;
+package cuahang.danhsach;
+
+import cuahang.sanpham.BienTheSanPham;
+import cuahang.sanpham.SanPham;
 
 import java.util.List;
 
@@ -89,7 +92,7 @@ public final class QuanLyBienTheSanPham extends DanhSach<BienTheSanPham> {
     }
 
     /** Liên kết sản phẩm cha và tồn đã được LuuTruText đối chiếu trước khi gọi. */
-    void napDanhSach(List<BienTheSanPham> duLieuDaKiemTra) {
+    public void napDanhSach(List<BienTheSanPham> duLieuDaKiemTra) {
         kiemTraKhongTrung(duLieuDaKiemTra, BienTheSanPham::getMaBienThe, "mã SKU");
         kiemTraKhongTrung(duLieuDaKiemTra,
                 bt -> List.of(bt.getMaSanPham(), bt.getKieuDongGoi(), bt.getSoDonViCoSo()), "quy cách SKU");

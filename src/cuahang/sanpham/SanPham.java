@@ -1,4 +1,6 @@
-package cuahang;
+package cuahang.sanpham;
+
+import cuahang.LuuTruText;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -19,7 +21,7 @@ public class SanPham {
     }
 
     /** Dựng lại sản phẩm đã có mã: nạp file hoặc làm duLieuMoi cho QuanLySanPham.sua. */
-    SanPham(String maSanPham, String tenSanPham, String thuongHieu, String donViCoSo, String dinhLuong,
+    public SanPham(String maSanPham, String tenSanPham, String thuongHieu, String donViCoSo, String dinhLuong,
             String moTa, LoaiSanPham loai, boolean dangKinhDoanh) {
         this.maSanPham = LuuTruText.vanBan(maSanPham, "Mã sản phẩm");
         this.tenSanPham = LuuTruText.vanBan(tenSanPham, "Tên sản phẩm");
@@ -34,7 +36,7 @@ public class SanPham {
         this.dangKinhDoanh = dangKinhDoanh;
     }
 
-    void capNhatThongTin(String tenSanPham, String thuongHieu, String moTa) {
+    public void capNhatThongTin(String tenSanPham, String thuongHieu, String moTa) {
         String ten = LuuTruText.vanBan(tenSanPham, "Tên sản phẩm");
         String hieu = LuuTruText.vanBan(thuongHieu, "Thương hiệu");
         String mo = LuuTruText.vanBanTuyChon(moTa, "Mô tả");
@@ -43,16 +45,16 @@ public class SanPham {
         this.moTa = mo;
     }
 
-    void ngungKinhDoanh() {
+    public void ngungKinhDoanh() {
         dangKinhDoanh = false;
     }
 
-    void moKinhDoanh() {
+    public void moKinhDoanh() {
         dangKinhDoanh = true;
     }
 
     /** Các trường xác định hàng hóa, không được đổi qua sửa. */
-    boolean cungHangHoa(SanPham khac) {
+    public boolean cungHangHoa(SanPham khac) {
         return maSanPham.equals(khac.maSanPham)
                 && donViCoSo.equals(khac.donViCoSo)
                 && dinhLuong.equals(khac.dinhLuong)

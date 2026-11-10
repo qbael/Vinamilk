@@ -10,7 +10,18 @@ Luồng gọi chính: `Main → GiaoDienConsole → DichVuCuaHang → lớp qu�
 - **Giao diện:** nhập/xuất console, thông báo lỗi rõ ràng, cho nhập lại, không tự sửa điểm hay tồn kho.
 - **Lưu trữ:** chuyển đối tượng thành bản ghi text và ngược lại, kiểm tra định dạng và tính toàn vẹn.
 
-Mỗi lớp/interface/enum có một tài liệu `.md` riêng trong thư mục `lop/`, và khi triển khai sẽ có một file `.java` riêng. Để dễ học, có thể đặt toàn bộ trong package `cuahang` ở `src/cuahang/`; chưa cần chia module hoặc thêm framework.
+Mỗi lớp/interface/enum có một tài liệu `.md` riêng trong thư mục `lop/` và một file `.java` riêng. Mã nguồn chia theo package trong `src/cuahang/`:
+
+| Package | Lớp |
+| --- | --- |
+| `cuahang` | `Main`, `GiaoDienConsole`, `DichVuCuaHang`, `LuuTruText` |
+| `cuahang.taikhoan` | `TaiKhoan`, `KhachHang`, `NhanVienBanHang`, `QuanLyCuaHang`, `VaiTro` |
+| `cuahang.sanpham` | `SanPham`, `BienTheSanPham`, `LoaiSanPham`, `KieuDongGoi` |
+| `cuahang.khuyenmai` | `ChinhSachGiamGia`, `KhuyenMai`, `KhuyenMaiPhanTram`, `KhuyenMaiSoTien` |
+| `cuahang.donhang` | `DonHang`, `ChiTietDonHang`, `TrangThaiDonHang`, `PhieuNhap`, `ChiTietPhieuNhap` |
+| `cuahang.danhsach` | `IQuanLy`, `DanhSach`, sáu lớp `QuanLy…` (trừ `QuanLyCuaHang`), `DanhSachChiTietDonHang`, `DanhSachChiTietPhieuNhap` |
+
+Các thao tác đổi trạng thái (`tangTon`, `congDiem`, `chotThanhToan`, `napDanhSach`…) phải để `public` vì `DichVuCuaHang` và `LuuTruText` nằm ở package khác; quy ước là chỉ hai lớp này gọi, `GiaoDienConsole` luôn đi qua `DichVuCuaHang`.
 
 ## 2. Kiểu dữ liệu chung
 
@@ -28,7 +39,7 @@ Phép nhân/cộng tiền và số lượng phải kiểm tra tràn số, ví d�
 
 ## 3. Tài liệu riêng cho từng lớp
 
-Mỗi tài liệu dưới đây mô tả trách nhiệm, thuộc tính, phương thức, quan hệ và các ràng buộc của đúng một kiểu Java. Mã nguồn tương ứng nằm trong `src/cuahang/`, mỗi kiểu một file cùng tên.
+Mỗi tài liệu dưới đây mô tả trách nhiệm, thuộc tính, phương thức, quan hệ và các ràng buộc của đúng một kiểu Java. Mã nguồn tương ứng nằm trong package con của `src/cuahang/` (bảng ở mục 1), mỗi kiểu một file cùng tên.
 
 | Nhóm | Tài liệu riêng |
 | --- | --- |

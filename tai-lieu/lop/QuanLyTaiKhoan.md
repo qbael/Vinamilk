@@ -26,7 +26,7 @@ Các phương thức dưới đây là instance; `xuat()` kế thừa `public fi
 | `void them(TaiKhoan taiKhoan)` | Từ chối `null`, trùng mã hoặc trùng tên đăng nhập đã chuẩn hóa |
 | `void sua(String ma, TaiKhoan duLieuMoi)` | Từ chối `null`, mã không tồn tại hoặc mã không khớp; kiểm tra toàn bộ trường trước khi gọi `khoa()`/`moKhoa()`, không thay phần tử bằng `list.set` |
 | `void xoa(String ma)` | Ném `UnsupportedOperationException("Không được xóa tài khoản; hãy khóa tài khoản qua dịch vụ.")` |
-| `void napDanhSach(List<TaiKhoan> duLieuDaKiemTra)` | Package-private, chỉ phục vụ nạp/phục hồi: kiểm tra toàn bộ lô trước khi `clear`/`addAll`; giữ điểm và thông tin xác thực đã lưu, không áp điều kiện tài khoản mới có điểm 0 |
+| `void napDanhSach(List<TaiKhoan> duLieuDaKiemTra)` | Public vì `LuuTruText` ở package khác gọi, nhưng chỉ phục vụ nạp/phục hồi: kiểm tra toàn bộ lô trước khi `clear`/`addAll`; giữ điểm và thông tin xác thực đã lưu, không áp điều kiện tài khoản mới có điểm 0 |
 
 ## Quan hệ và ràng buộc
 

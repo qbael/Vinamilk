@@ -33,7 +33,7 @@ Các thao tác file truyền lỗi `IOException` lên nơi điều phối; lỗi
 
 - [Main](Main.md) tạo đối tượng và yêu cầu nạp trước khi mở menu; [DichVuCuaHang](DichVuCuaHang.md) gọi ghi sau mỗi thay đổi nghiệp vụ.
 - Chỉ định dạng lưu trữ biết cách ánh xạ `vaiTro` sang lớp tài khoản và `loaiKhuyenMai` sang lớp khuyến mãi. Không dùng Java object serialization hoặc database.
-- Các danh sách tạm chỉ là vùng đệm khi nạp, không có lớp quản lý nghiệp vụ riêng. Sau khi kiểm tra toàn bộ đồ thị dữ liệu, gọi `napDanhSach(List<T> duLieuDaKiemTra)` nội bộ ở cả sáu đối tượng quản lý. Phương thức có phạm vi package-private, dùng `clear`/`addAll` trên `protected final List<T> danhSach` kế thừa từ `DanhSach<T>`; giữ nguyên danh tính đối tượng quản lý và tham chiếu danh sách. Menu không gọi thao tác này.
+- Các danh sách tạm chỉ là vùng đệm khi nạp, không có lớp quản lý nghiệp vụ riêng. Sau khi kiểm tra toàn bộ đồ thị dữ liệu, gọi `napDanhSach(List<T> duLieuDaKiemTra)` nội bộ ở cả sáu đối tượng quản lý. Phương thức để `public` vì các lớp quản lý nằm ở package `cuahang.danhsach`, dùng `clear`/`addAll` trên `protected final List<T> danhSach` kế thừa từ `DanhSach<T>`; giữ nguyên danh tính đối tượng quản lý và tham chiếu danh sách. Menu không gọi thao tác này.
 - Nạp file và phục hồi đều giữ tồn, điểm và trạng thái lịch sử đã đối chiếu hợp lệ; không gọi `them(...)` dành cho tạo mới vì tài khoản/SKU mới phải bắt đầu với điểm/tồn bằng 0. Danh sách chi tiết được ghép lại và thuộc đúng từng đơn/phiếu.
 - Thực thể được giữ nguyên ID khi nạp; nối lại chi tiết đúng đơn/phiếu. Không xóa lịch sử vì tài khoản hiện đã khóa hoặc SKU hiện ngừng bán.
 - Dữ liệu chứa hash/salt và thông tin cá nhân; không in toàn bộ nội dung file hoặc bản phục hồi ra log.

@@ -1,4 +1,4 @@
-package cuahang;
+package cuahang.donhang;
 
 public enum TrangThaiDonHang {
     CHO_THANH_TOAN("Chờ thanh toán"),

@@ -1,4 +1,4 @@
-package cuahang;
+package cuahang.sanpham;
 
 public enum LoaiSanPham {
     SUA("Sữa"),

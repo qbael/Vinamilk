@@ -20,7 +20,7 @@ Quản lý các dòng của đúng một [DonHang](DonHang.md), theo quan hệ c
 | `void them(ChiTietDonHang chiTiet)` | Override: thêm dòng mới; nếu đã có SKU, gộp lượng rồi tính lại tạm tính cho toàn dòng |
 | `void sua(String maBienThe, ChiTietDonHang duLieuMoi)` | Override: thay dòng khi đang soạn, giữ cùng SKU; kiểm tra lượng và tính lại giá/ưu đãi cho toàn dòng trước khi thay |
 | `void xoa(String maBienThe)` | Override: xóa một dòng khi đơn còn đang soạn; báo lỗi nếu không có dòng |
-| `void khoaChinhSua()` | Package-private: đặt `daChot = true`, không có thao tác mở khóa |
+| `void khoaChinhSua()` | Public vì `DonHang`/`PhieuNhap` ở package `cuahang.donhang` gọi khi chốt: đặt `daChot = true`, không có thao tác mở khóa |
 | `long tinhTongTienHang()` | Cộng `tinhTienHang()` của từng chi tiết |
 | `long tinhTongGiam()` | Tổng tiền giảm khuyến mãi của các dòng, chưa gồm đổi điểm |
 

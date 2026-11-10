@@ -1,4 +1,6 @@
-package cuahang;
+package cuahang.donhang;
+
+import cuahang.LuuTruText;
 
 public class ChiTietDonHang {
     private final String maBienThe;

@@ -1,4 +1,7 @@
-package cuahang;
+package cuahang.danhsach;
+
+import cuahang.sanpham.LoaiSanPham;
+import cuahang.sanpham.SanPham;
 
 import java.util.List;
 import java.util.Locale;
@@ -66,7 +69,7 @@ public final class QuanLySanPham extends DanhSach<SanPham> {
         danhSach.remove(sp);
     }
 
-    void napDanhSach(List<SanPham> duLieuDaKiemTra) {
+    public void napDanhSach(List<SanPham> duLieuDaKiemTra) {
         kiemTraKhongTrung(duLieuDaKiemTra, SanPham::getMaSanPham, "mã sản phẩm");
         thayToanBo(duLieuDaKiemTra);
     }

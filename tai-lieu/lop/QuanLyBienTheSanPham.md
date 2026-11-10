@@ -26,7 +26,7 @@ Các phương thức dưới đây là instance; `xuat()` kế thừa `public fi
 | `void them(BienTheSanPham bienThe)` | Từ chối `null`, kiểm tra sản phẩm cha tồn tại, mã không trùng, quy cách không trùng; SKU mới có tồn 0 |
 | `void sua(String ma, BienTheSanPham duLieuMoi)` | Từ chối `null`, mã không tồn tại hoặc mã không khớp; kiểm tra toàn bộ trường rồi gọi `doiGia`, `ngungKinhDoanh`/`moKinhDoanh`, không dùng `list.set` |
 | `void xoa(String ma)` | Xóa hẳn SKU tồn 0; còn tồn báo `IllegalStateException`. Dịch vụ kiểm tra thêm đơn, phiếu nhập và khuyến mãi trỏ tới SKU |
-| `void napDanhSach(List<BienTheSanPham> duLieuDaKiemTra)` | Package-private, chỉ phục vụ nạp/phục hồi: kiểm tra toàn bộ lô trước khi `clear`/`addAll`; giữ tồn đã đối chiếu từ chứng từ, không yêu cầu tồn 0 như SKU mới |
+| `void napDanhSach(List<BienTheSanPham> duLieuDaKiemTra)` | Public vì `LuuTruText` ở package khác gọi, nhưng chỉ phục vụ nạp/phục hồi: kiểm tra toàn bộ lô trước khi `clear`/`addAll`; giữ tồn đã đối chiếu từ chứng từ, không yêu cầu tồn 0 như SKU mới |
 
 ## Quan hệ và ràng buộc
 

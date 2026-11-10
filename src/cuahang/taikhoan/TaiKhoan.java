@@ -1,4 +1,6 @@
-package cuahang;
+package cuahang.taikhoan;
+
+import cuahang.LuuTruText;
 
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
@@ -61,7 +63,7 @@ public abstract class TaiKhoan {
     public abstract VaiTro layVaiTro();
 
     /** Bản sao cùng dữ liệu, chỉ khác trạng thái hoạt động; dùng làm duLieuMoi cho QuanLyTaiKhoan.sua. */
-    abstract TaiKhoan banSaoVoiTrangThai(boolean dangHoatDongMoi);
+    public abstract TaiKhoan banSaoVoiTrangThai(boolean dangHoatDongMoi);
 
     public static String chuanHoaTenDangNhap(String tenDangNhap) {
         String ten = LuuTruText.vanBan(tenDangNhap, "Tên đăng nhập").toLowerCase(Locale.ROOT);
@@ -110,7 +112,7 @@ public abstract class TaiKhoan {
      * Kiểm tra độ dài rồi băm mật khẩu với salt mới và số vòng hiện hành; chỉ gán khi băm xong,
      * nên lỗi không để lại trạng thái dở dang. Chỉ gọi qua DichVuCuaHang.doiMatKhau (đã kiểm tra mật khẩu cũ).
      */
-    final void datMatKhau(char[] matKhau) {
+    public final void datMatKhau(char[] matKhau) {
         if (matKhau == null || matKhau.length < DO_DAI_MAT_KHAU_TOI_THIEU) {
             throw new IllegalArgumentException("Mật khẩu phải có ít nhất " + DO_DAI_MAT_KHAU_TOI_THIEU + " ký tự.");
         }
@@ -122,16 +124,16 @@ public abstract class TaiKhoan {
         this.matKhauBam = bamMoi;
     }
 
-    void khoa() {
+    public void khoa() {
         dangHoatDong = false;
     }
 
-    void moKhoa() {
+    public void moKhoa() {
         dangHoatDong = true;
     }
 
     /** So sánh mọi trường trừ trạng thái hoạt động (và điểm ở lớp con). */
-    boolean cungThongTinCoDinh(TaiKhoan khac) {
+    public boolean cungThongTinCoDinh(TaiKhoan khac) {
         return getClass() == khac.getClass()
                 && maTaiKhoan.equals(khac.maTaiKhoan)
                 && tenDangNhap.equals(khac.tenDangNhap)
@@ -158,15 +160,15 @@ public abstract class TaiKhoan {
         return soDienThoai;
     }
 
-    String getSalt() {
+    public String getSalt() {
         return salt;
     }
 
-    String getMatKhauBam() {
+    public String getMatKhauBam() {
         return matKhauBam;
     }
 
-    int getSoVongBam() {
+    public int getSoVongBam() {
         return soVongBam;
     }
 

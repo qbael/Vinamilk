@@ -1,4 +1,7 @@
-package cuahang;
+package cuahang.danhsach;
+
+import cuahang.donhang.DonHang;
+import cuahang.donhang.TrangThaiDonHang;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -55,7 +58,7 @@ public final class QuanLyDonHang extends DanhSach<DonHang> {
     }
 
     /** Bất biến từng đơn đã được constructor DonHang kiểm tra khi dựng lại. */
-    void napDanhSach(List<DonHang> duLieuDaKiemTra) {
+    public void napDanhSach(List<DonHang> duLieuDaKiemTra) {
         kiemTraKhongTrung(duLieuDaKiemTra, DonHang::getMaDonHang, "mã đơn hàng");
         thayToanBo(duLieuDaKiemTra);
     }

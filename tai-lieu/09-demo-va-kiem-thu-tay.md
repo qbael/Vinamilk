@@ -101,12 +101,12 @@ Mỗi bước ghi: **gõ gì** → **thấy gì** → **ý cần nói**. Làm th
 
 | Yêu cầu | Mở file nào, nói gì |
 | --- | --- |
-| ≥ 15 lớp | 32 file trong `src/cuahang/`: 26 class, 2 interface, 4 enum ([thiết kế lớp](04-thiet-ke-lop.md)) |
+| ≥ 15 lớp | 32 file trong `src/cuahang/`, chia 6 package theo nhóm: 26 class, 2 interface, 4 enum ([thiết kế lớp](04-thiet-ke-lop.md)) |
 | Constructor | Mọi lớp có constructor tường minh; lớp thực thể có 2 constructor: tạo mới (sinh mã, kiểm tra) và dựng lại từ file, ví dụ `SanPham`, `DonHang`, `TaiKhoan` |
 | Kế thừa | `TaiKhoan` → `KhachHang`, `NhanVienBanHang`, `QuanLyCuaHang`; `KhuyenMai` → `KhuyenMaiPhanTram`, `KhuyenMaiSoTien`; `DanhSach<T>` → 8 lớp danh sách |
-| Đa hình | `QuanLyKhuyenMai.java:32` gọi `km.tinhTienGiam(...)` không cần biết lớp con; `GiaoDienConsole.java:103` chọn menu theo `tk.layVaiTro()`; biến `IQuanLy<SanPham>` gọi đúng `them/sua/xoa` của `QuanLySanPham` |
+| Đa hình | `danhsach/QuanLyKhuyenMai.java:36` gọi `km.tinhTienGiam(...)` không cần biết lớp con; `GiaoDienConsole.java:122` chọn menu theo `tk.layVaiTro()`; biến `IQuanLy<SanPham>` gọi đúng `them/sua/xoa` của `QuanLySanPham` |
 | Lớp danh sách | `DanhSach<T>` giữ `List<T>`; `QuanLySanPham`, `QuanLyDonHang`… có `them/sua/xoa/xuat` và các hàm tìm `timTheoMa`, `timTheoTen`… |
-| File text | `LuuTruText.docDuLieu()` (dòng 58) và `ghiAnToan()` (dòng 72, ghi file tạm rồi `ATOMIC_MOVE`); `GiaoDienConsole.xuatHoaDon` ghi hóa đơn |
+| File text | `LuuTruText.docDuLieu()` (dòng 84) và `ghiAnToan()` (dòng 98, ghi file tạm rồi `ATOMIC_MOVE`); `GiaoDienConsole.xuatHoaDon` ghi hóa đơn |
 | static | Thuộc tính: `DonHang.TIEN_MOI_DIEM`, `TaiKhoan.SO_VONG_BAM`, `DichVuCuaHang.NGUONG_TON_THAP`; phương thức: `TaiKhoan.chuanHoaTenDangNhap`, `DonHang.diemToiDaTheoTien`, `GiaoDienConsole.tien` |
 | abstract | `TaiKhoan.layVaiTro()`, `KhuyenMai.tinhTienGiam()`, `DanhSach.them/sua/xoa()` |
 | interface | `IQuanLy<T>` (xuat, them, sua, xoa) do `DanhSach<T>` implements; `ChinhSachGiamGia` do `KhuyenMai` implements |
@@ -118,6 +118,7 @@ Mỗi bước ghi: **gõ gì** → **thấy gì** → **ý cần nói**. Làm th
 - **Interface khác lớp trừu tượng thế nào?** `IQuanLy` chỉ là hợp đồng (không có dữ liệu); `DanhSach` là lớp trừu tượng có thuộc tính `danhSach` và code dùng chung `xuat`, `timDauTien`, `loc`.
 - **Vì sao SKU tách khỏi sản phẩm?** Cùng một sữa có hộp lẻ, lốc, thùng với giá và tồn riêng; bán 2 lốc chỉ trừ tồn SKU lốc.
 - **Mất điện giữa lúc lưu thì sao?** Ghi ra `du-lieu.tmp` rồi đổi tên nguyên khối; file chính chỉ là bản cũ hoặc bản mới, không bị ghi dở. Khi đọc, app kiểm tra liên kết và tồn/điểm khớp lịch sử; file hỏng thì báo lỗi, không tự ghi đè.
+- **Sao chia package mà nhiều phương thức đổi dữ liệu lại `public`?** `DichVuCuaHang` (package `cuahang`) cần gọi `tangTon`, `congDiem`… của lớp ở package con, nên Java bắt phải `public`. Quy ước: chỉ `DichVuCuaHang` và `LuuTruText` gọi chúng, giao diện luôn đi qua `DichVuCuaHang.giaoDich` để có lưu file và phục hồi khi lỗi.
 - **Mật khẩu lưu thế nào?** Không lưu rõ: PBKDF2 + salt ngẫu nhiên riêng từng tài khoản; đổi mật khẩu sinh salt mới.
 - **Giá đổi thì hóa đơn cũ có đổi không?** Không: dòng đơn chụp tên, giá, khuyến mãi lúc thanh toán.
 

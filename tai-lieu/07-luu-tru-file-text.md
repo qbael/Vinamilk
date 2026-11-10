@@ -40,7 +40,7 @@ Bộ dữ liệu mẫu đầy đủ nằm tại [`data/du-lieu.txt`](../data/du-
 3. Đọc và phân tích vào các danh sách **tạm**, chưa thay danh sách instance trong sáu đối tượng quản lý đang sử dụng. `Main` truyền cùng sáu đối tượng này cho `LuuTruText` và `DichVuCuaHang`.
 4. Tạo đúng lớp con theo `vaiTro` hoặc `loaiKhuyenMai`. Ghép chi tiết vào đơn/phiếu đúng mã; phát hiện chi tiết mồ côi, trùng dòng hoặc chứng từ rỗng.
 5. Kiểm tra khóa ngoại và vai trò của các bên, công thức tiền, điểm, tồn và ít nhất một quản lý đang hoạt động. Tài khoản từng lập chứng từ có thể hiện đã bị khóa; vẫn phải giữ và đọc được lịch sử.
-6. Chỉ khi toàn bộ đồ thị dữ liệu hợp lệ mới gọi `napDanhSach(List<T> duLieuDaKiemTra)` có phạm vi package-private trên cả sáu đối tượng quản lý. Dùng `clear`/`addAll` trên `protected final List<T> danhSach` của lớp cha `DanhSach<T>`; giữ nguyên các đối tượng quản lý và tham chiếu danh sách, chỉ thay nội dung. Danh sách chi tiết thuộc từng đơn/phiếu được dựng và ghép trong vùng tạm trước khi công bố.
+6. Chỉ khi toàn bộ đồ thị dữ liệu hợp lệ mới gọi `napDanhSach(List<T> duLieuDaKiemTra)` (để `public` vì các lớp quản lý nằm ở package `cuahang.danhsach`) trên cả sáu đối tượng quản lý. Dùng `clear`/`addAll` trên `protected final List<T> danhSach` của lớp cha `DanhSach<T>`; giữ nguyên các đối tượng quản lý và tham chiếu danh sách, chỉ thay nội dung. Danh sách chi tiết thuộc từng đơn/phiếu được dựng và ghép trong vùng tạm trước khi công bố.
 
 Nạp file và phục hồi RAM đều dùng luồng nạp nội bộ trên, không gọi `them(...)` dành cho tạo mới. Tồn, điểm và trạng thái lịch sử đã đối chiếu hợp lệ phải được khôi phục nguyên giá trị; quy tắc tồn/điểm ban đầu bằng 0 chỉ áp dụng khi tạo tài khoản/SKU mới.
 

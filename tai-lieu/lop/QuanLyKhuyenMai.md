@@ -26,7 +26,7 @@ Các phương thức dưới đây là instance; `xuat()` kế thừa `public fi
 | `void them(KhuyenMai khuyenMai)` | Từ chối `null`, trùng mã, SKU không tồn tại hoặc dữ liệu khuyến mãi sai |
 | `void sua(String ma, KhuyenMai duLieuMoi)` | Từ chối `null`, mã không tồn tại hoặc mã không khớp; kiểm tra toàn bộ trường rồi gọi `capNhatThongTin`, phương thức đổi mức giảm đúng lớp con và `ngungApDung` nếu cần; không dùng `list.set` |
 | `void xoa(String ma)` | Xóa hẳn chương trình theo mã. Dịch vụ kiểm tra chưa có đơn nào dùng trước khi gọi |
-| `void napDanhSach(List<KhuyenMai> duLieuDaKiemTra)` | Package-private, chỉ phục vụ nạp/phục hồi: kiểm tra toàn bộ lô trước khi `clear`/`addAll`, không áp điều kiện chỉ dành cho tạo mới |
+| `void napDanhSach(List<KhuyenMai> duLieuDaKiemTra)` | Public vì `LuuTruText` ở package khác gọi, nhưng chỉ phục vụ nạp/phục hồi: kiểm tra toàn bộ lô trước khi `clear`/`addAll`, không áp điều kiện chỉ dành cho tạo mới |
 
 ## Quan hệ và ràng buộc
 

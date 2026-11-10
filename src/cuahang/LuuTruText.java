@@ -1,5 +1,31 @@
 package cuahang;
 
+import cuahang.danhsach.DanhSachChiTietDonHang;
+import cuahang.danhsach.DanhSachChiTietPhieuNhap;
+import cuahang.danhsach.QuanLyBienTheSanPham;
+import cuahang.danhsach.QuanLyDonHang;
+import cuahang.danhsach.QuanLyKhuyenMai;
+import cuahang.danhsach.QuanLyPhieuNhap;
+import cuahang.danhsach.QuanLySanPham;
+import cuahang.danhsach.QuanLyTaiKhoan;
+import cuahang.donhang.ChiTietDonHang;
+import cuahang.donhang.ChiTietPhieuNhap;
+import cuahang.donhang.DonHang;
+import cuahang.donhang.PhieuNhap;
+import cuahang.donhang.TrangThaiDonHang;
+import cuahang.khuyenmai.KhuyenMai;
+import cuahang.khuyenmai.KhuyenMaiPhanTram;
+import cuahang.khuyenmai.KhuyenMaiSoTien;
+import cuahang.sanpham.BienTheSanPham;
+import cuahang.sanpham.KieuDongGoi;
+import cuahang.sanpham.LoaiSanPham;
+import cuahang.sanpham.SanPham;
+import cuahang.taikhoan.KhachHang;
+import cuahang.taikhoan.NhanVienBanHang;
+import cuahang.taikhoan.QuanLyCuaHang;
+import cuahang.taikhoan.TaiKhoan;
+import cuahang.taikhoan.VaiTro;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -488,7 +514,7 @@ public class LuuTruText {
     // ---------------------------------------------------------------- ràng buộc trường văn bản
 
     /** Trường văn bản bắt buộc: không trống, không chứa ký tự phân cách của định dạng text. */
-    static String vanBan(String giaTri, String tenTruong) {
+    public static String vanBan(String giaTri, String tenTruong) {
         String s = vanBanTuyChon(giaTri, tenTruong);
         if (s == null) {
             throw new IllegalArgumentException(tenTruong + " không được để trống.");
@@ -497,7 +523,7 @@ public class LuuTruText {
     }
 
     /** Trường văn bản tùy chọn: trống trả null. */
-    static String vanBanTuyChon(String giaTri, String tenTruong) {
+    public static String vanBanTuyChon(String giaTri, String tenTruong) {
         if (giaTri == null || giaTri.isBlank()) {
             return null;
         }
