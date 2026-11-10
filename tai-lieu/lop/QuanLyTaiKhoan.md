@@ -35,4 +35,4 @@ Các phương thức dưới đây là instance; `xuat()` kế thừa `public fi
 - `sua` chỉ đổi trạng thái bằng hành vi của tài khoản sau khi dịch vụ kiểm tra quyền và bảo vệ quản lý hoạt động cuối cùng. Mã, lớp cụ thể/vai trò, tên đăng nhập, họ tên, số điện thoại, hash/salt/tham số băm và điểm phải giữ nguyên; không dùng `sua` để đổi loại, thông tin xác thực hoặc gán điểm tùy ý.
 - Không xóa tài khoản đã có lịch sử; dùng trạng thái hoạt động. Tra số điện thoại không đồng nghĩa được phép dùng điểm của người đó.
 - `List.copyOf` chỉ bảo vệ cấu trúc danh sách, không làm phần tử bất biến. Giao diện chỉ đọc; không cho sửa trực tiếp dữ liệu xác thực, điểm hoặc trạng thái tài khoản.
-- Lớp này không có bảng/file riêng. Phần tử ánh xạ vào bảng logic `TAI_KHOAN`; việc đọc/ghi do [LuuTruText](LuuTruText.md) đảm nhiệm.
+- Lớp quản lý không có bản ghi riêng. Phần tử ánh xạ vào bảng `TAI_KHOAN` trong `tai-khoan.txt`; việc đọc/ghi do [LuuTruText](LuuTruText.md) đảm nhiệm.

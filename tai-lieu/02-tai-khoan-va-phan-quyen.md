@@ -28,7 +28,7 @@ Người dùng nhập tên đăng nhập, mật khẩu, họ tên và số đi�
 
 Quản lý đang hoạt động được tạo tài khoản nhân viên bán hàng hoặc quản lý mới. Tài khoản nội bộ không được tạo từ chức năng tự đăng ký của khách hàng.
 
-Khi file dữ liệu chưa tồn tại, ứng dụng thông báo đây là lần khởi tạo hệ thống và yêu cầu xác nhận trước khi tạo dữ liệu ban đầu. Người dùng nhập thông tin quản lý đầu tiên tại console; không dùng mật khẩu mặc định. Nếu file đã tồn tại nhưng rỗng hoặc hỏng, ứng dụng báo lỗi đọc dữ liệu, không tự khởi tạo và không ghi đè file đó.
+Khi chưa có file nào trong bộ tám file dữ liệu, ứng dụng thông báo đây là lần khởi tạo hệ thống và yêu cầu xác nhận trước khi tạo dữ liệu ban đầu. Người dùng nhập thông tin quản lý đầu tiên tại console; không dùng mật khẩu mặc định. Nếu đã có một phần bộ file hoặc có file rỗng/hỏng, ứng dụng báo lỗi đọc dữ liệu, không tự khởi tạo và không ghi đè file đó.
 
 ### 2.3. Đăng nhập, đăng xuất và khóa tài khoản
 

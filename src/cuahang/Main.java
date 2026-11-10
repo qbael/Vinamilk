@@ -11,7 +11,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        Path duongDan = Path.of("data", "du-lieu.txt").toAbsolutePath();
+        Path duongDan = Path.of("data").toAbsolutePath();
         QuanLyTaiKhoan quanLyTaiKhoan = new QuanLyTaiKhoan();
         QuanLySanPham quanLySanPham = new QuanLySanPham();
         QuanLyBienTheSanPham quanLyBienThe = new QuanLyBienTheSanPham(quanLySanPham);
@@ -23,7 +23,7 @@ public class Main {
         DichVuCuaHang dichVu = new DichVuCuaHang(quanLyTaiKhoan, quanLySanPham, quanLyBienThe, quanLyKhuyenMai,
                 quanLyDonHang, quanLyPhieuNhap, luuTru);
 
-        System.out.println("File dữ liệu: " + duongDan);
+        System.out.println("Thư mục dữ liệu: " + duongDan);
         try (Scanner boDoc = new Scanner(System.in, StandardCharsets.UTF_8)) {
             GiaoDienConsole giaoDien = new GiaoDienConsole(dichVu, boDoc);
             if (luuTru.tonTai()) {

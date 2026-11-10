@@ -33,4 +33,4 @@ Quản lý các dòng của đúng một [DonHang](DonHang.md), theo quan hệ c
 - Đơn đã lưu không sửa dòng từ menu; muốn đổi hàng phải hủy đơn chờ và lập lại. Thanh toán chỉ được dịch vụ tính lại giá/ưu đãi trên cùng các SKU và số lượng đã đặt, sau xác nhận của khách, qua hành vi chốt của đơn. Hành vi đó tạo và khóa danh sách chi tiết mới rồi thay bên trong đơn, không mở khóa danh sách cũ.
 - Đơn sở hữu kiểm soát quyền sửa và không công khai đối tượng danh sách có thể thay đổi cho giao diện. `List.copyOf` là bản sao nông, nên chi tiết đã chốt cũng không có setter tùy ý.
 - Các tổng của lớp chưa áp dụng điểm; phần giảm điểm/tổng trả nằm ở giao dịch thanh toán của đơn.
-- Lớp không có bảng/file riêng. Khi [LuuTruText](LuuTruText.md) ghi `CT_DON_HANG`, mã đơn được lấy từ chủ sở hữu; khóa dòng là `(maDonHang, maBienThe)`.
+- Danh sách không có bản ghi riêng; các dòng lưu trong `chi-tiet-don-hang.txt`. Khi [LuuTruText](LuuTruText.md) ghi `CT_DON_HANG`, mã đơn được lấy từ chủ sở hữu; khóa dòng là `(maDonHang, maBienThe)`.

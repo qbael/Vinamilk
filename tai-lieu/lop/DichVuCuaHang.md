@@ -24,7 +24,7 @@ Constructor nhận sáu đối tượng quản lý và `LuuTruText` do [Main](Ma
 | --- | --- | --- |
 | Tài khoản | `dangKyKhachHang(...)`, `dangNhap(...)`, `taoTaiKhoanNoiBo(...)`, `khoaTaiKhoan(...)`, `moKhoaTaiKhoan(...)`, `doiMatKhau(...)` | Kiểm tra xác thực, tên trùng, vai trò; bảo vệ quản lý hoạt động cuối; chỉ tự đổi mật khẩu của mình khi nhập đúng mật khẩu hiện tại |
 | Danh mục | `themSanPham(...)`, `capNhatSanPham(...)`, `themBienThe(...)`, `capNhatBienThe(...)`, `xoaBienThe(...)`, `xoaSanPham(...)` | Kiểm tra danh mục, giá, quy cách; không sửa tồn trực tiếp; chỉ xóa SKU chưa có giao dịch, sản phẩm không còn SKU |
-| Đặt/bán | `datHang(...)`, `lapDonTaiQuay(...)`, `xemDon(...)`, `huyDon(...)` | Kiểm tra chủ đơn, hàng, số lượng và trạng thái |
+| Đặt/bán | `datHang(...)`, `lapDonTaiQuay(...)`, `xemDon(...)`, `huyDon(...)` | Kiểm tra chủ đơn, hàng, số lượng và trạng thái; giữ tồn khi đặt, hoàn khi hủy trong cùng giao dịch |
 | Thanh toán | `thanhToan(...)` | Tính lại giá/khuyến mãi, kiểm tra điểm, tồn; chốt đơn và lưu đồng thời |
 | Khuyến mãi | `themKhuyenMai(...)`, `capNhatKhuyenMai(...)`, `ngungKhuyenMai(...)`, `xoaKhuyenMai(...)` | Chỉ quản lý; kiểm tra SKU, ngày và mức giảm; chỉ xóa chương trình chưa áp dụng cho đơn nào |
 | Nhập | `nhapHang(...)`, `xemPhieuNhap(...)` | Chỉ quản lý; tăng tồn cùng ghi nhận phiếu |
@@ -37,7 +37,7 @@ Các chữ ký là định hướng, chưa phải API hoàn chỉnh. Thao tác c
 ## Ràng buộc
 
 - Không để lớp quản lý danh sách hoặc menu tự ghép một giao dịch từ nhiều lần lưu rời.
-- Thanh toán kiểm tra đơn chờ, lấy giá/khuyến mãi hiện tại, kiểm tra đồng ý của khách rồi chốt đơn + tồn + điểm cùng một lần lưu.
+- Thanh toán kiểm tra đơn chờ, lấy giá/khuyến mãi hiện tại, kiểm tra đồng ý của khách rồi chốt đơn + xuất lượng đã giữ + điểm cùng một lần lưu, không trừ tồn khả dụng lần nữa.
 - Lưu thất bại phải phục hồi RAM; sau commit không rollback chỉ vì lỗi hiển thị. Quy trình cụ thể ở [lưu trữ](../07-luu-tru-file-text.md).
 - Phục hồi giữ nguyên sáu đối tượng quản lý và tham chiếu danh sách của chúng; phần tử có thể được dựng lại nên dịch vụ tra lại theo mã. Danh sách chi tiết vẫn thuộc từng đơn/phiếu.
 - Quản lý có quyền bán hàng qua điều kiện quyền, không cần kế thừa nhân viên.

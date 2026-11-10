@@ -1,91 +1,84 @@
 # 07. Lưu trữ file text
 
-Tài liệu này mô tả cách lưu toàn hệ thống trong một file text. Thứ tự cột và liên kết giữa các bảng được quy định riêng tại [Mô hình dữ liệu](05-mo-hinh-du-lieu.md).
+Dữ liệu được tách thành tám file text UTF-8, mỗi loại bản ghi một file. Thứ tự cột và liên kết giữa các bảng được quy định tại [Mô hình dữ liệu](05-mo-hinh-du-lieu.md).
 
 ## 1. Tổ chức file text
 
-```text
-data/
-    du-lieu.txt       File chính chứa toàn bộ các bảng
-    du-lieu.tmp       File tạm trong lúc ghi; không phải nguồn dữ liệu khi khởi động
-```
+| File trong `data/` | Loại bản ghi | Số bản ghi mẫu |
+| --- | --- | ---: |
+| [tai-khoan.txt](../data/tai-khoan.txt) | `TAI_KHOAN` | 50 |
+| [san-pham.txt](../data/san-pham.txt) | `SAN_PHAM` | 50 |
+| [bien-the.txt](../data/bien-the.txt) | `BIEN_THE` | 50 |
+| [khuyen-mai.txt](../data/khuyen-mai.txt) | `KHUYEN_MAI` | 50 |
+| [phieu-nhap.txt](../data/phieu-nhap.txt) | `PHIEU_NHAP` | 50 |
+| [chi-tiet-phieu-nhap.txt](../data/chi-tiet-phieu-nhap.txt) | `CT_PHIEU_NHAP` | 50 |
+| [don-hang.txt](../data/don-hang.txt) | `DON_HANG` | 50 |
+| [chi-tiet-don-hang.txt](../data/chi-tiet-don-hang.txt) | `CT_DON_HANG` | 50 |
+| **Tổng** | **8 loại** | **400** |
 
-Một file chứa nhiều bảng giúp một lần thay file cập nhật đồng thời đơn, tồn và điểm. Không tạo riêng `diem.txt`, `ton-kho.txt` hoặc `doanh-thu.txt` vì dễ lưu được bảng này nhưng mất bảng kia. Các file tài liệu vẫn tách riêng theo chủ đề.
+Các lớp con tài khoản dùng chung file `tai-khoan.txt`, phân biệt bằng `vaiTro`; hai lớp khuyến mãi dùng chung file `khuyen-mai.txt`, phân biệt bằng `loaiKhuyenMai`. Enum, interface và lớp quản lý không có file dữ liệu riêng. Tồn và điểm vẫn là thuộc tính trong bản ghi SKU/tài khoản, được đối chiếu với chứng từ; không tạo thêm bảng tồn/điểm/doanh thu.
 
-Quy ước định dạng:
+Quy ước định dạng cho **từng file**:
 
 1. UTF-8, mỗi bản ghi một dòng, cột phân cách bằng `|`.
-2. Dòng đầu chính xác `VNM|1`. Dòng cuối `END|N`, trong đó N là số bản ghi dữ liệu, không tính hai dòng đầu/cuối.
-3. Không có dòng tiêu đề cột trong dữ liệu thật; không có dòng trống ở giữa. Chấp nhận kết thúc dòng cuối bằng newline.
+2. Dòng đầu chính xác `VNM|1`. Dòng cuối `END|N`, trong đó N là số bản ghi trong chính file đó, không tính hai dòng đầu/cuối. Mỗi file mẫu có 52 dòng và kết thúc bằng `END|50`.
+3. File chỉ chứa đúng loại bản ghi đã quy định; không có dòng tiêu đề cột hoặc dòng trống ở giữa. Chấp nhận newline cuối file.
 4. `true`/`false` cho boolean; số không có dấu phân cách hàng nghìn; ngày `yyyy-MM-dd`, thời điểm `yyyy-MM-dd'T'HH:mm:ss`.
 5. Trường tùy chọn trống biểu diễn null; không ghi chuỗi `null`. Đọc bằng `split("\\|", -1)` để giữ cột trống cuối dòng.
-6. Trường văn bản không chứa `|`, `\r`, `\n`; báo lỗi và yêu cầu nhập lại. Phiên bản nhỏ này chưa cần cơ chế escape; tên tiếng Việt, dấu phẩy và dấu nháy được giữ bình thường.
-7. Kiểm tra số cột chính xác, enum hợp lệ, số trong miền giá trị, ID duy nhất, đủ dòng kết thúc và đúng số bản ghi. Không bỏ qua dòng lỗi.
+6. Trường văn bản không chứa `|`, `\r`, `\n`; báo lỗi và yêu cầu nhập lại. Tên tiếng Việt, dấu phẩy và dấu nháy được giữ bình thường.
+7. Kiểm tra số cột, enum, miền giá trị, ID duy nhất, đủ dòng kết thúc và đúng số bản ghi; không bỏ qua dòng lỗi.
 
-Ví dụ hai bản ghi dữ liệu danh mục (chỉ minh họa từng dòng, **không phải file đầy đủ để nạp**):
+Ví dụ một dòng trong `san-pham.txt` và một dòng trong `bien-the.txt` (chỉ minh họa, chưa đủ để nạp hệ thống):
 
 ```text
 SAN_PHAM|SP001|Sữa tươi có đường|Vinamilk|hộp|180 ml||SUA|true
 BIEN_THE|BT002|SP001|Lốc 4 hộp 180 ml|LOC|4|30000|20|true
 ```
 
-Khi triển khai, mã thật dùng UUID; cần có tài khoản quản lý, phiếu nhập tạo ra tồn đầu và các bản ghi liên quan thì file mới hợp lệ. Không phát sinh lại mã cho đối tượng cũ khi đọc file.
-
-Bộ dữ liệu mẫu đầy đủ nằm tại [`data/du-lieu.txt`](../data/du-lieu.txt), dùng UUID và có **60 bản ghi dữ liệu**, đáp ứng yêu cầu ít nhất 50 bản ghi trong file text. Xem thành phần và tài khoản thực hành ở mục 4.
+Bộ mẫu dùng UUID. Mã đối tượng được giữ nguyên khi đọc; tồn đầu phải có phiếu nhập hỗ trợ và điểm phải khớp các đơn đã thanh toán.
 
 ## 2. Quy trình đọc
 
-1. Xác định cố định đường dẫn dữ liệu của dự án; không lặng lẽ đọc một file khác do thay thư mục chạy.
-2. Nếu chưa có file, chỉ khởi tạo sau xác nhận và tạo quản lý đầu tiên. Nếu file có nhưng rỗng/lỗi/không đọc được, dừng và báo nguyên nhân; giữ nguyên file.
-3. Đọc và phân tích vào các danh sách **tạm**, chưa thay danh sách instance trong sáu đối tượng quản lý đang sử dụng. `Main` truyền cùng sáu đối tượng này cho `LuuTruText` và `DichVuCuaHang`.
-4. Tạo đúng lớp con theo `vaiTro` hoặc `loaiKhuyenMai`. Ghép chi tiết vào đơn/phiếu đúng mã; phát hiện chi tiết mồ côi, trùng dòng hoặc chứng từ rỗng.
-5. Kiểm tra khóa ngoại và vai trò của các bên, công thức tiền, điểm, tồn và ít nhất một quản lý đang hoạt động. Tài khoản từng lập chứng từ có thể hiện đã bị khóa; vẫn phải giữ và đọc được lịch sử.
-6. Chỉ khi toàn bộ đồ thị dữ liệu hợp lệ mới gọi `napDanhSach(List<T> duLieuDaKiemTra)` có phạm vi package-private trên cả sáu đối tượng quản lý. Dùng `clear`/`addAll` trên `protected final List<T> danhSach` của lớp cha `DanhSach<T>`; giữ nguyên các đối tượng quản lý và tham chiếu danh sách, chỉ thay nội dung. Danh sách chi tiết thuộc từng đơn/phiếu được dựng và ghép trong vùng tạm trước khi công bố.
+1. `Main` truyền đường dẫn **thư mục** `data/` cùng sáu đối tượng quản lý cho `LuuTruText`. Nếu có nhật ký phục hồi `.phuc-hoi.txt`, khôi phục bộ dữ liệu trước lần ghi bị gián đoạn trước khi kiểm tra/nạp.
+2. Chỉ cho khởi tạo khi chưa có file dữ liệu nào. Nếu đã có một phần trong tám file, thiếu file còn lại là lỗi, không được khởi tạo đè. File rỗng/hỏng/không đọc được cũng phải báo lỗi và giữ nguyên.
+3. Đọc đủ tám file, kiểm tra phần đầu/cuối, số dòng và loại bản ghi từng file. Lỗi định dạng chỉ rõ tên file và dòng tương ứng.
+4. Phân tích vào vùng **tạm**: tạo đúng lớp con, ghép chi tiết theo mã đơn/phiếu; phát hiện chi tiết mồ côi, trùng dòng hoặc chứng từ rỗng.
+5. Kiểm tra khóa ngoại, vai trò, công thức tiền, điểm, tồn và ít nhất một quản lý đang hoạt động. Tài khoản đã khóa vẫn được giữ để đọc lịch sử.
+6. Chỉ khi toàn bộ dữ liệu hợp lệ mới gọi `napDanhSach(...)` trên cả sáu đối tượng quản lý. Giữ nguyên các đối tượng quản lý dùng chung, chỉ thay nội dung danh sách; không nạp dở nếu một file lỗi.
 
-Nạp file và phục hồi RAM đều dùng luồng nạp nội bộ trên, không gọi `them(...)` dành cho tạo mới. Tồn, điểm và trạng thái lịch sử đã đối chiếu hợp lệ phải được khôi phục nguyên giá trị; quy tắc tồn/điểm ban đầu bằng 0 chỉ áp dụng khi tạo tài khoản/SKU mới.
+`xuatThanhChuoi()` và `napTuChuoi(...)` vẫn dùng biểu diễn gộp trong RAM để phục hồi giao dịch. Đây không phải file dữ liệu chính. Nạp và phục hồi không gọi `them(...)` dành cho tạo mới, vì tồn/điểm lịch sử phải được giữ nguyên sau khi kiểm tra.
 
-Kiểm tra đối chiếu bắt buộc trong phạm vi chưa có trả hàng/điều chỉnh thủ công:
+Đối chiếu bắt buộc:
 
 ```text
-tonMoiSKU = tổng lượng nhập SKU − tổng lượng SKU trong các đơn DA_THANH_TOAN
+tonThucTeMoiSKU = tổng lượng nhập SKU − tổng lượng SKU trong các đơn DA_THANH_TOAN
+tonKhaDungMoiSKU = tonThucTeMoiSKU − tổng lượng SKU trong các đơn CHO_THANH_TOAN
 diemKhach = tổng diemCong − tổng diemSuDung trên các đơn DA_THANH_TOAN của khách
 ```
 
-SKU và tài khoản mới đều bắt đầu ở 0; tồn đầu kỳ phải được tạo bằng phiếu nhập, điểm ban đầu không tặng thêm. Nếu tổng đối chiếu lệch giá trị lưu, báo lỗi dữ liệu thay vì tự sửa âm thầm. Chưa cần bảng sổ kho/sổ điểm riêng vì đã có chứng từ gốc.
+SKU và khách hàng mới bắt đầu ở 0. File vẫn lưu tồn thực tế; sau khi kiểm tra chứng từ, nạp lại lượng giữ từ đơn chờ trước khi công bố dữ liệu. Dữ liệu cũ không cần chuyển định dạng; khởi động lại hoặc phục hồi giao dịch không giữ trùng. Nếu đối chiếu lệch hoặc đơn chờ giữ vượt tồn thực tế, báo lỗi thay vì tự sửa dữ liệu.
 
 ## 3. Quy trình ghi và nhất quán RAM–file
 
-Áp dụng cho mọi thao tác thay đổi dữ liệu, kể cả đăng ký, sửa giá, hủy đơn, nhập hàng và thanh toán; không đợi thoát chương trình mới lưu.
+Áp dụng sau mọi thay đổi nghiệp vụ, không đợi thoát chương trình:
 
-1. Dịch vụ kiểm tra quyền và điều kiện, hiển thị nội dung cuối cho người dùng xác nhận.
-2. Giữ bản text của trạng thái hiện tại trong RAM để có thể phục hồi. `LuuTruText` đọc `xuat()` từ các đối tượng quản lý chung và các chi tiết thuộc từng chứng từ để định dạng bản text này. Không in hoặc ghi bản này ra log vì có dữ liệu tài khoản.
-3. Cập nhật các đối tượng trong RAM theo nghiệp vụ; kiểm tra tính hợp lệ của trạng thái dự kiến. Trong giai đoạn này không nhận thao tác khác.
-4. Ghi toàn bộ trạng thái mới vào `du-lieu.tmp` cùng thư mục/file system với file chính; đóng writer thành công. Không ghi đè trực tiếp file chính.
-5. Thay file chính bằng `Files.move` với yêu cầu `ATOMIC_MOVE`. **Chỉ khi move thành công mới coi giao dịch được lưu.** Việc thay thế đích đang tồn tại phụ thuộc file system; cần kiểm chứng trên môi trường chạy. Nếu không hỗ trợ thay thế nguyên tử, báo lỗi và giữ file cũ, không tự hạ xuống cách ghi thiếu an toàn. [Java 26 — Files.move](https://docs.oracle.com/en/java/javase/26/docs/api/java.base/java/nio/file/Files.html#move(java.nio.file.Path,java.nio.file.Path,java.nio.file.CopyOption...)).
-6. Nếu thất bại trước bước commit, phân tích và kiểm tra toàn bộ bản cũ rồi phục hồi nội dung vào đúng sáu đối tượng quản lý qua `napDanhSach`, giữ nguyên danh tính của chúng; bỏ tham chiếu phần tử đang thao tác và tra lại theo mã, báo chưa hoàn tất. Nếu phục hồi cũng lỗi, dừng ứng dụng, không tiếp tục giao dịch với RAM chưa chắc đúng.
-7. Sau commit, giữ RAM mới và mới hiển thị thành công. Lỗi in hóa đơn sau commit không được rollback hoặc thu tiền lần nữa; tra mã đơn và hiển thị lại.
+1. Dịch vụ kiểm tra quyền/điều kiện và giữ bản text trạng thái cũ trong RAM.
+2. Cập nhật RAM, xuất và kiểm tra toàn bộ trạng thái mới.
+3. Chuẩn bị đủ tám file `<tên-file>.tmp` trong `data/`; chưa thay file dữ liệu chính.
+4. Ghi trạng thái cũ vào `.phuc-hoi.tmp`, rồi đổi tên nguyên tử thành `.phuc-hoi.txt`. Khi khởi tạo lần đầu, nhật ký dùng dấu `MOI` để biết cần xóa bộ file đang tạo nếu lưu thất bại.
+5. Thay lần lượt tám file bằng `Files.move(..., ATOMIC_MOVE)`. Chỉ xóa `.phuc-hoi.txt` sau khi thay đủ cả bộ; lúc đó mới coi giao dịch lưu thành công.
+6. Nếu ghi thất bại, dùng nhật ký khôi phục bộ file cũ và dịch vụ phục hồi RAM từ bản chụp. Nếu không phục hồi được, dừng ứng dụng và giữ nhật ký để xử lý; không tiếp tục với dữ liệu chưa nhất quán.
+7. Nếu chương trình bị dừng trong khi nhật ký còn tồn tại, lần khởi động sau khôi phục bộ cũ trước khi nạp. File `.tmp` đơn lẻ không được dùng thay dữ liệu chính.
 
-Phiên đăng nhập nên giữ mã tài khoản hoặc tra lại tài khoản theo mã sau phục hồi, vì đối tượng cũ có thể đã được thay bằng đối tượng mới. Nếu tiến trình dừng sau commit nhưng trước khi in, lần mở lại file đã có trạng thái hoàn tất; thao tác thanh toán lặp bị chặn theo trạng thái đơn.
+Lỗi xuất hóa đơn sau khi lưu thành công không làm hoàn tác giao dịch hoặc thu tiền lần nữa. Phiên đăng nhập giữ mã tài khoản và tra lại sau phục hồi vì phần tử trong danh sách có thể đã được dựng lại.
 
-File tạm còn sót không được tự nạp thay file chính. Chỉ chạy một tiến trình với thư mục dữ liệu này; mô hình không giải quyết ghi đồng thời giữa nhiều JVM. Thay file nguyên tử hạn chế file bị ghi dở, không phải cam kết chống mọi lỗi ổ đĩa/mất điện. Sao lưu file đã đóng sau buổi thực hành; không sửa dữ liệu bằng tay khi chương trình đang chạy.
+Chỉ chạy một tiến trình với thư mục dữ liệu này. Cơ chế phục hồi xử lý lần ghi bị gián đoạn; chưa có `fsync` nên không cam kết chống mất điện hoặc lỗi ổ đĩa. Không sửa tay các file khi ứng dụng đang chạy; sao lưu cả tám file cùng lúc khi ứng dụng đã đóng.
 
-## 4. Bộ dữ liệu mẫu tối thiểu 50 bản ghi
+## 4. Bộ dữ liệu mẫu 50 bản ghi mỗi loại
 
-File [`data/du-lieu.txt`](../data/du-lieu.txt) có 62 dòng: `VNM|1`, 60 bản ghi và `END|60`. Số lượng tối thiểu 50 được tính trên tổng bản ghi của các bảng, không tính dòng đầu/cuối và không yêu cầu mỗi bảng có 50 dòng.
+Bộ mẫu có đúng **50 bản ghi mỗi file, tổng 400 bản ghi**, không tính dòng `VNM|1` và `END|50`. Con số 50 là kích thước bộ mẫu; ứng dụng vẫn cho thêm dữ liệu và lưu đúng `END|N` theo số lượng hiện tại.
 
-| Loại bản ghi | Số lượng |
-| --- | ---: |
-| `TAI_KHOAN` | 5 |
-| `SAN_PHAM` | 5 |
-| `BIEN_THE` | 15 |
-| `KHUYEN_MAI` | 3 |
-| `PHIEU_NHAP` | 1 |
-| `CT_PHIEU_NHAP` | 15 |
-| `DON_HANG` | 8 |
-| `CT_DON_HANG` | 8 |
-| **Tổng** | **60** |
-
-Bộ mẫu có đủ ba vai trò, năm nhóm hàng và ba kiểu đóng gói. Phiếu nhập ngày 01/10/2026 tạo tồn 100 cho từng SKU; năm đơn đã thanh toán trừ tồn và cập nhật điểm, hai đơn chờ và một đơn hủy không làm đổi tồn/điểm. Có đơn vãng lai, đơn dùng điểm, hai loại khuyến mãi và hai ưu đãi cùng SKU để kiểm tra chọn mức giảm tốt nhất. Ngày và giá chỉ dùng minh họa cho đồ án.
+Bộ mẫu gồm 1 quản lý, 1 nhân viên và 48 khách hàng; đủ năm nhóm hàng, ba kiểu đóng gói, hai loại khuyến mãi và ba trạng thái đơn. Tám đơn tháng 10 giữ nguyên lịch sử và kết quả tiền/điểm/tồn. Mười lăm dòng nhập ngày 01/10 được chia thành 15 phiếu, mỗi phiếu một dòng; thêm 35 phiếu và 42 đơn trong tháng 11. Vì vậy mỗi phiếu/đơn đều có một dòng chi tiết và báo cáo tháng 10 vẫn giữ kết quả cũ. Ngày và giá chỉ dùng minh họa đồ án.
 
 | Tên đăng nhập mẫu | Vai trò | Điểm hiện có |
 | --- | --- | ---: |
@@ -94,7 +87,8 @@ Bộ mẫu có đủ ba vai trò, năm nhóm hàng và ba kiểu đóng gói. Ph
 | `demo.khach01` | Khách hàng | 2 |
 | `demo.khach02` | Khách hàng | 6 |
 | `demo.khach03` | Khách hàng | 6 |
+| `demo.khach04`…`demo.khach48` | Khách hàng | Theo đơn đã thanh toán |
 
-Mật khẩu thực hành cho các tài khoản trên là `VnmDemo!2026`. File chỉ lưu PBKDF2-HMAC-SHA256 với 600000 vòng, salt ngẫu nhiên riêng 16 byte và hash 32 byte, mã hóa Base64. Các tài khoản này chỉ phục vụ bộ mẫu; khi khởi tạo hệ thống mới, người vận hành vẫn tự nhập tài khoản quản lý đầu tiên theo mục 2.
+Mật khẩu thực hành là `VnmDemo!2026`. File lưu PBKDF2-HMAC-SHA256 với 600000 vòng, salt riêng 16 byte và hash 32 byte, mã hóa Base64. Khi khởi tạo hệ thống mới, người vận hành tự nhập tài khoản quản lý đầu tiên.
 
-Khi thay đổi bộ mẫu, phải giữ ít nhất 50 bản ghi, cập nhật `END|N` và đối chiếu lại khóa ngoại, tiền, tồn và điểm. Bộ mẫu dùng cho việc triển khai/kiểm thử; `LuuTruText` nạp và kiểm tra toàn bộ bộ mẫu khi khởi động (KT33 trong `KiemThu`).
+Khi đổi bộ mẫu, giữ đủ 50 bản ghi từng loại, cập nhật `END|N` từng file và kiểm tra khóa ngoại, tiền, tồn, điểm. `KiemThu` kiểm tra số lượng và nạp bộ mẫu bằng chính `LuuTruText`.

@@ -23,13 +23,13 @@ Thư mục `lop/` có **32 file riêng**, ví dụ [TaiKhoan](lop/TaiKhoan.md), 
 - Ba loại tài khoản: khách hàng, nhân viên bán hàng, quản lý cửa hàng.
 - Năm nhóm hàng: sữa, sữa chua, kem, nước giải khát, phô mai; quy cách bán lẻ, lốc, thùng nằm ở biến thể sản phẩm.
 - Mỗi biến thể có mã bán hàng, giá và tồn kho riêng. Không tự chuyển tồn giữa hộp, lốc và thùng.
-- Đặt hàng là yêu cầu mua và nhận tại cửa hàng. Chỉ thanh toán thành công mới ghi nhận doanh thu, trừ hàng và cập nhật điểm.
+- Đặt hàng giữ ngay tồn khả dụng; hủy đơn chờ sẽ hoàn lượng đã giữ. Thanh toán xuất hàng đã giữ, ghi nhận doanh thu và cập nhật điểm, không trừ khả dụng lần nữa.
 - Dùng kế thừa cho tài khoản và khuyến mãi; dùng composition cho đơn hàng và các dòng chi tiết.
 - `IQuanLy<T>` khai báo xuất, thêm, sửa, xóa; lớp cha generic `DanhSach<T>` implements interface; tám lớp danh sách kế thừa với kiểu phần tử tương ứng.
 - Sáu đối tượng `QuanLy...` được tạo một lần trong `Main`, dùng chung qua constructor của dịch vụ/lưu trữ; chi tiết vẫn thuộc riêng từng chứng từ.
-- Lưu các bảng logic trong một file `data/du-lieu.txt`, để một lần ghi chứa đầy đủ thay đổi của đơn hàng, tồn kho và điểm.
+- Lưu tám bảng logic trong tám file text riêng tại `data/`; ghi theo bộ với nhật ký phục hồi để giữ đơn hàng, tồn kho và điểm nhất quán.
 
-Bộ dữ liệu mẫu tại [`data/du-lieu.txt`](../data/du-lieu.txt) có **60 bản ghi**, vượt yêu cầu tối thiểu 50 bản ghi, gồm đủ tám bảng logic. Thành phần và tài khoản thực hành được mô tả trong [mục dữ liệu mẫu](07-luu-tru-file-text.md#4-bộ-dữ-liệu-mẫu-tối-thiểu-50-bản-ghi).
+Bộ dữ liệu mẫu trong [`data/`](../data/) có **50 bản ghi mỗi loại, tổng 400 bản ghi** ở tám file. Tên file, thành phần và tài khoản thực hành nằm trong [lưu trữ file text](07-luu-tru-file-text.md).
 
 ## Cấu trúc quản lý danh sách
 
@@ -40,7 +40,7 @@ Ví dụ `QuanLySanPham extends DanhSach<SanPham>` thực hiện `IQuanLy<SanPha
 - `src/cuahang/`: 32 file `.java`, mỗi lớp/interface/enum trong thiết kế một file, cùng package `cuahang`. Điểm vào duy nhất là `cuahang.Main`.
 - `test/cuahang/KiemThu.java`: một file self-check (không dùng framework) kiểm chứng các tình huống trong [kế hoạch kiểm thử](08-ke-hoach-kiem-thu.md). File này nằm ngoài `src/` nên không làm đổi con số 32 kiểu.
 
-Chạy từ thư mục gốc dự án (đường dẫn dữ liệu là `data/du-lieu.txt` tính từ thư mục chạy; chương trình in đường dẫn tuyệt đối khi khởi động):
+Chạy từ thư mục gốc dự án (đường dẫn thư mục dữ liệu là `data/` tính từ thư mục chạy; chương trình in đường dẫn tuyệt đối khi khởi động):
 
 ```bash
 javac -d out $(find src -name '*.java') && java -cp out cuahang.Main
@@ -58,7 +58,7 @@ Chạy kiểm thử end-to-end qua giao diện console (gõ sẵn phím vào ch�
 bash test/e2e.sh
 ```
 
-Đăng nhập thử bằng `demo.quanly`, `demo.nhanvien`, `demo.khach01`… với mật khẩu `VnmDemo!2026`. Chương trình ghi thẳng vào `data/du-lieu.txt` sau mỗi thao tác và lưu hóa đơn vào thư mục `hoa-don/` ở thư mục chạy; muốn quay về bộ mẫu thì chạy `git restore data/du-lieu.txt`. Nếu chưa có file dữ liệu, chương trình hỏi xác nhận rồi tạo quản lý đầu tiên.
+Đăng nhập thử bằng `demo.quanly`, `demo.nhanvien`, `demo.khach01`… với mật khẩu `VnmDemo!2026`. Chương trình lưu bộ tám file trong `data/` sau mỗi thao tác và lưu hóa đơn vào thư mục `hoa-don/` ở thư mục chạy; muốn quay về bộ mẫu thì chạy `git restore data/`. Nếu chưa có file dữ liệu nào, chương trình hỏi xác nhận rồi tạo quản lý đầu tiên; thiếu một phần bộ file thì báo lỗi.
 
 Mã nguồn không dùng tính năng preview, tính năng riêng của JDK 26 hay thư viện ngoài JDK; đã chạy và kiểm thử với JDK 25, chạy được trên JDK 26.
 

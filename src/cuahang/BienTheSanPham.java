@@ -9,6 +9,7 @@ public class BienTheSanPham {
     private final KieuDongGoi kieuDongGoi;
     private final int soDonViCoSo;
     private int soLuongTon;
+    private int soLuongDaGiu;
     private long giaBan;
     private boolean dangKinhDoanh;
 
@@ -65,9 +66,28 @@ public class BienTheSanPham {
         if (soLuong <= 0) {
             throw new IllegalArgumentException("Lượng giảm tồn phải dương.");
         }
-        if (soLuong > soLuongTon) {
-            throw new IllegalArgumentException("Không đủ tồn cho " + tenQuyCach + ": còn " + soLuongTon + ".");
+        if (soLuong > getSoLuongTon()) {
+            throw new IllegalArgumentException("Không đủ tồn cho " + tenQuyCach + ": còn " + getSoLuongTon() + ".");
         }
+        soLuongTon -= soLuong;
+    }
+
+    void giuTon(int soLuong) {
+        if (soLuong <= 0 || soLuong > getSoLuongTon()) {
+            throw new IllegalArgumentException("Không đủ tồn để giữ hàng " + tenQuyCach + ": còn " + getSoLuongTon() + ".");
+        }
+        soLuongDaGiu += soLuong;
+    }
+
+    void hoanTon(int soLuong) {
+        if (soLuong <= 0 || soLuong > soLuongDaGiu) {
+            throw new IllegalArgumentException("Số lượng hoàn phải dương và không vượt số hàng đang giữ.");
+        }
+        soLuongDaGiu -= soLuong;
+    }
+
+    void xuatHangDaGiu(int soLuong) {
+        hoanTon(soLuong);
         soLuongTon -= soLuong;
     }
 
@@ -116,7 +136,13 @@ public class BienTheSanPham {
         return soDonViCoSo;
     }
 
+    /** Tồn khả dụng, đã trừ lượng giữ cho các đơn chờ thanh toán. */
     public int getSoLuongTon() {
+        return soLuongTon - soLuongDaGiu;
+    }
+
+    /** Tồn thực tế dùng để lưu file và đối chiếu nhập − bán. */
+    int getSoLuongTonThucTe() {
         return soLuongTon;
     }
 

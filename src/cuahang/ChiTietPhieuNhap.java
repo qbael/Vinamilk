@@ -9,7 +9,7 @@ public class ChiTietPhieuNhap {
 
     public ChiTietPhieuNhap(String maBienThe, String tenSanPhamLucNhap, String tenQuyCachLucNhap, int soLuong,
                             long donGiaNhap) {
-        this.maBienThe = LuuTruText.vanBan(maBienThe, "Mã SKU");
+        this.maBienThe = LuuTruText.vanBan(maBienThe, "Mã sản phẩm");
         this.tenSanPhamLucNhap = LuuTruText.vanBan(tenSanPhamLucNhap, "Tên sản phẩm lúc nhập");
         this.tenQuyCachLucNhap = LuuTruText.vanBan(tenQuyCachLucNhap, "Tên quy cách lúc nhập");
         if (soLuong <= 0) {

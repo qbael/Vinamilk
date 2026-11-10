@@ -33,4 +33,4 @@ Các phương thức dưới đây là instance; `xuat()` kế thừa `public fi
 - Phiếu đã ghi nhận bất biến, không sửa/xóa; nhập lại cùng mã bị từ chối. SKU ngừng bán vẫn có thể nhập nhưng không tự được mở bán lại.
 - Chi nhập trong kỳ là tổng `tinhTongTien()` của các phiếu phù hợp. Phiếu không có công nợ hoặc trạng thái chờ trong phiên bản đầu.
 - Danh sách trả về dùng `List.copyOf`, chỉ ngăn sửa cấu trúc; giao diện chỉ đọc và không được thay đổi phiếu đã ghi nhận.
-- Lớp không có bảng/file riêng; phiếu và dòng con ánh xạ `PHIEU_NHAP`/`CT_PHIEU_NHAP`. [LuuTruText](LuuTruText.md) đảm nhiệm lưu cùng tồn và dữ liệu khác.
+- Lớp quản lý không có bản ghi riêng; phiếu và dòng con lưu ở `phieu-nhap.txt`/`chi-tiet-phieu-nhap.txt`. [LuuTruText](LuuTruText.md) đảm nhiệm lưu cùng tồn và dữ liệu khác.

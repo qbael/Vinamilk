@@ -286,7 +286,7 @@ public class DichVuCuaHang {
         yeuCauQuanLy(maQuanLy);
         BienTheSanPham cu = timBienTheCoSan(maBienThe);
         BienTheSanPham moi = new BienTheSanPham(maBienThe, cu.getMaSanPham(), cu.getTenQuyCach(),
-                cu.getKieuDongGoi(), cu.getSoDonViCoSo(), giaBan, cu.getSoLuongTon(), dangKinhDoanh);
+                cu.getKieuDongGoi(), cu.getSoDonViCoSo(), giaBan, cu.getSoLuongTonThucTe(), dangKinhDoanh);
         giaoDich(() -> quanLyBienThe.sua(maBienThe, moi));
     }
 
@@ -380,7 +380,7 @@ public class DichVuCuaHang {
         }
         ChiTietDonHang cu = gio.timTheoBienThe(maBienThe);
         int tong = cu == null ? soLuong : Math.addExact(cu.getSoLuong(), soLuong);
-        ChiTietDonHang dong = dongBan(timBienTheDangBan(maBienThe), tong, null, 0);
+        ChiTietDonHang dong = dongBan(timBienTheDangBan(maBienThe), tong, null, 0, true);
         if (cu == null) {
             gio.them(dong);
         } else {
@@ -391,7 +391,7 @@ public class DichVuCuaHang {
     /** Đặt lại số lượng một dòng trong giỏ (thay, không cộng). */
     public void suaSoLuongTrongGio(String maNguoiGoi, DanhSachChiTietDonHang gio, String maBienThe, int soLuongMoi) {
         yeuCau(maNguoiGoi);
-        gio.sua(maBienThe, dongBan(timBienTheDangBan(maBienThe), soLuongMoi, null, 0));
+        gio.sua(maBienThe, dongBan(timBienTheDangBan(maBienThe), soLuongMoi, null, 0, true));
     }
 
     public void xoaKhoiGio(String maNguoiGoi, DanhSachChiTietDonHang gio, String maBienThe) {
@@ -402,7 +402,7 @@ public class DichVuCuaHang {
     /** Bảng giá tạm tính của giỏ theo giá và khuyến mãi hôm nay; không lưu gì. */
     public DanhSachChiTietDonHang baoGia(String maNguoiGoi, DanhSachChiTietDonHang gio) {
         yeuCau(maNguoiGoi);
-        return tinhGia(gio.xuat(), homNay());
+        return tinhGia(gio.xuat(), homNay(), true);
     }
 
     /** Khách tự đặt đơn nhận tại cửa hàng; đơn luôn gắn chính khách đang đăng nhập. */
@@ -421,8 +421,13 @@ public class DichVuCuaHang {
     }
 
     private String luuDonMoi(String maKhachHang, String maNguoiLap, DanhSachChiTietDonHang gio) {
-        DonHang don = new DonHang(maKhachHang, maNguoiLap, tinhGia(gio.xuat(), homNay()), bayGio());
-        giaoDich(() -> quanLyDonHang.them(don));
+        DonHang don = new DonHang(maKhachHang, maNguoiLap, tinhGia(gio.xuat(), homNay(), true), bayGio());
+        giaoDich(() -> {
+            quanLyDonHang.them(don);
+            for (ChiTietDonHang ct : don.getChiTiet()) {
+                quanLyBienThe.timTheoMa(ct.getMaBienThe()).giuTon(ct.getSoLuong());
+            }
+        });
         return don.getMaDonHang();
     }
 
@@ -447,14 +452,19 @@ public class DichVuCuaHang {
         return don;
     }
 
-    /** Hủy đơn chờ: chỉ đổi trạng thái, không hoàn tồn/điểm vì đơn chờ chưa trừ. */
+    /** Hủy đơn chờ và trả lượng hàng đang giữ về tồn khả dụng trong cùng một lần lưu. */
     public void huyDon(String maNguoiGoi, String maDonHang) {
         DonHang don = xemDon(maNguoiGoi, maDonHang);
         if (don.getTrangThai() != TrangThaiDonHang.CHO_THANH_TOAN) {
             throw new IllegalStateException("Chỉ hủy được đơn đang chờ thanh toán (đơn này: "
                     + don.getTrangThai().getTenHienThi() + ").");
         }
-        giaoDich(() -> quanLyDonHang.timTheoMa(maDonHang).huy());
+        giaoDich(() -> {
+            quanLyDonHang.timTheoMa(maDonHang).huy();
+            for (ChiTietDonHang ct : don.getChiTiet()) {
+                quanLyBienThe.timTheoMa(ct.getMaBienThe()).hoanTon(ct.getSoLuong());
+            }
+        });
     }
 
     /** Lịch sử điểm: các đơn đã thanh toán của khách (điểm dùng/cộng nằm trên đơn). */
@@ -473,7 +483,7 @@ public class DichVuCuaHang {
         if (don.getMaKhachHang() == null) {
             return 0;
         }
-        DanhSachChiTietDonHang dong = tinhGia(don.getChiTiet(), homNay());
+        DanhSachChiTietDonHang dong = tinhGia(don.getChiTiet(), homNay(), false);
         return Math.min(khachDangHoatDong(don.getMaKhachHang()).getDiemTichLuy(),
                 DonHang.diemToiDaTheoTien(dong.tinhTongTienHang() - dong.tinhTongGiam()));
     }
@@ -490,7 +500,7 @@ public class DichVuCuaHang {
     }
 
     /**
-     * Thu tiền: tính lại, đối chiếu với tổng khách đã xác nhận, rồi chốt đơn + trừ tồn
+     * Thu tiền: tính lại, đối chiếu với tổng khách đã xác nhận, rồi chốt đơn + xuất hàng đã giữ
      * + trừ/cộng điểm trong cùng một lần lưu. Chỉ trả về khi đã lưu thành công.
      */
     public DonHang thanhToan(String maNguoiThu, String maDonHang, int diemSuDung, long tongDaXacNhan) {
@@ -505,7 +515,7 @@ public class DichVuCuaHang {
                         "Số tiền phải trả đã thay đổi so với bảng tính khách xác nhận; hãy xem lại.");
             }
             for (ChiTietDonHang ct : dh.getChiTiet()) {
-                quanLyBienThe.timTheoMa(ct.getMaBienThe()).giamTon(ct.getSoLuong());
+                quanLyBienThe.timTheoMa(ct.getMaBienThe()).xuatHangDaGiu(ct.getSoLuong());
             }
             if (dh.getMaKhachHang() != null) {
                 KhachHang khach = (KhachHang) quanLyTaiKhoan.timTheoMa(dh.getMaKhachHang());
@@ -537,7 +547,7 @@ public class DichVuCuaHang {
                 throw new IllegalArgumentException("Khách không đủ điểm: hiện có " + diemCo + ".");
             }
         }
-        return tinhGia(don.getChiTiet(), ngay);
+        return tinhGia(don.getChiTiet(), ngay, false);
     }
 
     private KhachHang khachDangHoatDong(String maKhachHang) {
@@ -552,9 +562,9 @@ public class DichVuCuaHang {
 
     /**
      * Dựng danh sách dòng mới theo giá bán và khuyến mãi tốt nhất của ngày cho cả dòng.
-     * Mọi SKU phải đang bán và đủ tồn; không tự bỏ dòng nào.
+     * Mọi SKU phải đang bán; giỏ chưa giữ hàng phải đủ tồn khả dụng. Không tự bỏ dòng nào.
      */
-    private DanhSachChiTietDonHang tinhGia(List<ChiTietDonHang> dong, LocalDate ngay) {
+    private DanhSachChiTietDonHang tinhGia(List<ChiTietDonHang> dong, LocalDate ngay, boolean kiemTraTon) {
         if (dong.isEmpty()) {
             throw new IllegalArgumentException("Giỏ hàng đang trống.");
         }
@@ -563,7 +573,7 @@ public class DichVuCuaHang {
             BienTheSanPham bt = timBienTheDangBan(ct.getMaBienThe());
             KhuyenMai km = quanLyKhuyenMai.timTotNhat(bt.getMaBienThe(), ngay, bt.getGiaBan(), ct.getSoLuong());
             ketQua.them(dongBan(bt, ct.getSoLuong(), km == null ? null : km.getMaKhuyenMai(),
-                    km == null ? 0 : km.tinhTienGiam(bt.getGiaBan(), ct.getSoLuong())));
+                    km == null ? 0 : km.tinhTienGiam(bt.getGiaBan(), ct.getSoLuong()), kiemTraTon));
         }
         return ketQua;
     }
@@ -576,9 +586,9 @@ public class DichVuCuaHang {
         return bt;
     }
 
-    /** Dòng bán chụp tên/giá hiện tại; số lượng không vượt tồn hiện có. */
-    private ChiTietDonHang dongBan(BienTheSanPham bt, int soLuong, String maKhuyenMai, long tienGiam) {
-        if (soLuong > bt.getSoLuongTon()) {
+    /** Dòng bán chụp tên/giá hiện tại; chỉ kiểm tra tồn khả dụng cho giỏ chưa giữ hàng. */
+    private ChiTietDonHang dongBan(BienTheSanPham bt, int soLuong, String maKhuyenMai, long tienGiam, boolean kiemTraTon) {
+        if (kiemTraTon && soLuong > bt.getSoLuongTon()) {
             throw new IllegalArgumentException("Không đủ hàng " + bt.getTenQuyCach() + ": còn "
                     + bt.getSoLuongTon() + ", cần " + soLuong + ".");
         }
@@ -781,7 +791,7 @@ public class DichVuCuaHang {
         List<DongNhapXuatTon> ketQua = new ArrayList<>();
         for (BienTheSanPham bt : quanLyBienThe.xuat()) {
             long[] o = luyKe.getOrDefault(bt.getMaBienThe(), new long[6]);
-            long ton = bt.getSoLuongTon();
+            long ton = bt.getSoLuongTonThucTe();
             long tonCuoi = ton - o[2] + o[5];
             long tonDau = tonCuoi - o[1] + o[4];
             boolean lech = ton != (o[0] + o[1] + o[2]) - (o[3] + o[4] + o[5]);
@@ -837,7 +847,7 @@ public class DichVuCuaHang {
         yeuCauQuanLy(maQuanLy);
         DanhSachChiTietPhieuNhap chiTiet = new DanhSachChiTietPhieuNhap();
         for (ChiTietPhieuNhap ct : phieuDangSoan.xuat()) {
-            Math.addExact(timBienTheCoSan(ct.getMaBienThe()).getSoLuongTon(), ct.getSoLuong());
+            Math.addExact(timBienTheCoSan(ct.getMaBienThe()).getSoLuongTonThucTe(), ct.getSoLuong());
             chiTiet.them(ct);
         }
         PhieuNhap phieu = new PhieuNhap(maQuanLy, tenNguonNhap, bayGio(), chiTiet);

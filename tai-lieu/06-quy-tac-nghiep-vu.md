@@ -6,9 +6,9 @@ Các quy tắc dưới đây là đặc tả cần triển khai. Các tình hu�
 
 - Có đúng năm nhóm hàng trong `LoaiSanPham`; quy cách nằm trong `BienTheSanPham`, không kế thừa sữa từ lốc hoặc thùng.
 - Đơn vị đặt/nhập luôn là SKU. Ví dụ lốc 4 hộp, mua 3 lốc thì lượng bán là 3, số hộp mô tả là 12; chỉ tồn SKU lốc giảm 3.
-- SKU mới có tồn 0. Chỉ phiếu nhập đã ghi nhận làm tăng tồn; chỉ đơn đã thanh toán làm giảm tồn. Không cho sửa tồn trực tiếp từ menu.
+- SKU mới có tồn 0. Phiếu nhập tăng tồn thực tế; thanh toán xuất hàng đã giữ. Tồn khả dụng = tồn thực tế − lượng trên các đơn chờ thanh toán. Không cho sửa tồn trực tiếp từ menu.
 - Mỗi chứng từ có ít nhất một dòng, mỗi SKU tối đa một dòng. Số lượng nguyên dương; kiểm tra tổng sau khi gộp dòng, không chỉ kiểm tra từng lần chọn.
-- Đặt hàng kiểm tra tồn hiện tại nhưng không giữ hàng. Thanh toán phải kiểm tra lại tồn và trạng thái kinh doanh của cả sản phẩm cha và SKU.
+- Xác nhận đặt hoặc lưu đơn tại quầy giữ ngay hàng khỏi tồn khả dụng; thiếu tồn thì từ chối cả đơn. Soạn giỏ chưa giữ hàng. Hủy đơn chờ hoàn đủ lượng đã giữ; thanh toán không trừ khả dụng lần nữa, vẫn kiểm tra trạng thái kinh doanh của cả sản phẩm cha và SKU.
 - Mã/đơn vị/định lượng/quy cách đã xác định hàng hóa không được sửa thành một loại hàng khác. Đổi giá và mô tả không được viết lại dữ liệu chụp trong chứng từ cũ.
 
 ## 2. Vòng đời đơn hàng
@@ -22,7 +22,7 @@ stateDiagram-v2
 
 Không có đường chuyển từ đã thanh toán hoặc đã hủy về chờ. Một yêu cầu thanh toán lần hai trả lỗi “Đơn đã thanh toán”, không trừ tồn/điểm thêm. In lại hóa đơn là thao tác đọc.
 
-Đơn chờ có tổng tạm tính và không áp dụng điểm; tại quầy, tính lại giá/khuyến mãi hiện hành rồi khách chọn điểm. Nếu khách chưa đồng ý tổng cuối, đơn vẫn chờ, các danh sách không đổi. Đơn đã lưu không sửa người mua hoặc các dòng qua menu; muốn đổi giỏ hàng thì hủy đơn chờ và lập lại. Điều chỉnh dòng trước khi lưu vẫn được phép.
+Đơn chờ có tổng tạm tính, đã giữ hàng và không áp dụng điểm; tại quầy, tính lại giá/khuyến mãi hiện hành rồi khách chọn điểm. Nếu khách chưa đồng ý tổng cuối, đơn vẫn chờ và vẫn giữ hàng. Chỉ hủy đơn mới hoàn lượng giữ, không tự hết hạn. Đơn đã lưu không sửa người mua hoặc các dòng qua menu; muốn đổi giỏ hàng thì hủy đơn chờ và lập lại. Điều chỉnh dòng trước khi lưu vẫn được phép.
 
 ## 3. Công thức khuyến mãi
 

@@ -32,4 +32,4 @@ Quản lý chi tiết thuộc đúng một [PhieuNhap](PhieuNhap.md), theo quan 
 - Chỉ chủ sở hữu và [DichVuCuaHang](DichVuCuaHang.md) được điều phối thay đổi lúc soạn. Phiếu đã ghi nhận bất biến; giao diện không được lấy danh sách này rồi thêm/xóa dòng.
 - Sau khi kiểm tra đủ dữ liệu, constructor của phiếu gọi `khoaChinhSua()` khi nhận quyền sở hữu, kể cả phiếu dựng lại từ file. Cả ba override `them`/`sua`/`xoa` kiểm tra `daChot` trước khi thay đổi và báo `IllegalStateException` nếu đã khóa, kể cả lời gọi qua `IQuanLy<ChiTietPhieuNhap>` hoặc tham chiếu cũ của nơi soạn.
 - `List.copyOf` chỉ bảo vệ cấu trúc; phần tử phải giữ đóng gói và không cho sửa chi tiết của phiếu đã chốt. Hai phiếu không được dùng chung đối tượng danh sách hoặc chi tiết có thể thay đổi.
-- Lớp không tăng tồn, không ghi file và không có bảng riêng. [LuuTruText](LuuTruText.md) ghi các phần tử vào `CT_PHIEU_NHAP`, lấy mã phiếu từ chủ sở hữu; khóa dòng là `(maPhieuNhap, maBienThe)`.
+- Lớp không tự tăng tồn hoặc ghi file; các dòng lưu trong `chi-tiet-phieu-nhap.txt`. [LuuTruText](LuuTruText.md) ghi các phần tử vào `CT_PHIEU_NHAP`, lấy mã phiếu từ chủ sở hữu; khóa dòng là `(maPhieuNhap, maBienThe)`.
