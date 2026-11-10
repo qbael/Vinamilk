@@ -193,7 +193,7 @@ public class LuuTruText {
             ghiFileTam(noiDungCu);
             thayCacFile();
         }
-        // shortcut: chưa fsync; cần bổ sung khi phải bảo đảm dữ liệu qua sự cố mất điện.
+        // Chưa fsync: cần bổ sung khi phải bảo đảm dữ liệu qua sự cố mất điện.
         Files.delete(duongDanPhucHoi);
     }
 

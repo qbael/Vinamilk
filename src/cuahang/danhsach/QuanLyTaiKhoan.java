@@ -7,7 +7,6 @@ import cuahang.taikhoan.TaiKhoan;
 import java.util.List;
 
 public final class QuanLyTaiKhoan extends DanhSach<TaiKhoan> {
-    /** Danh sách rỗng; Main tạo một lần rồi dùng chung cho dịch vụ và lưu trữ. */
     public QuanLyTaiKhoan() {
         super();
     }

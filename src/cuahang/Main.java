@@ -14,7 +14,6 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class Main {
-    /** Lớp chỉ chứa điểm khởi chạy main, không tạo đối tượng. */
     private Main() {
     }
 

@@ -984,10 +984,10 @@ public class KiemThu {
         List<String> dongHd = chay(() -> Files.readAllLines(fileHd));
         dung(fileHd.getFileName().toString().equals("HD-20261002-84736ab2.txt"), "Tên file hóa đơn theo ngày + mã ngắn");
         dung(dongHd.stream().anyMatch(s -> s.contains("HÓA ĐƠN")) && dongHd.stream().anyMatch(s -> s.contains("Trần Thị Ngân"))
-                        && dongHd.stream().anyMatch(s -> s.startsWith("TỔNG THANH TOÁN") && s.endsWith("54.000đ")),
+                        && dongHd.stream().anyMatch(s -> s.matches("\\| TỔNG THANH TOÁN +54\\.000đ \\|")),
                 "File hóa đơn có tiêu đề, người thu và tổng tiền");
-        dung(dongHd.stream().allMatch(s -> s.length() <= 50 && s.equals(s.stripTrailing())),
-                "File hóa đơn rộng tối đa 50 ký tự, không có khoảng trắng cuối dòng");
+        dung(dongHd.stream().allMatch(s -> s.length() == 54 && (s.matches("\\+-+\\+") || s.matches("\\| .* \\|"))),
+                "File hóa đơn đóng khung: mọi dòng rộng đúng 54 ký tự, viền thẳng");
         loi(IllegalStateException.class,
                 () -> chay(() -> gd.xuatHoaDon(bo.donHang.timTheoMa("bc4ebe22-5123-49ab-b57f-6c8f9f3e97ed"), thuMucHd)),
                 "Đơn chờ không xuất hóa đơn");

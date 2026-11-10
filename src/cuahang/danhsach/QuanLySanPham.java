@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Locale;
 
 public final class QuanLySanPham extends DanhSach<SanPham> {
-    /** Danh sách rỗng; Main tạo một lần rồi dùng chung cho dịch vụ và lưu trữ. */
     public QuanLySanPham() {
         super();
     }

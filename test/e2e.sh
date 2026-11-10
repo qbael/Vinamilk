@@ -73,7 +73,7 @@ c
 0" "Đã lưu đơn" "Thanh toán thành công" "TỔNG THANH TOÁN +24.000đ" "Đã lưu hóa đơn: .*hoa-don/HD-[0-9]{8}-[0-9a-f]{8}\.txt"
 
 # File hóa đơn tự lưu sau khi thanh toán
-if grep -qE "^TỔNG THANH TOÁN +24.000đ$" "$TMP"/hoa-don/HD-*.txt 2>/dev/null; then
+if grep -qE "^[|] TỔNG THANH TOÁN +24.000đ [|]$" "$TMP"/hoa-don/HD-*.txt 2>/dev/null; then
     echo "PASS: File hóa đơn có tổng tiền"
 else
     echo "FAIL: File hóa đơn có tổng tiền"; loi=$((loi + 1))

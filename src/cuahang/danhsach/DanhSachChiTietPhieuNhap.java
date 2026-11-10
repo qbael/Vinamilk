@@ -5,7 +5,6 @@ import cuahang.donhang.ChiTietPhieuNhap;
 public final class DanhSachChiTietPhieuNhap extends DanhSach<ChiTietPhieuNhap> {
     private boolean daChot = false;
 
-    /** Danh sách dòng đang soạn, chưa chốt. */
     public DanhSachChiTietPhieuNhap() {
         super();
     }

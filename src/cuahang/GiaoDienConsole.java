@@ -304,7 +304,6 @@ public class GiaoDienConsole {
         switch (chon) {
             case 1 -> {
                 while (phienConHieuLuc() && menuBanHang("BÁN HÀNG", "Quay lại", false)) {
-                    // lặp đến khi chọn quay lại
                 }
             }
             case 2 -> menuSanPham();
@@ -328,7 +327,6 @@ public class GiaoDienConsole {
             inBangBienThe(ds);
         }
         LocalDate homNay = DichVuCuaHang.homNay();
-        // chỉ khuyến mãi của các SKU vừa tìm thấy, không in cả danh mục
         List<String> maTimThay = ds.stream().map(BienTheSanPham::getMaBienThe).toList();
         List<KhuyenMai> dangApDung = dichVu.danhSachKhuyenMai(maTaiKhoanDangNhap).stream()
                 .filter(km -> km.coHieuLuc(homNay) && maTimThay.contains(km.getMaBienThe())).toList();
@@ -632,20 +630,41 @@ public class GiaoDienConsole {
         if (dh.getTrangThai() != TrangThaiDonHang.DA_THANH_TOAN) {
             throw new IllegalStateException("Chỉ xuất hóa đơn cho đơn đã thanh toán.");
         }
-        List<String> d = new ArrayList<>();
-        d.add(giua("CỬA HÀNG SỮA"));
-        d.add(giua("Hóa đơn bán hàng — thanh toán tại cửa hàng"));
-        d.add(giua("Đơn vị tiền: đồng"));
-        d.add("");
-        d.addAll(dongDon(dh, false));
-        d.add("");
-        d.add(giua("Cảm ơn quý khách, hẹn gặp lại!"));
-        d.add(giua("Xuất file lúc " + thoiDiem(DichVuCuaHang.bayGio())));
+        // Khung ASCII như menu: vạch "=====" / "-----" của dongDon thành viền, tiêu đề "== X ==" căn giữa trong khung
+        String vien = "+" + "-".repeat(RONG_HOA_DON + 2) + "+";
+        List<String> d = new ArrayList<>(List.of(vien));
+        oKhung(d, giua("CỬA HÀNG SỮA"));
+        oKhung(d, giua("Hóa đơn bán hàng — thanh toán tại cửa hàng"));
+        oKhung(d, giua("Đơn vị tiền: đồng"));
+        d.add(vien);
+        for (String s : dongDon(dh, false)) {
+            if (s.matches("=+ .+ =+")) {
+                oKhung(d, giua(s.replaceAll("^=+ | =+$", "")));
+                d.add(vien);
+            } else if (s.matches("[=-]+")) {
+                d.add(vien);
+            } else {
+                oKhung(d, s);
+            }
+        }
+        oKhung(d, giua("Cảm ơn quý khách, hẹn gặp lại!"));
+        oKhung(d, giua("Xuất file lúc " + thoiDiem(DichVuCuaHang.bayGio())));
+        d.add(vien);
         Files.createDirectories(thuMuc);
         Path file = thuMuc.resolve("HD-" + dh.getThoiDiemThanhToan().format(DateTimeFormatter.BASIC_ISO_DATE)
                 + "-" + dh.getMaDonHang().substring(0, DO_DAI_MA_NGAN) + ".txt");
-        Files.write(file, d.stream().map(String::stripTrailing).toList(), StandardCharsets.UTF_8);
+        Files.write(file, d, StandardCharsets.UTF_8);
         return file;
+    }
+
+    /** Thêm một dòng "| … |" rộng RONG_HOA_DON; dòng dài hơn (vd. tên rất dài) xuống dòng, không cắt chữ. */
+    private static void oKhung(List<String> d, String s) {
+        String con = Normalizer.normalize(s, Normalizer.Form.NFC);
+        while (con.length() > RONG_HOA_DON) {
+            d.add("| " + con.substring(0, RONG_HOA_DON) + " |");
+            con = "  " + con.substring(RONG_HOA_DON);
+        }
+        d.add("| " + con + " ".repeat(RONG_HOA_DON - con.length()) + " |");
     }
 
     /** Ghi file hóa đơn và báo kết quả; lỗi ghi file không ảnh hưởng giao dịch đã lưu. */
@@ -1457,7 +1476,7 @@ public class GiaoDienConsole {
 
     /** Phần đầu ngắn nhất (tối thiểu 8 ký tự) để các mã trong cùng danh sách khác nhau. */
     static Map<String, String> maNgan(Collection<String> dsMa) {
-        // ponytail: so từng cặp O(n²), đủ cho vài nghìn mã; cần nhanh hơn thì sắp xếp rồi chỉ so mã kề nhau.
+        // So từng cặp O(n²), đủ cho vài nghìn mã; cần nhanh hơn thì sắp xếp rồi chỉ so mã kề nhau.
         Map<String, String> ketQua = new HashMap<>();
         for (String ma : dsMa) {
             int doDai = Math.min(DO_DAI_MA_NGAN, ma.length());
